@@ -291,6 +291,25 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       // Look for cached styles for this hostname or its domain match
       const normalizedHostname = normalizeHostname(message.hostname);
 
+      // Get the parent frame's hostname if this is an iframe
+      let parentHostname = null;
+      if (sender.frameId !== 0 && sender.tab && sender.tab.url) {
+        try {
+          const parentUrl = new URL(sender.tab.url);
+          parentHostname = normalizeHostname(parentUrl.hostname);
+        } catch (e) {
+          console.error("Error parsing parent URL:", e);
+        }
+      }
+
+      console.log(
+        `Content script ready in ${
+          sender.frameId === 0 ? "main frame" : "iframe"
+        }: ${normalizedHostname}${
+          parentHostname ? ` (parent: ${parentHostname})` : ""
+        }`
+      );
+
       // Get settings to check if styling is enabled
       const settingsData = await browser.storage.local.get(BROWSER_STORAGE_KEY);
       const settings = ensureDefaultSettings(
@@ -299,17 +318,120 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
 
       if (settings.enableStyling === false) return;
 
-      const css = await getStylesForHostname(normalizedHostname, settings);
+      // First try to get specific styles for this hostname
+      let css = await getStylesForHostname(normalizedHostname, settings);
+
+      // If this is an iframe, add iframe-specific transparency styles
+      if (message.isIframe) {
+        const iframeTransparencyCSS = `
+          /* Make iframe content transparent */
+          html, body { 
+            background: transparent !important;
+            background-color: transparent !important;
+          }
+        `;
+
+        // Add transparency CSS to any existing CSS, or use it alone
+        css = css ? css + iframeTransparencyCSS : iframeTransparencyCSS;
+
+        // Also try to find the iframe in the parent document and make it transparent
+        if (sender.tab && sender.tab.id) {
+          try {
+            // The iframe host is the current content script's host
+            const iframeHost = normalizedHostname;
+
+            // Inject a script to make the iframe element transparent in the parent page
+            const makeIframeTransparentCode = `
+              (function() {
+                // Try finding iframes by source containing the host
+                const iframes = document.querySelectorAll('iframe');
+                for (const iframe of iframes) {
+                  if (iframe.src && iframe.src.includes('${iframeHost}')) {
+                    iframe.style.background = 'transparent';
+                    iframe.allowTransparency = true;
+                    iframe.setAttribute('allowtransparency', 'true');
+                    console.log('ZenInternet: Made iframe transparent:', iframe.src);
+                  }
+                }
+              })();
+            `;
+
+            // Execute this in the parent frame only
+            browser.tabs
+              .executeScript(sender.tab.id, {
+                code: makeIframeTransparentCode,
+                frameId: 0, // Execute in the main frame
+              })
+              .catch((err) => {
+                // This might fail due to CSP, which is fine
+                console.log(
+                  "Failed to execute iframe transparency script:",
+                  err
+                );
+              });
+          } catch (err) {
+            console.error(
+              "Error trying to make iframe transparent in parent:",
+              err
+            );
+          }
+        }
+      }
+
+      // If we're in an iframe and didn't find specific styles, try using parent styles
+      if (!css && sender.frameId !== 0 && parentHostname) {
+        // Check if we should use parent site's style for this iframe
+        // This is useful for cases like tasks.google.com in calendar.google.com
+        const parentDomain = parentHostname.split(".").slice(-2).join(".");
+        const iframeDomain = normalizedHostname.split(".").slice(-2).join(".");
+
+        // If the iframe and parent share the same base domain, try applying parent styles
+        if (parentDomain === iframeDomain) {
+          console.log(
+            `Trying to use parent styles for iframe: ${normalizedHostname} (parent: ${parentHostname})`
+          );
+          css = await getStylesForHostname(parentHostname, settings);
+
+          // Also add iframe-specific transparency styles
+          if (css) {
+            css += `
+              /* Make iframe content transparent */
+              html, body { 
+                background: transparent !important;
+                background-color: transparent !important;
+              }
+            `;
+          }
+        }
+      }
 
       // If we found matching CSS, send it immediately to the content script
       if (css) {
         browser.tabs
-          .sendMessage(sender.tab.id, {
-            action: "applyStyles",
-            css: css,
-          }, { frameId: sender.frameId })
+          .sendMessage(
+            sender.tab.id,
+            {
+              action: "applyStyles",
+              css: css,
+            },
+            { frameId: sender.frameId }
+          )
           .catch((err) => {
             if (logging) console.log("Failed to send immediate CSS:", err);
+          });
+      } else if (message.isIframe) {
+        // Even if we have no CSS, ensure iframe transparency
+        browser.tabs
+          .sendMessage(
+            sender.tab.id,
+            {
+              action: "makeTransparent",
+            },
+            { frameId: sender.frameId }
+          )
+          .catch((err) => {
+            if (logging)
+              console.log("Failed to send iframe transparency command:", err);
           });
       }
     } catch (error) {
@@ -767,23 +889,73 @@ async function applyCSS(tabId, hostname, features) {
 
   if (combinedCSS) {
     try {
-      // Try to send via messaging (most reliable for instant application)
+      // Add iframe transparency CSS to all CSS
+      const withIframeSupport =
+        combinedCSS +
+        `
+        /* Support for iframes */
+        iframe {
+          background: transparent !important;
+          background-color: transparent !important;
+        }
+      `;
+
+      // Try to send via messaging to all frames (most reliable for instant application)
       console.log(
-        `DEBUG: Sending styles to tab ${tabId} via messaging (${combinedCSS.length} bytes)`
+        `DEBUG: Sending styles to tab ${tabId} via messaging (${withIframeSupport.length} bytes)`
       );
-      await browser.tabs.sendMessage(tabId, {
-        action: "applyStyles",
-        css: combinedCSS,
-      });
+
+      // First try sending to the main frame
+      await browser.tabs.sendMessage(
+        tabId,
+        {
+          action: "applyStyles",
+          css: withIframeSupport,
+        },
+        { frameId: 0 }
+      ); // Main frame
+
+      // Then try to send to all frames (this might fail for cross-origin iframes)
+      try {
+        await browser.tabs.executeScript(tabId, {
+          code: `
+            (function() {
+              // Find all iframes and make them transparent
+              const iframes = document.querySelectorAll('iframe');
+              for (const iframe of iframes) {
+                iframe.style.background = 'transparent';
+                iframe.allowTransparency = true;
+                iframe.setAttribute('allowtransparency', 'true');
+              }
+            })();
+          `,
+          allFrames: false, // Just in the main frame
+        });
+      } catch (e) {
+        console.log("Failed to make iframes transparent:", e);
+      }
     } catch (e) {
       // Fallback to insertCSS if messaging fails
       console.log(
         `DEBUG: Messaging failed, falling back to insertCSS: ${e.message}`
       );
-      await browser.tabs.insertCSS(tabId, {
-        code: combinedCSS,
-        runAt: "document_start",
-      });
+      try {
+        await browser.tabs.insertCSS(tabId, {
+          code:
+            combinedCSS +
+            `
+            /* Support for iframes */
+            iframe {
+              background: transparent !important;
+              background-color: transparent !important;
+            }
+          `,
+          runAt: "document_start",
+          allFrames: true, // Apply to all frames
+        });
+      } catch (insertError) {
+        console.error(`DEBUG: insertCSS also failed: ${insertError.message}`);
+      }
     }
     console.log(`DEBUG: Successfully injected custom CSS for ${hostname}`);
   } else {
