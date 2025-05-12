@@ -307,7 +307,7 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
           .sendMessage(sender.tab.id, {
             action: "applyStyles",
             css: css,
-          })
+          }, { frameId: sender.frameId })
           .catch((err) => {
             if (logging) console.log("Failed to send immediate CSS:", err);
           });
