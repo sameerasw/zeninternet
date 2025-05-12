@@ -40,5 +40,12 @@
     "data-viewer/data-viewer.css",
     "styling/*",
     "shared/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "all_frames": true
+    }
   ]
 }
