@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS = {
   disableHover: false, // Don't disable hover effects by default
   disableFooter: false, // Don't disable footers by default
   fallbackBackgroundList: [], // Empty array for fallback background sites
+  welcomeShown: false, // Track if welcome screen has been shown
 };
 
 /**

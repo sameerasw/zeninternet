@@ -84,6 +84,9 @@ new (class ExtensionPopup {
       });
     });
 
+    // Check and show welcome screen for first-time users
+    this.checkWelcomeScreen();
+
     // Bind event listeners
     this.refetchCSSButton.addEventListener("click", this.refetchCSS.bind(this));
     this.refetchCSSButton.addEventListener(
@@ -138,13 +141,28 @@ new (class ExtensionPopup {
       .getElementById("bug-report-link")
       ?.addEventListener("click", (e) => {
         e.preventDefault();
-        this.handleBugReport();
+        this.showBugReportOverlay();
       });
 
     // Setup auto-update and display last fetched time
     this.setupAutoUpdate();
     this.displayLastFetchedTime();
     this.displayAddonVersion();
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const header = document.querySelector(".app-header");
+
+      window.addEventListener("scroll", () => {
+        const scrollPercentage =
+          (window.scrollY / document.body.scrollHeight) * 100;
+
+        if (scrollPercentage > 5) {
+          header.classList.add("compact");
+        } else {
+          header.classList.remove("compact");
+        }
+      });
+    });
   }
 
   async getCurrentTabInfo() {
@@ -210,6 +228,16 @@ new (class ExtensionPopup {
     });
 
     this.reloadButton.addEventListener("click", this.reloadPage.bind(this));
+
+    // Add FAQ event listeners
+    document
+      .getElementById("toggle-faq")
+      ?.addEventListener("click", this.toggleFAQ.bind(this));
+
+    // Add event delegation for FAQ items
+    document
+      .getElementById("faq-content")
+      ?.addEventListener("click", this.handleFAQClick.bind(this));
   }
 
   restoreSettings() {
@@ -1447,56 +1475,346 @@ new (class ExtensionPopup {
     }
   }
 
-  // Handle bug report with automatic data inclusion
-  async handleBugReport() {
+  // Toggle FAQ section visibility
+  toggleFAQ() {
+    const faqContent = document.getElementById("faq-content");
+    const toggleButton = document.getElementById("toggle-faq");
+
+    faqContent.classList.toggle("collapsed");
+
+    // Update the icon
+    const icon = toggleButton.querySelector("i");
+    if (faqContent.classList.contains("collapsed")) {
+      icon.className = "fas fa-chevron-down";
+    } else {
+      icon.className = "fas fa-chevron-up";
+    }
+  }
+
+  // Handle FAQ item clicks (only one open at a time)
+  handleFAQClick(event) {
+    // Find the closest FAQ item container
+    const faqItem = event.target.closest(".faq-item");
+    if (!faqItem) return;
+
+    const question = faqItem.querySelector(".faq-question");
+    const answer = faqItem.querySelector(".faq-answer");
+
+    if (!question || !answer) return;
+
+    const isCurrentlyActive = question.classList.contains("active");
+
+    // Close all FAQ items
+    document.querySelectorAll(".faq-question").forEach((q) => {
+      q.classList.remove("active");
+      const a = q.nextElementSibling;
+      if (a) a.classList.remove("active");
+    });
+
+    // If the clicked item wasn't active, open it
+    if (!isCurrentlyActive) {
+      question.classList.add("active");
+      answer.classList.add("active");
+    }
+  }
+
+  // Show bug report overlay
+  showBugReportOverlay() {
+    const overlay = document.getElementById("bug-report-overlay");
+    overlay.classList.remove("hidden");
+
+    // Reset all bug option selections
+    document.querySelectorAll(".bug-option").forEach((option) => {
+      option.classList.remove("selected");
+    });
+
+    // Reset submit button
+    const submitBtn = document.getElementById("submit-bug-report");
+    submitBtn.disabled = true;
+
+    // Setup bug option event listeners
+    document.querySelectorAll(".bug-option").forEach((option) => {
+      option.addEventListener("click", () => {
+        // Remove selected class from all options
+        document.querySelectorAll(".bug-option").forEach((opt) => {
+          opt.classList.remove("selected");
+        });
+
+        // Add selected class to clicked option
+        option.classList.add("selected");
+
+        // Enable submit button
+        submitBtn.disabled = false;
+      });
+    });
+
+    // Cancel button event listener
+    document
+      .getElementById("cancel-bug-report")
+      .addEventListener("click", () => {
+        this.hideBugReportOverlay();
+      });
+
+    // Submit button event listener
+    submitBtn.addEventListener("click", () => {
+      this.submitBugReport();
+    });
+
+    // Close overlay when clicking outside
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        this.hideBugReportOverlay();
+      }
+    });
+  }
+
+  // Hide bug report overlay
+  hideBugReportOverlay() {
+    const overlay = document.getElementById("bug-report-overlay");
+    overlay.classList.add("hidden");
+  }
+
+  // Submit bug report
+  async submitBugReport() {
+    const selectedOption = document.querySelector(".bug-option.selected");
+    if (!selectedOption) return;
+
+    const bugType = selectedOption.getAttribute("data-type");
+    const submitBtn = document.getElementById("submit-bug-report");
+
+    // Show loading state
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+    submitBtn.disabled = true;
+
     try {
-      // Show loading state temporarily
-      const bugReportLink = document.getElementById("bug-report-link");
-      const originalText = bugReportLink.innerHTML;
-      bugReportLink.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Preparing...';
+      // Collect relevant data based on bug type
+      const bugData = await this.collectDataForBugType(bugType);
 
-      // Collect all extension data
-      const bugReportData = await this.collectBugReportData();
+      // Get repository information
+      const repoInfo = this.getRepositoryForBugType(bugType);
 
-      // Format the JSON data for GitHub issue
-      const jsonData = JSON.stringify(bugReportData, null, 2);
+      // Create issue body
+      const issueBody = this.createBugReportBodyForType(bugType, bugData);
 
-      // Get current tab info for context
+      // Create GitHub issue URL with proper template
+      let issueUrl = `https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/new`;
+
+      // Add template parameter if available
+      if (repoInfo.template) {
+        issueUrl += `?template=${repoInfo.template}.md`;
+      }
+
+      // Add title and body parameters
+      const urlParams = new URLSearchParams();
+      urlParams.append("title", repoInfo.title);
+      urlParams.append("body", issueBody);
+
+      // Combine URL with parameters
+      const separator = repoInfo.template ? "&" : "?";
+      issueUrl += separator + urlParams.toString();
+
+      // Open the URL
+      browser.tabs.create({ url: issueUrl });
+
+      // Hide overlay
+      this.hideBugReportOverlay();
+    } catch (error) {
+      console.error("Error submitting bug report:", error);
+      alert("Failed to create bug report. Please try again.");
+    } finally {
+      // Restore button state
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }
+  }
+
+  // Get repository information based on bug type
+  getRepositoryForBugType(bugType) {
+    const repos = {
+      1: {
+        owner: "sameerasw",
+        repo: "my-internet",
+        title: "[BUG] Website Theme Issue",
+        template: "bug_report",
+      },
+      2: {
+        owner: "sameerasw",
+        repo: "zeninternet",
+        title: "[BUG] Extension Issue",
+        template: "bug_report",
+      },
+      3: {
+        owner: "sameerasw",
+        repo: "my-internet",
+        title: "[TRANSPARENCY] Browser Transparency Issue",
+        template: "bug_report",
+      },
+      4: {
+        owner: "sameerasw",
+        repo: "zeninternet",
+        title: "[FEATURE] Feature Request",
+        template: "bug_report",
+      },
+      5: {
+        owner: "sameerasw",
+        repo: "my-internet",
+        title: "[OTHER] General Issue",
+      },
+    };
+
+    return repos[bugType] || repos["5"];
+  }
+
+  // Collect data based on bug type
+  async collectDataForBugType(bugType) {
+    try {
+      const allData = await browser.storage.local.get(null);
+      const manifest = browser.runtime.getManifest();
       const tabs = await browser.tabs.query({
         active: true,
         currentWindow: true,
       });
-      const currentUrl = tabs.length > 0 ? tabs[0].url : "";
+      const currentTab = tabs[0];
 
-      // Create the issue body with embedded JSON
-      const issueBody = this.createBugReportBody(jsonData, currentUrl);
+      // Base data for all types
+      const baseData = {
+        reportDate: new Date().toISOString(),
+        addonVersion: manifest.version,
+        currentTabUrl: currentTab ? currentTab.url : "N/A",
+        currentTabHostname: currentTab
+          ? new URL(currentTab.url).hostname
+          : "N/A",
+        browserInfo: {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+        },
+      };
 
-      // Create the GitHub issue URL with pre-filled template
-      const issueUrl = `https://github.com/sameerasw/zeninternet/issues/new?template=bug_report.md&title=[BUG] &body=${encodeURIComponent(
-        issueBody
-      )}`;
+      // Global settings
+      const globalSettings = allData[this.BROWSER_STORAGE_KEY] || {};
+      const skipForceList = allData[SKIP_FORCE_THEMING_KEY] || [];
+      const skipThemingList = allData[SKIP_THEMING_KEY] || [];
+      const fallbackBackgroundList = allData[FALLBACK_BACKGROUND_KEY] || [];
 
-      // Open the URL
-      window.open(issueUrl, "_blank");
+      switch (bugType) {
+        case "1": // Current website's theme - include site-specific settings
+          const currentHostname = currentTab
+            ? normalizeHostname(new URL(currentTab.url).hostname)
+            : null;
+          const siteSettings = currentHostname
+            ? allData[`${this.BROWSER_STORAGE_KEY}.${currentHostname}`] || {}
+            : {};
 
-      // Reset button state
-      bugReportLink.innerHTML = originalText;
+          return {
+            ...baseData,
+            settings: {
+              globalSettings,
+              skipForceList,
+              skipThemingList,
+              fallbackBackgroundList,
+              currentSiteSettings: siteSettings,
+            },
+          };
+
+        case "2": // Extension issue - global settings only
+        case "3": // Transparency issue - global settings only
+        case "5": // Other - global settings only
+          return {
+            ...baseData,
+            settings: {
+              globalSettings,
+              skipForceList,
+              skipThemingList,
+              fallbackBackgroundList,
+            },
+          };
+
+        case "4": // Feature request - no settings data
+          return baseData;
+
+        default:
+          return baseData;
+      }
     } catch (error) {
-      console.error("Error preparing bug report:", error);
-
-      // Fallback to simple bug report without data
-      const fallbackUrl =
-        "https://github.com/sameerasw/zeninternet/issues/new?template=bug_report.md&title=[BUG] ";
-      window.open(fallbackUrl, "_blank");
-
-      // Reset button state
-      const bugReportLink = document.getElementById("bug-report-link");
-      bugReportLink.innerHTML = '<i class="fa-brands fa-github"></i> Bug?';
+      console.error("Error collecting bug data:", error);
+      return { error: "Failed to collect data: " + error.message };
     }
   }
 
-  // Collect all extension data for bug report
+  // Create bug report body for specific type
+  createBugReportBodyForType(bugType, data) {
+    const typeDescriptions = {
+      1: "Website Theme Issue",
+      2: "Extension Issue",
+      3: "Browser Transparency Issue",
+      4: "Feature Request",
+      5: "Other Issue",
+    };
+
+    const description = typeDescriptions[bugType] || "General Issue";
+    const currentUrl =
+      data.currentTabUrl && data.currentTabUrl !== "N/A"
+        ? data.currentTabUrl
+        : "";
+
+    let body = `## Describe the ${
+      bugType === "4" ? "feature request" : "bug"
+    }\n`;
+    body += `<!-- Please provide a clear description of ${
+      bugType === "4"
+        ? "the feature you'd like to see"
+        : "the issue you're experiencing"
+    } -->\n\n`;
+
+    if (bugType !== "4") {
+      body += `## Steps to reproduce\n`;
+      body += `Steps to reproduce the behavior:\n1. \n2. \n3. \n\n`;
+
+      body += `## Expected behavior\n`;
+      body += `<!-- What you expected to happen -->\n\n`;
+
+      body += `## Actual behavior\n`;
+      body += `<!-- What actually happened -->\n\n`;
+    } else {
+      body += `## Feature Description\n`;
+      body += `<!-- Describe the feature you'd like to see -->\n\n`;
+
+      body += `## Use Case\n`;
+      body += `<!-- Why would this feature be useful? -->\n\n`;
+    }
+
+    // Add settings data if available
+    if (data.settings && bugType !== "4") {
+      body += `## ZenInternet Settings Data\n`;
+      body += `*This data was automatically collected to help with debugging.*\n\n`;
+      body += `<details>\n<summary>Click to expand settings data</summary>\n\n`;
+      body += `\`\`\`json\n${JSON.stringify(
+        data,
+        null,
+        2
+      )}\n\`\`\`\n\n</details>\n\n`;
+    }
+
+    body += `## Browser Information\n`;
+    body += `- **Zen Browser Version:** <!-- Please specify your Zen browser version -->\n`;
+    body += `- **Platform:** ${
+      data.browserInfo?.platform || "<!-- Your OS -->"
+    }\n`;
+    body += `- **Extension Version:** ${data.addonVersion}\n\n`;
+
+    if (currentUrl && bugType === "1") {
+      body += `## Website\n`;
+      body += `Current website: ${currentUrl}\n\n`;
+    }
+
+    body += `## Additional context\n`;
+    body += `<!-- Add any other relevant information here -->\n`;
+
+    return body;
+  }
+
+  // Collect all extension data for bug report (legacy method - still used by export)
   async collectBugReportData() {
     try {
       // Get all storage data
@@ -1617,5 +1935,43 @@ ${
 
 ## Additional context
 <!-- Add any other context about the problem here. -->`;
+  }
+
+  // Add welcome screen check method
+  async checkWelcomeScreen() {
+    try {
+      // Check if welcome screen should be shown
+      const shouldShow = await window.checkAndShowWelcome();
+
+      if (shouldShow) {
+        // Hide the main popup content while welcome is shown
+        const container = document.querySelector(".container");
+        if (container) {
+          container.style.opacity = "0.3";
+          container.style.pointerEvents = "none";
+        }
+
+        // Listen for welcome screen completion
+        const checkWelcomeComplete = setInterval(() => {
+          const welcomeOverlay = document.getElementById("welcome-overlay");
+          if (!welcomeOverlay || welcomeOverlay.classList.contains("hidden")) {
+            clearInterval(checkWelcomeComplete);
+            // Restore main popup content
+            if (container) {
+              container.style.opacity = "1";
+              container.style.pointerEvents = "auto";
+            }
+            // Reload settings to reflect welcome screen changes
+            this.loadSettings().then(() => {
+              this.restoreSettings();
+              this.updateModeLabels();
+              this.updateModeIndicator();
+            });
+          }
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Error checking welcome screen:", error);
+    }
   }
 })();

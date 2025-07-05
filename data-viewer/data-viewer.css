@@ -176,7 +176,8 @@ body {
 
 .website-content {
   max-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
   transition: max-height 0.3s ease;
   background-color: var(--secondary-bg);
 }
