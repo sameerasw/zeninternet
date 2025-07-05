@@ -1,47 +1,23 @@
-# Transparent Zen
+# Zen internet
 
-Transparent Zen is a browser extension specifically designed for Zen Browser. This extension injects styles into supported websites to make them transparent, providing a new experience.
+A prettier Internet in Zen and Firefox.
 
 <a href="https://addons.mozilla.org/en-US/firefox/addon/zen-internet/">
     <img alt="Firefox Add-Ons" src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png" height="40">
 </a>
 <br>
-<img width="379" alt="image" src="https://github.com/user-attachments/assets/18134c23-6a8a-4598-987d-9fdfa29b09b2" />
 
-https://github.com/user-attachments/assets/03ce72fc-e5b0-48fc-b0ae-40c6671b187d
+![CleanShot 2025-05-14 at 3  05 47@2x](https://github.com/user-attachments/assets/0f46a0b2-8857-4c54-98ca-8503f5fb933c)
 
-## Supported Websites
-Checkout the [repository](https://github.com/sameerasw/my-internet) for website css styling which are used in this addon.
+![CleanShot 2025-05-14 at 3  06 09@2x](https://github.com/user-attachments/assets/be7a8079-43a5-40f4-973c-fa2632d0fc25)
 
-### Unsupported websites now can be forced!
+<img width="1305" alt="image" src="https://github.com/user-attachments/assets/3086e330-df6e-4164-b4cd-ae102ebe7a4f" />
 
-https://github.com/user-attachments/assets/85f795cc-049f-4338-a74b-8f5d2a9eb5bd
+## [Guide](https://www.sameerasw.com/zen)
 
+## Bug Reporting 🐛
 
-
-#### To Do
-- [x] Feature specific toggles for each website
-- [ ] Custom css by user
-
-## Prerequisites
-#### Transparent Zen
-- [Guide](https://sameerasw.notion.site/Zen-Transparency-1939c6099d4080468f02cf05ae50e827?pvs=4)
-
-## Installation
-
-To install the addon, you can either download it from the [Firefox Add-Ons Store](https://addons.mozilla.org/en-US/firefox/addon/zen-internet) or grab the latest release from github and manually install it through the Zen Browser settings.
-
-## Usage
-
-Once installed, Open the addon dialog, enable theming and click the refetch latest styles button to load the latest stylesheets from the repository
-
-<img width="334" alt="CleanShot 2025-02-25 at 11  19 49@2x" src="https://github.com/user-attachments/assets/573519aa-10de-4606-8c9f-30a21661bcf4" />
-
-Then reload the page and enjoy :D
-You can disable website specific theming from the pop-up.
-
-<img width="367" alt="CleanShot 2025-02-25 at 11  20 55@2x" src="https://github.com/user-attachments/assets/05645e1e-e83a-4f54-8895-6ea1744e9711" />
-
+Found a bug? Use the "Bug?" button in the extension popup for streamlined reporting! It automatically includes your extension settings and configuration data to help us debug faster.
 
 If you would like to contribute to the addon, please follow these steps:
 
@@ -50,10 +26,11 @@ If you would like to contribute to the addon, please follow these steps:
 3. Make your changes and commit them with a descriptive message.
 4. Push your changes to your fork and create a pull request.
 
-   > Thanks to [@YelehaUwU](https://github.com/YelehaUwU) for the contributions on the pop-up UI!
+Thanks:
+
+- to [@YelehaUwU](https://github.com/YelehaUwU) for the contributions on the pop-up UI!
+- to the [Transparent Zen ](https://github.com/frostybiscuit/transparent-zen) for the addon base and the inspiration <3
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
-Enjoy :D Huge thanks to the [Transparent Zen ](https://github.com/frostybiscuit/transparent-zen) for the addon base and the inspiration <3

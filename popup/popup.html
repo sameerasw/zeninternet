@@ -6,107 +6,380 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../theme.css">
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="welcome.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
   <div class="container">
     <header class="app-header">
-      <div id="header-container">
-        <div class="logo-container">
-          <img src="../assets/images/logo_48.png" alt="ZenInternet Logo" class="logo-img">
-          <h1 class="app-title">Zen Internet</h1>
+      <div class="header-row">
+        <div id="header-container">
+          <div class="logo-container">
+            <img src="../assets/images/logo.png" alt="ZenInternet Logo" class="logo-img">
+            <h1 class="app-title">Zen Internet</h1>
+          </div>
+          <div class="miniheader">
+            <div id="addon-version" class="addon-version"></div>
+            <div class="author">by <a href="https://www.sameerasw.com/" target="_blank">@sameerasw</a></div>
+          </div>
         </div>
-        <div class="miniheader">
-          <div id="addon-version" class="addon-version"></div>
-          <div class="author">by <a href="https://www.sameerasw.com/" target="_blank">@sameerasw</a></div>
+        <div class="header-buttons">
+          <button id="how-to-use" class="icon-button" title="How to use?">🤔</button>
+          <button id="whats-new" class="whats-new-button" title="What's New">✨</button>
         </div>
+
       </div>
-      <button id="whats-new" class="whats-new-button" title="What's New">✨</button>
+      <button id="reload" class="action-button secondary"
+        title="Reload the page to apply changes. Most-likely will be needed when removing styling.">
+        <span>Reload the page</span> <i class="fas fa-sync-alt"></i>
+      </button>
     </header>
 
     <main class="app-content">
-      <div class="toggle-container features-container">
-        <label class="toggle-switch">
-          <input type="checkbox" id="enable-styling">
-          <span class="slider round"></span>
-        </label>
-        <span class="toggle-label">Enable Styling</span>
-      </div>
 
       <!-- Current Site Features Section -->
       <div id="current-site-features" class="features-container">
-        <button class="collapsible-button" id="toggle-features">
-          <span>Current Site Features</span>
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div id="current-site-toggles" class="features-list collapsed"></div>
-        <div class="actions" id="current-site-actions">
-          <!-- reload botton -->
-          <button id="reload" class="action-button secondary">
-            Reload to apply <i class="fas fa-sync-alt"></i>
-          </button>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button id="refetch-css" class="action-button primary">
-          <i class="fas fa-sync-alt"></i> Refetch latest styles
-        </button>
-      </div>
-
-      <div class="toggle-container">
-        <label class="toggle-switch">
-          <input type="checkbox" id="auto-update">
-          <span class="slider round"></span>
-        </label>
-        <span class="toggle-label">Auto Update Styles</span>
-      </div>
-      <div id="last-fetched-time" class="last-fetched-time"></div>
-      <div class="forcing-container">
-        <div class="toggle-container">
+        <div class="toggle-container skip-theming">
           <label class="toggle-switch">
-            <input type="checkbox" id="force-styling">
+            <input type="checkbox" id="skip-theming">
             <span class="slider round"></span>
           </label>
-          <span class="toggle-label">Force Styling</span>
+          <span id="site-style-toggle-label" class="toggle-label">Skip Styling for this Site</span>
+          <span class="help-icon"
+            title="Blacklist mode: Enable to skip adding below features. Whitelist mode: Enable to include below features">?</span>
         </div>
-        <div class="toggle-container">
-          <label class="toggle-switch">
-            <input type="checkbox" id="whitelist-mode">
-            <span class="slider round"></span>
-          </label>
-          <span id="whitelist-mode-label" class="toggle-label">Blacklist Mode</span>
-        </div>
-        <div class="toggle-container">
+        <div class="toggle-container skip-theming">
           <label class="toggle-switch">
             <input type="checkbox" id="skip-force-theming">
             <span class="slider round"></span>
           </label>
           <span id="site-toggle-label" class="toggle-label">Skip Forcing for this Site</span>
+          <span class="help-icon"
+            title="Blacklist mode: Enable to skip force theming this website. Whitelist mode: Enable to force this website">?</span>
+        </div>
+        <div class="expanded-section">
+          <button class="collapsible-button" id="toggle-features">
+            <span id="current-site-label">
+              <span id="site-domain" class="site-domain"></span>
+              <span>Features</span>
+            </span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div id="current-site-toggles" class="features-list collapsed"></div>
+          <div class="actions" id="current-site-actions">
+          </div>
         </div>
       </div>
 
+      <div class="features-container">
+        <div id="main-toggles">
+          <div class="toggle-container">
+            <label class="toggle-switch">
+              <input type="checkbox" id="enable-styling">
+              <span class="slider round"></span>
+            </label>
+            <span class="toggle-label">Global Styling</span>
+            <span class="help-icon" title="Master toggle for all the CSS styling">?</span>
+          </div>
+          <div class="toggle-container">
+            <label class="toggle-switch">
+              <input type="checkbox" id="whitelist-style-mode">
+              <span class="slider round"></span>
+            </label>
+            <span id="whitelist-style-mode-label" class="toggle-label">Blacklist Mode</span>
+            <span class="help-icon"
+              title="Blacklist mode: apply styling to all sites except those in the list. Whitelist mode: only apply styling to sites in the list.">?</span>
+          </div>
+
+        </div>
+        <div class="expanded-section">
+          <button class="collapsible-button" id="toggle-forcing">
+            <span>Force Styling Settings</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div id="forcing-content" class="forcing-container collapsed">
+            <div class="toggle-container">
+              <label class="toggle-switch">
+                <input type="checkbox" id="force-styling">
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-label">Force Styling</span>
+              <span class="help-icon"
+                title="Applies basic styling to websites that don't have specific pre-made theme and features.">?</span>
+            </div>
+            <div class="toggle-container">
+              <label class="toggle-switch">
+                <input type="checkbox" id="whitelist-mode">
+                <span class="slider round"></span>
+              </label>
+              <span id="whitelist-mode-label" class="toggle-label">Forced Blacklist Mode</span>
+              <span class="help-icon"
+                title="Blacklist mode: apply forced styling to all sites except those in the list. Whitelist mode: only apply forced styling to sites in the list.">?</span>
+            </div>
+            <div class="toggle-container">
+              <label class="toggle-switch">
+                <input type="checkbox" id="fallback-background">
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-label">Fallback Background</span>
+              <span class="help-icon"
+                title="Adds a solid white background color to websites which never had a proper background and skipping still keeps a transparent background.">?</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="features-container">
+        <div class="actions">
+          <button id="refetch-css" class="action-button primary" title="Fetch the latest styles from the repository">
+            <i class="fas fa-sync-alt"></i> Refetch latest styles
+          </button>
+        </div>
+
+        <div class="toggle-container" id="auto-update-container">
+          <label class="toggle-switch">
+            <input type="checkbox" id="auto-update">
+            <span class="slider round"></span>
+          </label>
+          <span class="toggle-label">Auto Update Styles</span>
+          <span class="help-icon"
+            title="Automatically checks for and downloads new styles every 2 hours. Keeps your themes up-to-date without manual intervention.">?</span>
+        </div>
+        <div id="last-fetched-time" class="last-fetched-time"></div>
+      </div>
+
       <div class="actions">
-        <button id="view-data" class="action-button secondary">
+        <button id="view-data" class="action-button secondary" title="Open advanced settings in a new tab">
           <i class="fa-solid fa-gear"></i>
           Advanced Settings
         </button>
       </div>
 
+      <!-- FAQ Section -->
+      <div class="faq-section">
+        <div class="expanded-section">
+          <button class="collapsible-button" id="toggle-faq">
+            <span>Frequently Asked Questions</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div id="faq-content" class="faq-container collapsed">
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Why is transparency not working?</span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="faq-answer">
+                <p><strong>OS Compatibility:</strong> Only some operating systems support transparency:</p>
+                <ul>
+                  <li>macOS (native support)</li>
+                  <li>Windows 11 (native mica and acrylic)</li>
+                  <li>Windows 11 with mods like Mica for Everyone or DWM blur glass</li>
+                  <li>Windows 10 with DWM blur glass <strong>(Questionable)</strong></li>
+                  <li>Wayland on KDE with Kvin blur</li>
+                  <li>GTK Gnome DE (experimental with blur my shell)</li>
+                </ul>
+                <p><strong>Common fixes:</strong></p>
+                <ul>
+                  <li>Check if transparency enabled in the OS</li>
+                  <li>Turn off power saving</li>
+                  <li>Turn off <strong>"Show accent color on window borders"</strong> in Windows</li>
+                  <li>Disable conflicting mods like better letterboxing or custom themes</li>
+                  <li>Adjust Zen theme contrast slider for more transparency</li>
+                  <li>Try re-opening the browser</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>How do site-specific features work?</span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="faq-answer">
+                <p>Each website can have customized features like transparency, hover effects, and layout adjustments.
+                </p>
+                <ul>
+                  <li>Browse to any website and check the addon popup</li>
+                  <li>You'll see available features for that site</li>
+                  <li>Toggle individual features on/off as needed</li>
+                  <li>Disabling features may require a page reload</li>
+                  <li>Use the "Global Feature Controls" in Advanced Settings for global overrides</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Text is unreadable</span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="faq-answer">
+                <p>This can happen if the website's text color is too light or dark against a transparent background.
+                </p>
+                <p>If you are on a website without a dedicated dark theme, you can try using <strong>darkreader
+                    addon</strong> for better
+                  contrast.</p>
+                <ul>
+                  <li>Toggle website's dark/ light theme manually</li>
+                  <li>Try adjusting the Zen theme contrast slider</li>
+                  <li>Disable transparency for that site if needed</li>
+                  <li>Report the issue to request a specific theme</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>What is blacklist vs whitelist mode?</span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="faq-answer">
+                <p>These modes control how built-in and forced themes and features are applied:</p>
+                <ul>
+                  <li><strong>Blacklist Mode:</strong> Apply styles to all sites except those you manually skip</li>
+                  <li><strong>Whitelist Mode:</strong> Only apply styles to sites you specifically select</li>
+                  <p>Whitelist mode is generally recommended for better performance and control but may require more
+                    manual setup for each site.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>What is force theming?</span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="faq-answer">
+                <p>Force theming applies basic transparency to websites without specific themes:</p>
+                <ul>
+                  <li>Can be used with the blacklist or whitelist mode</li>
+                  <li>Includes dark theme support with darkreader addon for better transparency</li>
+                  <li>May cause some visual issues on complex sites</li>
+                </ul>
+                <p><strong>Fallback Background:</strong> Use this option for sites with no default background color when
+                  transparency doesn't take effect. Enable if skipping the website still leaves it transparent.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>How do I request themes or report issues?</span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="faq-answer">
+                <p>You can request themes and report bugs directly from the addon:</p>
+                <ul>
+                  <li>Use the built-in "Request Theme" button for the active website</li>
+                  <li>Click "Bug?" in the footer to report issues of the addon</li>
+                  <li>Theme contributions are welcome on GitHub</li>
+                </ul>
+                <p><strong>Unsupported sites:</strong> Mozilla addons store, Settings pages, New tab page, PDF viewer,
+                  and other restricted pages cannot be themed.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
     </main>
 
-
     <footer class="app-footer">
-      <a href="https://sameerasw.github.io/my-internet/" class="footer-link" target="_blank">
+      <a href="https://sameerasw.github.io/my-internet/" class="footer-link" target="_blank"
+        title="Visit the project styles repository">
         <i class="fas fa-book"></i> Styles
       </a>
       <div class="footer-divider"></div>
-      <a href="https://github.com/sameerasw/my-internet/issues/new/choose" class="footer-link" target="_blank">
+      <a href="#" id="bug-report-link" class="footer-link"
+        title="Report a bug or issue to the addon's GitHub repository">
         <i class="fa-brands fa-github"></i> Bug?
       </a>
     </footer>
   </div>
+
+  <!-- Theme Request Prompt Overlay -->
+  <div id="theme-request-overlay" class="theme-request-overlay hidden">
+    <div class="theme-request-prompt">
+      <h3>Theme Request</h3>
+
+      <div class="prompt-question">
+        <h4>
+          Tried forcing the theme?
+        </h4>
+        <p>Please enable forcing for the website and see if a theme is still needed.</p>
+        <div class="custom-toggle-container">
+          <div class="custom-toggle" id="forcing-toggle" data-options="2">
+            <div class="toggle-option active" data-value="no">No</div>
+            <div class="toggle-option" data-value="yes">Yes</div>
+            <div class="toggle-slider"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-question">
+        <h4>
+          Does the website require an account?
+        </h4>
+        <p>If I do not have an account, might take some time for others to contribute.</p>
+        <div class="custom-toggle-container">
+          <div class="custom-toggle" id="account-toggle" data-options="3">
+            <div class="toggle-option" data-value="no">No</div>
+            <div class="toggle-option active" data-value="unset">Unset</div>
+            <div class="toggle-option" data-value="yes">Yes</div>
+            <div class="toggle-slider"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-actions">
+        <button id="cancel-request" class="action-button secondary">Cancel</button>
+        <button id="submit-request" class="action-button primary">Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bug Report Overlay -->
+  <div id="bug-report-overlay" class="theme-request-overlay hidden">
+    <div class="theme-request-prompt">
+      <h3>Bug Report</h3>
+
+      <div class="prompt-question">
+        <h4>What is your issue/bug related to?</h4>
+        <p>Select the category that best describes your issue:</p>
+        <div class="bug-options-container">
+          <button class="bug-option" data-type="1">
+            <i class="fas fa-palette"></i>
+            <span>Current website's theme</span>
+          </button>
+          <button class="bug-option" data-type="2">
+            <i class="fas fa-puzzle-piece"></i>
+            <span>An issue with the extension</span>
+          </button>
+          <button class="bug-option" data-type="3">
+            <i class="fas fa-eye"></i>
+            <span>Browser transparency issue</span>
+          </button>
+          <button class="bug-option" data-type="4">
+            <i class="fas fa-lightbulb"></i>
+            <span>Feature request</span>
+          </button>
+          <button class="bug-option" data-type="5">
+            <i class="fas fa-question"></i>
+            <span>Other...</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="prompt-actions">
+        <button id="cancel-bug-report" class="action-button secondary">Cancel</button>
+        <button id="submit-bug-report" class="action-button primary" disabled>Submit Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="welcome.js"></script>
   <script src="popup.js"></script>
 </body>
 

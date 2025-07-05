@@ -6,7 +6,7 @@
   background-color: var(--secondary-bg);
   border-radius: var(--radius-md);
   padding: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 4px;
   border-left: 3px solid var(--accent-color);
 }
 
@@ -14,11 +14,12 @@
   margin-top: 8px;
   color: var(--text-secondary);
   font-size: 13px;
-  padding-left: 58px;
+  /* padding-left: 58px; */
 }
 
 /* General layout adjustments */
 .app-content {
+  width: 90%;
   max-width: 960px;
   margin: 0 auto;
   padding: 20px;
@@ -36,7 +37,7 @@ body {
 
 /* Data section styling */
 .data-section {
-  margin-bottom: 24px;
+  margin-bottom: 4px;
   background-color: var(--secondary-bg);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -93,6 +94,17 @@ body {
   color: var(--text-secondary);
 }
 
+/* Status indicators for consistency */
+.status-open {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.status-closed {
+  background-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
 /* No data message */
 .no-data {
   padding: 16px;
@@ -109,7 +121,7 @@ body {
 }
 
 .website-panel {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   background-color: var(--bg-color);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -164,7 +176,8 @@ body {
 
 .website-content {
   max-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
   transition: max-height 0.3s ease;
   background-color: var(--secondary-bg);
 }
@@ -346,18 +359,7 @@ body {
 
 /* Clear list button styling */
 .clear-list-button {
-  margin-top: 8px;
-  margin-bottom: 16px;
-  background-color: var(--secondary-bg);
-  border-color: var(--border-color);
-  font-size: 12px;
-  padding: 6px 12px;
-}
-
-.clear-list-button:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-  border-color: var(--danger-color);
-  color: var(--danger-color);
+  margin-bottom: 20px;
 }
 
 /* Null and object value styling */
@@ -373,7 +375,7 @@ body {
 
 /* Danger zone styling */
 .danger-zone {
-  margin-top: 24px;
+  margin-top: 8px;
   padding: 16px;
   background-color: var(--danger-bg-color);
   border: 1px solid var(--danger-border-color);
@@ -444,5 +446,215 @@ body {
 
   .features-list {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+/* Styling for the website lists section */
+.tables-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.list-title-section {
+  margin-bottom: 16px;
+}
+
+.list-title-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.list-section {
+  background-color: var(--bg-color);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.list-section h4 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--accent-color);
+}
+
+.list-description {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.remove-site-button {
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.remove-site-button:hover {
+  background-color: var(--danger-hover-color);
+  transform: scale(1.1);
+}
+
+.remove-site-button i {
+  font-size: 12px;
+}
+
+.clear-list-button {
+  margin-bottom: 20px;
+}
+
+/* Backup and Restore Styling */
+.backup-restore-container {
+  background-color: var(--bg-color);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border-left: 3px solid var(--accent-color);
+}
+
+.backup-description {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.backup-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.import-container,
+#export-settings {
+  flex: 1;
+}
+
+.import-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.import-status {
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 8px 0;
+  border-radius: var(--radius-sm);
+}
+
+.status-success {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.status-error {
+  color: var(--danger-color);
+  font-weight: 500;
+}
+
+/* Repository URL styling */
+.repository-url-container {
+  background-color: var(--bg-color);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border-left: 3px solid var(--accent-color);
+}
+
+.repository-url-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.repository-url-input {
+  /* width: 100%; */
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.repository-url-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.repository-url-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.repository-url-status {
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 8px 0;
+  border-radius: var(--radius-sm);
+}
+
+/* Add responsive adjustments for mobile */
+@media (max-width: 1024px) {
+  .tables-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .repository-url-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .repository-url-buttons button {
+    width: 100%;
+  }
+}
+
+/* Global toggles container styling */
+.global-toggles-container {
+  background-color: var(--bg-color);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border-left: 3px solid var(--accent-color);
+}
+
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.toggle-row .toggle-container {
+  flex: 1;
+  min-width: 180px;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .toggle-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toggle-row .toggle-container {
+    margin-bottom: 4px;
   }
 }

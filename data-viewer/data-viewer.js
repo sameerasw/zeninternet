@@ -1,18 +1,38 @@
 document.addEventListener("DOMContentLoaded", function () {
   const BROWSER_STORAGE_KEY = "transparentZenSettings";
   const SKIP_FORCE_THEMING_KEY = "skipForceThemingList";
+  const SKIP_THEMING_KEY = "skipThemingList";
+  const FALLBACK_BACKGROUND_KEY = "fallbackBackgroundList";
+  const REPOSITORY_URL_KEY = "stylesRepositoryUrl";
+  const DEFAULT_REPOSITORY_URL =
+    "https://sameerasw.github.io/my-internet/styles.json";
 
   const globalSettingsElement = document.getElementById("global-settings-data");
   const skipListElement = document.getElementById("skip-list-data");
   const combinedWebsitesElement = document.getElementById(
     "combined-websites-data"
   );
-  const backButton = document.getElementById("back-button");
   const deleteAllButton = document.getElementById("delete-all-data");
   const versionElement = document.getElementById("addon-version");
   const disableTransparencyToggle = document.getElementById(
     "disable-transparency"
   );
+  // New toggle elements
+  const disableHoverToggle = document.getElementById("disable-hover");
+  const disableFooterToggle = document.getElementById("disable-footer");
+
+  // Repository URL Elements
+  const repositoryUrlInput = document.getElementById("repository-url");
+  const setRepositoryUrlButton = document.getElementById("set-repository-url");
+  const resetRepositoryUrlButton = document.getElementById(
+    "reset-repository-url"
+  );
+  const repositoryUrlStatus = document.getElementById("repository-url-status");
+
+  // Backup & Restore Elements
+  const exportButton = document.getElementById("export-settings");
+  const importFileInput = document.getElementById("import-file");
+  const importStatusElement = document.getElementById("import-status");
 
   // Load and display the data
   loadAllData();
@@ -20,14 +40,18 @@ document.addEventListener("DOMContentLoaded", function () {
   // Display addon version
   displayAddonVersion();
 
-  // Event listener for the back button
-  backButton.addEventListener("click", function () {
-    window.close();
-  });
-
   // Event listener for disable transparency toggle
   disableTransparencyToggle.addEventListener("change", function () {
     saveTransparencySettings(this.checked);
+  });
+
+  // Event listeners for new toggles
+  disableHoverToggle.addEventListener("change", function () {
+    saveHoverSettings(this.checked);
+  });
+
+  disableFooterToggle.addEventListener("change", function () {
+    saveFooterSettings(this.checked);
   });
 
   // Event listener for delete all data button
@@ -40,6 +64,132 @@ document.addEventListener("DOMContentLoaded", function () {
       deleteAllData();
     }
   });
+
+  // Repository URL event listeners
+  setRepositoryUrlButton.addEventListener("click", setRepositoryUrl);
+  resetRepositoryUrlButton.addEventListener("click", resetRepositoryUrl);
+
+  // New event listeners for export and import functionality
+  exportButton.addEventListener("click", exportSettings);
+  importFileInput.addEventListener("change", importSettings);
+
+  // Load the repository URL from storage
+  loadRepositoryUrl();
+
+  async function loadRepositoryUrl() {
+    try {
+      const data = await browser.storage.local.get(REPOSITORY_URL_KEY);
+      const repositoryUrl = data[REPOSITORY_URL_KEY] || DEFAULT_REPOSITORY_URL;
+      repositoryUrlInput.value = repositoryUrl;
+    } catch (error) {
+      console.error("Error loading repository URL:", error);
+      repositoryUrlInput.value = DEFAULT_REPOSITORY_URL;
+    }
+  }
+
+  async function setRepositoryUrl() {
+    try {
+      const newUrl = repositoryUrlInput.value.trim();
+
+      if (!newUrl) {
+        showRepositoryUrlStatus("Repository URL cannot be empty", "error");
+        return;
+      }
+
+      // Simple URL validation
+      try {
+        new URL(newUrl);
+      } catch (e) {
+        showRepositoryUrlStatus("Invalid URL format", "error");
+        return;
+      }
+
+      // Save the new URL to storage
+      await browser.storage.local.set({ [REPOSITORY_URL_KEY]: newUrl });
+
+      showRepositoryUrlStatus("Repository URL saved successfully", "success");
+
+      // Prompt the user to clear styles data
+      if (
+        confirm(
+          "Would you like to clear existing styles data to avoid conflicts with the new repository?\n\nThis will clear saved styles and website-specific settings, but keep your global settings."
+        )
+      ) {
+        await clearStylesData();
+      }
+    } catch (error) {
+      console.error("Error setting repository URL:", error);
+      showRepositoryUrlStatus(`Error saving URL: ${error.message}`, "error");
+    }
+  }
+
+  async function resetRepositoryUrl() {
+    try {
+      repositoryUrlInput.value = DEFAULT_REPOSITORY_URL;
+      await browser.storage.local.set({
+        [REPOSITORY_URL_KEY]: DEFAULT_REPOSITORY_URL,
+      });
+
+      showRepositoryUrlStatus("Repository URL reset to default", "success");
+
+      // Prompt to clear styles data
+      if (
+        confirm(
+          "Would you like to clear existing styles data to avoid conflicts?\n\nThis will clear saved styles and website-specific settings, but keep your global settings."
+        )
+      ) {
+        await clearStylesData();
+      }
+    } catch (error) {
+      console.error("Error resetting repository URL:", error);
+      showRepositoryUrlStatus(`Error resetting URL: ${error.message}`, "error");
+    }
+  }
+
+  async function clearStylesData() {
+    try {
+      // Get all storage data to filter what to keep and what to remove
+      const allData = await browser.storage.local.get(null);
+
+      // Create a new object with just the data we want to keep
+      const dataToKeep = {};
+
+      // Keep global settings
+      if (allData[BROWSER_STORAGE_KEY]) {
+        dataToKeep[BROWSER_STORAGE_KEY] = allData[BROWSER_STORAGE_KEY];
+      }
+
+      // Keep repository URL
+      if (allData[REPOSITORY_URL_KEY]) {
+        dataToKeep[REPOSITORY_URL_KEY] = allData[REPOSITORY_URL_KEY];
+      }
+
+      // Clear all storage first
+      await browser.storage.local.clear();
+
+      // Then restore the data we want to keep
+      await browser.storage.local.set(dataToKeep);
+
+      // Refresh the data display
+      loadAllData();
+
+      showRepositoryUrlStatus("Styles data cleared successfully", "success");
+    } catch (error) {
+      console.error("Error clearing styles data:", error);
+      showRepositoryUrlStatus(`Error clearing data: ${error.message}`, "error");
+    }
+  }
+
+  function showRepositoryUrlStatus(message, type) {
+    repositoryUrlStatus.textContent = message;
+    repositoryUrlStatus.className = `repository-url-status status-${type}`;
+
+    // Clear the message after 5 seconds
+    setTimeout(() => {
+      repositoryUrlStatus.textContent = "";
+      repositoryUrlStatus.className = "repository-url-status";
+    }, 5000);
+  }
 
   async function deleteAllData() {
     try {
@@ -68,18 +218,200 @@ document.addEventListener("DOMContentLoaded", function () {
       settings.disableTransparency = isDisabled;
 
       await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
-      alert(
-        `Transparency has been ${
-          isDisabled ? "disabled" : "enabled"
-        } globally. This will affect all websites.`
-      );
+      // No notification - just save the setting silently
     } catch (error) {
       console.error("Error saving transparency settings:", error);
-      alert(
-        "An error occurred while saving the transparency setting: " +
-          error.message
-      );
     }
+  }
+
+  // New functions to save hover and footer settings
+  async function saveHoverSettings(isDisabled) {
+    try {
+      const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+      const settings = data[BROWSER_STORAGE_KEY] || {};
+
+      // Update the disableHover setting
+      settings.disableHover = isDisabled;
+
+      await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
+      // No notification - just save the setting silently
+    } catch (error) {
+      console.error("Error saving hover settings:", error);
+    }
+  }
+
+  async function saveFooterSettings(isDisabled) {
+    try {
+      const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+      const settings = data[BROWSER_STORAGE_KEY] || {};
+
+      // Update the disableFooter setting
+      settings.disableFooter = isDisabled;
+
+      await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
+      // No notification - just save the setting silently
+    } catch (error) {
+      console.error("Error saving footer settings:", error);
+    }
+  }
+
+  // Export settings functionality
+  async function exportSettings() {
+    try {
+      // Retrieve all storage data to find site-specific settings
+      const allData = await browser.storage.local.get(null);
+
+      // Get the fallback background list once
+      const fallbackBackgroundList = allData[FALLBACK_BACKGROUND_KEY] || [];
+
+      // Extract only the settings we want to backup
+      const settingsToBackup = {
+        [BROWSER_STORAGE_KEY]: allData[BROWSER_STORAGE_KEY] || {},
+        [SKIP_FORCE_THEMING_KEY]: allData[SKIP_FORCE_THEMING_KEY] || [],
+        [SKIP_THEMING_KEY]: allData[SKIP_THEMING_KEY] || [],
+        [FALLBACK_BACKGROUND_KEY]: fallbackBackgroundList,
+        [REPOSITORY_URL_KEY]:
+          allData[REPOSITORY_URL_KEY] || DEFAULT_REPOSITORY_URL,
+      };
+
+      // Remove fallbackBackgroundList from global settings if it exists there
+      if (settingsToBackup[BROWSER_STORAGE_KEY].fallbackBackgroundList) {
+        delete settingsToBackup[BROWSER_STORAGE_KEY].fallbackBackgroundList;
+      }
+
+      // Also extract site-specific settings (keys that start with BROWSER_STORAGE_KEY.)
+      const siteSpecificSettings = {};
+      for (const [key, value] of Object.entries(allData)) {
+        if (key.startsWith(BROWSER_STORAGE_KEY + ".")) {
+          siteSpecificSettings[key] = value;
+        }
+      }
+
+      // Add export timestamp and version
+      const manifest = browser.runtime.getManifest();
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        addonVersion: manifest.version,
+        settings: settingsToBackup,
+        siteSettings: siteSpecificSettings,
+      };
+
+      // Convert to JSON
+      const jsonData = JSON.stringify(exportData, null, 2);
+
+      // Create a blob and download link
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary anchor and trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `zen-internet-settings-${
+        new Date().toISOString().split("T")[0]
+      }.json`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+
+      // Show success message
+      showImportStatus("Settings exported successfully!", "success");
+    } catch (error) {
+      console.error("Error exporting settings:", error);
+      showImportStatus(`Export failed: ${error.message}`, "error");
+    }
+  }
+
+  // Import settings functionality
+  async function importSettings(event) {
+    try {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = async (e) => {
+        try {
+          const importData = JSON.parse(e.target.result);
+
+          // Validate the imported data structure
+          if (
+            !importData.settings ||
+            !importData.settings[BROWSER_STORAGE_KEY]
+          ) {
+            throw new Error("Invalid settings file format");
+          }
+
+          // Confirm the import
+          if (
+            confirm(
+              `Are you sure you want to import settings from ${importData.exportDate}? This will overwrite your current settings.`
+            )
+          ) {
+            // First store the global settings, lists, and repository URL
+            const importOperations = {
+              [BROWSER_STORAGE_KEY]: importData.settings[BROWSER_STORAGE_KEY],
+              [SKIP_FORCE_THEMING_KEY]:
+                importData.settings[SKIP_FORCE_THEMING_KEY] || [],
+              [SKIP_THEMING_KEY]: importData.settings[SKIP_THEMING_KEY] || [],
+              [REPOSITORY_URL_KEY]:
+                importData.settings[REPOSITORY_URL_KEY] ||
+                DEFAULT_REPOSITORY_URL,
+            };
+
+            // Then add any site-specific settings if they exist
+            if (importData.siteSettings) {
+              for (const [key, value] of Object.entries(
+                importData.siteSettings
+              )) {
+                importOperations[key] = value;
+              }
+            }
+
+            // Apply all settings at once
+            await browser.storage.local.set(importOperations);
+
+            showImportStatus(
+              "Settings imported successfully! Reloading...",
+              "success"
+            );
+
+            // Reload the page after a short delay
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            // User cancelled
+            importFileInput.value = "";
+            showImportStatus("Import cancelled", "error");
+          }
+        } catch (parseError) {
+          console.error("Error parsing import file:", parseError);
+          showImportStatus(`Import failed: ${parseError.message}`, "error");
+        }
+      };
+
+      reader.readAsText(file);
+    } catch (error) {
+      console.error("Error handling import:", error);
+      showImportStatus(`Import failed: ${error.message}`, "error");
+    }
+  }
+
+  // Helper function to show import status messages
+  function showImportStatus(message, type) {
+    importStatusElement.textContent = message;
+    importStatusElement.className = `import-status status-${type}`;
+
+    // Clear the message after 5 seconds
+    setTimeout(() => {
+      importStatusElement.textContent = "";
+      importStatusElement.className = "import-status";
+    }, 5000);
   }
 
   async function displayAddonVersion() {
@@ -90,24 +422,32 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadAllData() {
     try {
       // Load all data from storage
-      const data = await browser.storage.local.get(null);
+      const allData = await browser.storage.local.get(null);
 
-      // Display global settings
-      const globalSettings = data[BROWSER_STORAGE_KEY] || {};
-      displayGlobalSettings(globalSettings);
+      // Extract global settings
+      const globalSettings = allData[BROWSER_STORAGE_KEY] || {};
 
-      // Set the disable transparency toggle state
+      // Restore the toggle states based on actual values
       disableTransparencyToggle.checked =
         globalSettings.disableTransparency || false;
+      disableHoverToggle.checked = globalSettings.disableHover || false;
+      disableFooterToggle.checked = globalSettings.disableFooter || false;
 
-      // Display skip/enable list
-      const skipList = data[SKIP_FORCE_THEMING_KEY] || [];
-      displaySkipList(skipList, globalSettings.whitelistMode);
+      // Extract skip lists
+      const skipForceList = allData[SKIP_FORCE_THEMING_KEY] || [];
+      const skipThemingList = allData[SKIP_THEMING_KEY] || [];
+      const fallbackBackgroundList = allData[FALLBACK_BACKGROUND_KEY] || [];
 
-      // Display combined websites and settings
-      displayCombinedWebsiteData(data);
-
-      console.info("Data loaded successfully");
+      // Display the data
+      displayGlobalSettings(globalSettings);
+      displayCombinedSkipLists(
+        skipForceList,
+        skipThemingList,
+        fallbackBackgroundList,
+        globalSettings.whitelistMode || false,
+        globalSettings.whitelistStyleMode || false
+      );
+      displayCombinedWebsiteData(allData);
     } catch (error) {
       console.error("Error loading data:", error);
     }
@@ -149,52 +489,137 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${new Date(settings.lastFetchedTime).toLocaleString()}</td>
       `;
       tbody.appendChild(row);
+    } else {
+      // Show "Never" if no lastFetchedTime is found
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${formatSettingName("lastFetchedTime")}</td>
+        <td><span class="null-value">Never</span></td>
+      `;
+      tbody.appendChild(row);
     }
 
     table.appendChild(tbody);
     globalSettingsElement.appendChild(table);
   }
 
-  function displaySkipList(skipList, isWhitelistMode) {
+  function displayCombinedSkipLists(
+    skipForceList,
+    skipThemingList,
+    fallbackBackgroundList,
+    isWhitelistMode,
+    isWhitelistStyleMode
+  ) {
     skipListElement.innerHTML = "";
 
-    const modeType = isWhitelistMode ? "Whitelist" : "Blacklist";
-    const actionType = isWhitelistMode ? "Enabled" : "Skipped";
+    // Create title and description section
+    const titleSection = document.createElement("div");
+    titleSection.className = "list-title-section";
 
-    const modeInfo = document.createElement("div");
-    modeInfo.classList.add("mode-info");
-    modeInfo.innerHTML = `<strong>Current Mode:</strong> ${modeType} Mode - ${
+    const forceModeName = isWhitelistMode ? "Whitelist" : "Blacklist";
+    const styleModeName = isWhitelistStyleMode ? "Whitelist" : "Blacklist";
+
+    titleSection.innerHTML = `
+      <h3>Website Lists Overview</h3>
+      <div class="mode-info">
+        <div><strong>Force Styling Mode:</strong> ${forceModeName} Mode (${
       isWhitelistMode
-        ? "Only apply forced styling to sites in the list"
-        : "Apply forced styling to all sites except those in the list"
-    }`;
-    skipListElement.appendChild(modeInfo);
+        ? "only apply to sites in the list"
+        : "apply to all except sites in the list"
+    })</div>
+        <div><strong>General Styling Mode:</strong> ${styleModeName} Mode (${
+      isWhitelistStyleMode
+        ? "only apply to sites in the list"
+        : "apply to all except sites in the list"
+    })</div>
+      </div>
+    `;
 
-    // Add Clear List button
-    if (skipList.length > 0) {
-      const clearListButton = document.createElement("button");
-      clearListButton.classList.add(
+    skipListElement.appendChild(titleSection);
+
+    // Add Clear All Lists button
+    if (
+      skipForceList.length > 0 ||
+      skipThemingList.length > 0 ||
+      fallbackBackgroundList.length > 0
+    ) {
+      const clearAllButton = document.createElement("button");
+      clearAllButton.classList.add(
         "action-button",
-        "secondary",
+        "danger",
         "clear-list-button"
       );
-      clearListButton.innerHTML = '<i class="fas fa-trash"></i> Clear List';
-      clearListButton.addEventListener("click", function () {
-        if (
-          confirm(
-            `Are you sure you want to clear the entire ${modeType} list? This will affect how styling is applied to websites.`
-          )
-        ) {
-          clearSkipList();
-        }
-      });
-      skipListElement.appendChild(clearListButton);
+      clearAllButton.innerHTML = '<i class="fas fa-trash"></i> Clear All Lists';
+      clearAllButton.addEventListener("click", clearAllSkipLists);
+      skipListElement.appendChild(clearAllButton);
     }
 
-    if (skipList.length === 0) {
-      skipListElement.innerHTML +=
-        '<div class="no-data">No websites in the list.</div>';
-      return;
+    // Create container for the three tables
+    const tablesContainer = document.createElement("div");
+    tablesContainer.className = "tables-container";
+
+    // Create force styling list
+    const forceListSection = createSingleListSection(
+      skipForceList,
+      isWhitelistMode,
+      "Force Styling List",
+      isWhitelistMode
+        ? "Sites where forced styling IS applied"
+        : "Sites where forced styling is NOT applied",
+      SKIP_FORCE_THEMING_KEY
+    );
+
+    // Create regular styling list
+    const regularListSection = createSingleListSection(
+      skipThemingList,
+      isWhitelistStyleMode,
+      "Regular Styling List",
+      isWhitelistStyleMode
+        ? "Sites where regular styling IS applied"
+        : "Sites where regular styling is NOT applied",
+      SKIP_THEMING_KEY
+    );
+
+    // Create fallback background list
+    const fallbackListSection = createSingleListSection(
+      fallbackBackgroundList,
+      false, // Fallback background is not whitelist/blacklist based
+      "Fallback Background List",
+      "Sites where a default background added, no transparency",
+      FALLBACK_BACKGROUND_KEY
+    );
+
+    tablesContainer.appendChild(forceListSection);
+    tablesContainer.appendChild(regularListSection);
+    tablesContainer.appendChild(fallbackListSection);
+    skipListElement.appendChild(tablesContainer);
+  }
+
+  function createSingleListSection(
+    list,
+    isWhitelistMode,
+    title,
+    description,
+    storageKey
+  ) {
+    const section = document.createElement("div");
+    section.className = "list-section";
+
+    const sectionTitle = document.createElement("h4");
+    sectionTitle.textContent = title;
+    section.appendChild(sectionTitle);
+
+    const sectionDescription = document.createElement("p");
+    sectionDescription.className = "list-description";
+    sectionDescription.textContent = description;
+    section.appendChild(sectionDescription);
+
+    if (list.length === 0) {
+      const emptyMessage = document.createElement("div");
+      emptyMessage.className = "no-data";
+      emptyMessage.textContent = "No websites in this list";
+      section.appendChild(emptyMessage);
+      return section;
     }
 
     const table = document.createElement("table");
@@ -203,33 +628,81 @@ document.addEventListener("DOMContentLoaded", function () {
     // Table header
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
-    headerRow.innerHTML = `<th>${actionType} Websites</th>`;
+    headerRow.innerHTML = `<th>Website</th><th>Action</th>`;
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
     // Table body
     const tbody = document.createElement("tbody");
 
-    for (const site of skipList) {
+    for (const site of list) {
       const row = document.createElement("tr");
-      row.innerHTML = `<td>${site}</td>`;
+
+      // Website column
+      const siteCell = document.createElement("td");
+      siteCell.textContent = site;
+      row.appendChild(siteCell);
+
+      // Action column
+      const actionCell = document.createElement("td");
+      const removeButton = document.createElement("button");
+      removeButton.className = "remove-site-button";
+      removeButton.innerHTML = '<i class="fas fa-times"></i>';
+      removeButton.title = "Remove from list";
+      removeButton.addEventListener("click", function () {
+        removeSiteFromList(site, storageKey);
+      });
+      actionCell.appendChild(removeButton);
+      row.appendChild(actionCell);
+
       tbody.appendChild(row);
     }
 
     table.appendChild(tbody);
-    skipListElement.appendChild(table);
+    section.appendChild(table);
+    return section;
   }
 
-  async function clearSkipList() {
+  async function removeSiteFromList(site, listKey) {
     try {
-      await browser.storage.local.remove(SKIP_FORCE_THEMING_KEY);
-      alert(`${SKIP_FORCE_THEMING_KEY} has been cleared successfully.`);
-      loadAllData(); // Reload data to reflect changes
+      // Get current list
+      const data = await browser.storage.local.get(listKey);
+      const list = data[listKey] || [];
+
+      // Remove the site
+      const newList = list.filter((item) => item !== site);
+
+      // Save updated list
+      await browser.storage.local.set({ [listKey]: newList });
+
+      // Refresh the display
+      loadAllData();
+
+      console.log(`Removed ${site} from ${listKey}`);
     } catch (error) {
-      console.error("Error clearing skip list:", error);
-      alert(
-        "An error occurred while trying to clear the list: " + error.message
-      );
+      console.error(`Error removing site from list: ${error}`);
+      alert(`An error occurred: ${error.message}`);
+    }
+  }
+
+  async function clearAllSkipLists() {
+    try {
+      if (
+        confirm(
+          "Are you sure you want to clear ALL website lists? This will remove all entries from:\n- Force Styling List\n- Regular Styling List\n- Fallback Background List\n\nThis action cannot be undone."
+        )
+      ) {
+        await browser.storage.local.set({
+          [SKIP_FORCE_THEMING_KEY]: [],
+          [SKIP_THEMING_KEY]: [],
+          [FALLBACK_BACKGROUND_KEY]: [],
+        });
+        loadAllData(); // Reload to show empty lists
+        console.log("All skip lists cleared");
+      }
+    } catch (error) {
+      console.error("Error clearing skip lists:", error);
+      alert("An error occurred while clearing the lists: " + error.message);
     }
   }
 

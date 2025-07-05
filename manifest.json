@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Zen Internet",
-  "version": "1.8.0",
-  "description": "Inject custom css from my repository in real time",
+  "version": "2.6.1",
+  "description": "Make the internet feel native and elegant. Zen Internet is a browser extension that enhances your browsing experience by providing a clean and minimalistic interface with transparency and a focus on content. Customize the features in the addon popup.",
   "browser_specific_settings": {
     "gecko": {
       "id": "{91aa3897-2634-4a8a-9092-279db23a7689}"
@@ -23,7 +23,11 @@
   ],
   "browser_action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Zen Internet"
+    "default_title": "Zen Internet",
+    "default_icon": {
+      "48": "assets/images/logo_48.png",
+      "96": "assets/images/logo_96.png"
+    }
   },
   "background": {
     "scripts": ["background.js"],
@@ -34,6 +38,8 @@
     "data-viewer/data-viewer.html",
     "data-viewer/data-viewer.js",
     "data-viewer/data-viewer.css",
-    "styling/*"
+    "popup/welcome.css",
+    "popup/welcome.js",
+    "shared/*"
   ]
 }

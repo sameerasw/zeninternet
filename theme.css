@@ -20,6 +20,8 @@
   --text-secondary: #a0a0b8;
   --header-bg-start: #2c3e50;
   --header-bg-end: #1a2530;
+  --bg-transparent: #2245;
+  --bg-transparent-surface: #3355;
   --logo-filter: none;
   --danger-bg-color: rgba(220, 53, 69, 0.1);
   --danger-border-color: rgba(220, 53, 69, 0.3);
@@ -36,6 +38,8 @@
     --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     --header-bg-start: #f98764;
     --header-bg-end: #e77c5d;
+    --bg-transparent: #bbb5;
+    --bg-transparent-surface: #aaa5;
     /* Invert and desaturate logo in light mode */
     --logo-filter: invert(1) saturate(0);
     --danger-bg-color: rgba(220, 53, 69, 0.08);
