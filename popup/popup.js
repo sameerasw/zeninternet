@@ -5,44 +5,45 @@ let FALLBACK_BACKGROUND_KEY = "fallbackBackgroundList";
 let STYLES_MAPPING_KEY = "stylesMapping";
 const USER_STYLES_MAPPING_KEY = "userStylesMapping";
 
-// Default settings to use when values are missing
 const DEFAULT_SETTINGS = {
-  enableStyling: true, // Enable styling globally
-  autoUpdate: true, // Auto-update styles
-  forceStyling: false, // Force styling on sites without themes
-  whitelistMode: false, // Use blacklist mode by default for force styling
-  whitelistStyleMode: false, // Use blacklist mode by default for regular styling
-  disableTransparency: false, // Don't disable transparency by default
-  disableHover: false, // Don't disable hover effects by default
-  disableFooter: false, // Don't disable footers by default
-  fallbackBackgroundList: [], // Empty array for fallback background sites
+  enableStyling: true,
+  autoUpdate: true,
+  forceStyling: false,
+  whitelistMode: false,
+  whitelistStyleMode: false,
+  disableTransparency: false,
+  disableHover: false,
+  disableFooter: false,
+  fallbackBackgroundList: [],
 };
 
-// Helper function to ensure all required settings exist
+/**
+ * Ensures all required settings exist with default values.
+ */
 function ensureDefaultSettings(settings = {}) {
   const result = { ...settings };
-
-  // Apply default values for any missing settings
   for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
     if (result[key] === undefined) {
       result[key] = defaultValue;
     }
   }
-
   return result;
 }
 
-// Helper function to normalize hostnames by removing www. prefix
+/**
+ * Normalizes hostnames by removing the www. prefix.
+ */
 function normalizeHostname(hostname) {
   return hostname.startsWith("www.") ? hostname.substring(4) : hostname;
 }
 
-// === DOM Utility ===
 const $ = (selector) => document.getElementById(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const on = (el, event, handler) => el && el.addEventListener(event, handler);
 
-// === Overlay/Modal Utility ===
+/**
+ * Sets up a modal overlay with common handlers.
+ */
 function setupOverlay({ overlayId, cancelId, submitId, onCancel, onSubmit, onShow, onHide }) {
   const overlay = $(overlayId);
   if (!overlay) return;
@@ -85,8 +86,6 @@ new (class ExtensionPopup {
   fallbackBackgroundList = [];
 
   constructor() {
-    if (logging) console.log("Initializing ExtensionPopup");
-    // Load settings and initialize the popup
     this.loadSettings().then(() => {
       this.loadSkipForceThemingList().then(() => {
         this.loadSkipThemingList().then(() => {
@@ -94,17 +93,15 @@ new (class ExtensionPopup {
             this.getCurrentTabInfo().then(() => {
               this.restoreSettings();
               this.bindAllEvents();
-              this.initializeThemeRequestOverlay(); // Add this line
+              this.initializeThemeRequestOverlay();
             });
           });
         });
       });
     });
 
-    // Check and show welcome screen for first-time users
     this.checkWelcomeScreen();
 
-    // Bind event listeners
     this.refetchCSSButton.addEventListener("click", this.refetchCSS.bind(this));
     this.refetchCSSButton.addEventListener(
       "auxclick",
@@ -120,12 +117,10 @@ new (class ExtensionPopup {
     );
     this.reloadButton.addEventListener("click", this.reloadPage.bind(this));
 
-    // Add toggle features button event listener
     document
       .getElementById("toggle-features")
       ?.addEventListener("click", this.toggleFeatures.bind(this));
 
-    // Add toggle forcing button event listener
     document
       .getElementById("toggle-forcing")
       ?.addEventListener("click", this.toggleForcing.bind(this));
@@ -140,20 +135,15 @@ new (class ExtensionPopup {
       this.handleWhitelistStyleModeChange.bind(this)
     );
 
-    // Add event listener for the "What's New" button
     this.whatsNewButton.addEventListener("click", this.openWhatsNew.bind(this));
-
-    // Add event listener for the "How to use?" button
     this.howToUseButton.addEventListener("click", this.openHowToUse.bind(this));
 
-    // Add event listener for the data viewer button
     document.getElementById("view-data")?.addEventListener("click", () => {
       browser.tabs.create({
         url: browser.runtime.getURL("data-viewer/data-viewer.html"),
       });
     });
 
-    // Add event listener for bug report
     document
       .getElementById("bug-report-link")
       ?.addEventListener("click", (e) => {
@@ -161,18 +151,15 @@ new (class ExtensionPopup {
         this.showBugReportOverlay();
       });
 
-    // Setup auto-update and display last fetched time
     this.setupAutoUpdate();
     this.displayLastFetchedTime();
     this.displayAddonVersion();
 
     document.addEventListener("DOMContentLoaded", function () {
       const header = document.querySelector(".app-header");
-
       window.addEventListener("scroll", () => {
         const scrollPercentage =
           (window.scrollY / document.body.scrollHeight) * 100;
-
         if (scrollPercentage > 5) {
           header.classList.add("compact");
         } else {
@@ -182,8 +169,10 @@ new (class ExtensionPopup {
     });
   }
 
+  /**
+   * Retrieves information about the currently active tab.
+   */
   async getCurrentTabInfo() {
-    if (logging) console.log("getCurrentTabInfo called");
     try {
       const tabs = await browser.tabs.query({
         active: true,
@@ -192,24 +181,15 @@ new (class ExtensionPopup {
       if (tabs.length > 0) {
         const url = new URL(tabs[0].url);
         this.currentSiteHostname = url.hostname;
-        // Store normalized hostname
         this.normalizedCurrentSiteHostname = normalizeHostname(
           this.currentSiteHostname
         );
-        console.info(
-          "Current site hostname:",
-          this.currentSiteHostname,
-          "(normalized:",
-          this.normalizedCurrentSiteHostname,
-          ")"
-        );
 
-        // Update the site label with current hostname (without www.)
         const siteDomainElement = document.getElementById("site-domain");
         if (siteDomainElement) {
           const displayDomain = normalizeHostname(this.currentSiteHostname);
           siteDomainElement.textContent = displayDomain;
-          siteDomainElement.title = displayDomain; // Add full domain as tooltip for long domains
+          siteDomainElement.title = displayDomain;
         }
       }
     } catch (error) {
@@ -217,9 +197,10 @@ new (class ExtensionPopup {
     }
   }
 
+  /**
+   * Binds UI events to their respective handlers.
+   */
   bindAllEvents() {
-    if (logging) console.log("bindAllEvents called");
-    // Bind event listeners for settings changes
     this.enableStylingSwitch.addEventListener("change", () => {
       this.saveSettings();
       this.updateActiveTabStyling();
@@ -246,20 +227,19 @@ new (class ExtensionPopup {
 
     this.reloadButton.addEventListener("click", this.reloadPage.bind(this));
 
-    // Add FAQ event listeners
     document
       .getElementById("toggle-faq")
       ?.addEventListener("click", this.toggleFAQ.bind(this));
 
-    // Add event delegation for FAQ items
     document
       .getElementById("faq-content")
       ?.addEventListener("click", this.handleFAQClick.bind(this));
   }
 
+  /**
+   * Restores UI state from stored settings.
+   */
   restoreSettings() {
-    if (logging) console.log("restoreSettings called");
-    // Restore global settings
     this.enableStylingSwitch.checked =
       this.globalSettings.enableStyling ?? true;
     this.autoUpdateSwitch.checked = this.globalSettings.autoUpdate ?? false;
@@ -271,8 +251,6 @@ new (class ExtensionPopup {
 
     this.updateModeLabels();
 
-    // In whitelist mode, checked means "include this site"
-    // In blacklist mode, checked means "skip this site"
     this.skipForceThemingSwitch.checked = this.skipForceThemingList.includes(
       normalizeHostname(this.currentSiteHostname)
     );
@@ -289,19 +267,18 @@ new (class ExtensionPopup {
     this.loadCurrentSiteFeatures();
   }
 
+  /**
+   * Loads global and site-specific settings from storage.
+   */
   async loadSettings() {
-    if (logging) console.log("loadSettings called");
-    // Load global settings
     const globalData = await browser.storage.local.get(
       this.BROWSER_STORAGE_KEY
     );
 
-    // Apply defaults for any missing settings
     this.globalSettings = ensureDefaultSettings(
       globalData[this.BROWSER_STORAGE_KEY] || {}
     );
 
-    // Save back any applied defaults
     if (
       JSON.stringify(this.globalSettings) !==
       JSON.stringify(globalData[this.BROWSER_STORAGE_KEY])
@@ -309,12 +286,9 @@ new (class ExtensionPopup {
       await browser.storage.local.set({
         [this.BROWSER_STORAGE_KEY]: this.globalSettings,
       });
-      if (logging) console.log("Applied missing default settings");
     }
 
-    // Load site-specific settings if on a specific site
     if (this.currentSiteHostname) {
-      // Try both normalized and original hostnames for backwards compatibility
       const normalizedSiteKey = `${this.BROWSER_STORAGE_KEY}.${this.normalizedCurrentSiteHostname}`;
       const originalSiteKey = `${this.BROWSER_STORAGE_KEY}.${this.currentSiteHostname}`;
 
@@ -326,26 +300,20 @@ new (class ExtensionPopup {
         originalData[originalSiteKey] ||
         {};
 
-      // Make sure we always save to the normalized key going forward
       if (!normalizedData[normalizedSiteKey] && originalData[originalSiteKey]) {
-        // Migrate settings from original to normalized key
         await browser.storage.local.set({
           [normalizedSiteKey]: this.siteSettings,
         });
-        if (logging)
-          console.log(
-            "Migrated settings to normalized key:",
-            normalizedSiteKey
-          );
       }
 
       await this.loadCurrentSiteFeatures();
     }
   }
 
+  /**
+   * Saves current settings to storage.
+   */
   saveSettings() {
-    if (logging) console.log("saveSettings called");
-    // Save global settings
     this.globalSettings.enableStyling = this.enableStylingSwitch.checked;
     this.globalSettings.autoUpdate = this.autoUpdateSwitch.checked;
     this.globalSettings.forceStyling = this.forceStylingSwitch.checked;
@@ -358,13 +326,10 @@ new (class ExtensionPopup {
         [this.BROWSER_STORAGE_KEY]: this.globalSettings,
       })
       .then(() => {
-        if (logging) console.log("Global settings saved");
         this.updateActiveTabStyling();
       });
 
-    // Save site-specific settings
     if (this.currentSiteHostname) {
-      // UPDATED: Always save site settings using the normalized hostname
       const siteKey = `${this.BROWSER_STORAGE_KEY}.${this.normalizedCurrentSiteHostname}`;
       const featureSettings = {};
 
@@ -381,51 +346,50 @@ new (class ExtensionPopup {
           [siteKey]: featureSettings,
         })
         .then(() => {
-          if (logging)
-            console.log("Site settings saved to normalized key:", siteKey);
           this.updateActiveTabStyling();
         });
     }
-
-    console.info("Settings saved", {
-      global: this.globalSettings,
-      site: this.siteSettings,
-    });
   }
 
+  /**
+   * Loads the list of sites to skip for forced theming.
+   */
   async loadSkipForceThemingList() {
     const data = await browser.storage.local.get(SKIP_FORCE_THEMING_KEY);
     this.skipForceThemingList = data[SKIP_FORCE_THEMING_KEY] || [];
 
-    // Initialize with empty array if missing
     if (!data[SKIP_FORCE_THEMING_KEY]) {
       await browser.storage.local.set({ [SKIP_FORCE_THEMING_KEY]: [] });
-      if (logging) console.log("Initialized empty skip force theming list");
     }
   }
 
+  /**
+   * Loads the list of sites to skip for regular theming.
+   */
   async loadSkipThemingList() {
     const data = await browser.storage.local.get(SKIP_THEMING_KEY);
     this.skipThemingList = data[SKIP_THEMING_KEY] || [];
 
-    // Initialize with empty array if missing
     if (!data[SKIP_THEMING_KEY]) {
       await browser.storage.local.set({ [SKIP_THEMING_KEY]: [] });
-      if (logging) console.log("Initialized empty skip theming list");
     }
   }
 
+  /**
+   * Loads the list of sites with fallback background enabled.
+   */
   async loadFallbackBackgroundList() {
     const data = await browser.storage.local.get(FALLBACK_BACKGROUND_KEY);
     this.fallbackBackgroundList = data[FALLBACK_BACKGROUND_KEY] || [];
 
-    // Initialize with empty array if missing
     if (!data[FALLBACK_BACKGROUND_KEY]) {
       await browser.storage.local.set({ [FALLBACK_BACKGROUND_KEY]: [] });
-      if (logging) console.log("Initialized empty fallback background list");
     }
   }
 
+  /**
+   * Saves the list of sites to skip for forced theming.
+   */
   saveSkipForceThemingList() {
     const isChecked = this.skipForceThemingSwitch.checked;
     const index = this.skipForceThemingList.indexOf(
@@ -433,12 +397,10 @@ new (class ExtensionPopup {
     );
 
     if (isChecked && index === -1) {
-      // Add to the list (whitelist: include, blacklist: skip)
       this.skipForceThemingList.push(
         normalizeHostname(this.currentSiteHostname)
       );
     } else if (!isChecked && index !== -1) {
-      // Remove from the list (whitelist: exclude, blacklist: include)
       this.skipForceThemingList.splice(index, 1);
     }
 
@@ -451,6 +413,9 @@ new (class ExtensionPopup {
       });
   }
 
+  /**
+   * Saves the list of sites to skip for regular theming.
+   */
   saveSkipThemingList() {
     const isChecked = this.skipThemingSwitch.checked;
     const index = this.skipThemingList.indexOf(
@@ -458,10 +423,8 @@ new (class ExtensionPopup {
     );
 
     if (isChecked && index === -1) {
-      // Add to the list (whitelist: include, blacklist: skip)
       this.skipThemingList.push(normalizeHostname(this.currentSiteHostname));
     } else if (!isChecked && index !== -1) {
-      // Remove from the list (whitelist: exclude, blacklist: include)
       this.skipThemingList.splice(index, 1);
     }
 
@@ -474,6 +437,9 @@ new (class ExtensionPopup {
       });
   }
 
+  /**
+   * Saves the list of sites with fallback background enabled.
+   */
   saveFallbackBackgroundList() {
     const isChecked = this.fallbackBackgroundSwitch.checked;
     const index = this.fallbackBackgroundList.indexOf(
@@ -481,12 +447,10 @@ new (class ExtensionPopup {
     );
 
     if (isChecked && index === -1) {
-      // Add to the list
       this.fallbackBackgroundList.push(
         normalizeHostname(this.currentSiteHostname)
       );
     } else if (!isChecked && index !== -1) {
-      // Remove from the list
       this.fallbackBackgroundList.splice(index, 1);
     }
 
@@ -499,6 +463,9 @@ new (class ExtensionPopup {
       });
   }
 
+  /**
+   * Initializes theme request overlay logic.
+   */
   initializeThemeRequestOverlay() {
     const overlay = $("theme-request-overlay");
     const cancelBtn = $("cancel-request");
@@ -506,21 +473,17 @@ new (class ExtensionPopup {
     const forcingToggle = $("forcing-toggle");
     const accountToggle = $("account-toggle");
 
-    // Handle custom toggle clicks
     this.setupCustomToggle(forcingToggle);
     this.setupCustomToggle(accountToggle);
 
-    // Handle cancel button
     cancelBtn.addEventListener("click", () => {
       this.hideThemeRequestOverlay();
     });
 
-    // Handle submit button
     submitBtn.addEventListener("click", () => {
       this.submitThemeRequest();
     });
 
-    // Close overlay when clicking outside
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) {
         this.hideThemeRequestOverlay();
@@ -528,89 +491,92 @@ new (class ExtensionPopup {
     });
   }
 
+  /**
+   * Sets up multi-option toggle buttons.
+   */
   setupCustomToggle(toggleElement) {
     const options = toggleElement.querySelectorAll(".toggle-option");
 
     options.forEach((option) => {
       option.addEventListener("click", () => {
-        // Remove active class from all options
         options.forEach((opt) => opt.classList.remove("active"));
-        // Add active class to clicked option
         option.classList.add("active");
       });
     });
   }
 
+  /**
+   * Displays the theme request overlay.
+   */
   showThemeRequestOverlay() {
     const overlay = $("theme-request-overlay");
     overlay.classList.remove("hidden");
 
-    // Reset toggles to default states
     const forcingToggle = $("forcing-toggle");
     const accountToggle = $("account-toggle");
 
-    // Reset forcing toggle to "Off" (middle position)
     forcingToggle
       .querySelectorAll(".toggle-option")
       .forEach((opt) => opt.classList.remove("active"));
     forcingToggle.querySelector('[data-value="off"]').classList.add("active");
 
-    // Reset account toggle to "Unset" (middle position)
     accountToggle
       .querySelectorAll(".toggle-option")
       .forEach((opt) => opt.classList.remove("active"));
     accountToggle.querySelector('[data-value="unset"]').classList.add("active");
   }
 
+  /**
+   * Hides the theme request overlay.
+   */
   hideThemeRequestOverlay() {
     const overlay = $("theme-request-overlay");
     overlay.classList.add("hidden");
   }
 
+  /**
+   * Returns the value selected in a custom toggle.
+   */
   getToggleValue(toggleId) {
     const toggle = $(toggleId);
     const activeOption = toggle.querySelector(".toggle-option.active");
     return activeOption ? activeOption.getAttribute("data-value") : "unset";
   }
 
+  /**
+   * Submits a theme request to the remote repository.
+   */
   async submitThemeRequest() {
     const forcingValue = this.getToggleValue("forcing-toggle");
     const accountValue = this.getToggleValue("account-toggle");
 
-    // Show loading state
     const submitBtn = $("submit-request");
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
     submitBtn.disabled = true;
 
     try {
-      // Check if issue already exists
       const existingIssue = await this.checkExistingIssue(
         this.currentSiteHostname
       );
 
       if (existingIssue) {
-        // Show existing issue found screen
         this.showExistingIssueScreen(existingIssue, forcingValue, accountValue);
         return;
       }
 
-      // No existing issue found, proceed with creation
       this.createNewIssue(forcingValue, accountValue);
     } catch (error) {
-      console.warn(
-        "Failed to check existing issues, proceeding anyway:",
-        error
-      );
-      // If API check fails, proceed with creating the issue
       this.createNewIssue(forcingValue, accountValue);
     } finally {
-      // Reset button state
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
     }
   }
 
+  /**
+   * Checks for existing theme requests on GitHub.
+   */
   async checkExistingIssue(hostname) {
     const owner = "sameerasw";
     const repo = "my-internet";
@@ -624,24 +590,17 @@ new (class ExtensionPopup {
     const response = await fetch(url, {
       headers: {
         Accept: "application/vnd.github.v3+json",
-        // Using anonymous requests to avoid token management
       },
     });
 
     if (!response.ok) {
       if (response.status === 403) {
-        // Rate limit exceeded, proceed without checking
-        console.warn(
-          "GitHub API rate limit exceeded, skipping duplicate check"
-        );
         return null;
       }
       throw new Error(`GitHub API error: ${response.status}`);
     }
 
     const data = await response.json();
-
-    // Look for issues that contain the hostname in the title
     const matchingIssues = data.items.filter(
       (issue) =>
         issue.title.toLowerCase().includes(hostname.toLowerCase()) ||
@@ -651,10 +610,11 @@ new (class ExtensionPopup {
     return matchingIssues.length > 0 ? matchingIssues[0] : null;
   }
 
+  /**
+   * Displays info about an existing theme request.
+   */
   showExistingIssueScreen(existingIssue, forcingValue, accountValue) {
     const prompt = document.querySelector(".theme-request-prompt");
-
-    // Store the original values for potential submission
     this.pendingRequestData = { forcingValue, accountValue };
 
     const createdDate = new Date(existingIssue.created_at).toLocaleDateString();
@@ -728,7 +688,6 @@ new (class ExtensionPopup {
       </div>
     `;
 
-    // Bind new event listeners
     document
       .getElementById("view-existing-issue")
       .addEventListener("click", () => {
@@ -747,11 +706,12 @@ new (class ExtensionPopup {
     });
   }
 
+  /**
+   * Generates a new theme request issue on GitHub.
+   */
   createNewIssue(forcingValue, accountValue) {
-    // Build the issue body with the responses
     let issueBody = `Please add a theme for ${this.currentSiteHostname}\n\n`;
 
-    // Add forcing status
     if (forcingValue === "yes") {
       issueBody += "**Tried forcing:** YES\n";
     } else if (forcingValue === "no") {
@@ -760,7 +720,6 @@ new (class ExtensionPopup {
       issueBody += "**Tried forcing:** Not specified\n";
     }
 
-    // Add account requirement status
     if (accountValue === "yes") {
       issueBody += "**Requires account:** YES\n";
     } else if (accountValue === "no") {
@@ -772,50 +731,41 @@ new (class ExtensionPopup {
     issueBody +=
       "\n---\n\n*This request was generated automatically from the Zen Internet extension.*";
 
-    // Create the GitHub issue URL
     const issueUrl = `https://github.com/sameerasw/my-internet/issues/new?template=website-theme-request.md&title=[THEME] ${
       this.currentSiteHostname
     }&body=${encodeURIComponent(issueBody)}`;
 
-    // Open the URL and hide the overlay
     window.open(issueUrl, "_blank");
     this.hideThemeRequestOverlay();
   }
 
+  /**
+   * Truncates text to a specified length.
+   */
   truncateText(text, maxLength) {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + "...";
   }
 
+  /**
+   * Loads specific feature toggles for the current website.
+   */
   async loadCurrentSiteFeatures() {
-    if (logging) console.log("loadCurrentSiteFeatures called");
     try {
       const stylesData = await browser.storage.local.get("styles");
       const styles = stylesData.styles?.website || {};
 
       this.currentSiteFeatures.innerHTML = "";
 
-      // Debug which hostname we're searching for
-      console.log(
-        "Looking for styles for:",
-        this.normalizedCurrentSiteHostname,
-        "(original:",
-        this.currentSiteHostname,
-        ")"
-      );
-
-      // Find any matching style for this site
       let currentSiteKey = Object.keys(styles).find((site) =>
         this.isCurrentSite(site.replace(".css", ""))
       );
 
-      // Check for mapped styles if no direct match found
       let isMappedStyle = false;
       let mappedSourceStyle = null;
       if (!currentSiteKey) {
         const mappingData = await browser.storage.local.get(STYLES_MAPPING_KEY);
         const userMappingData = await browser.storage.local.get(USER_STYLES_MAPPING_KEY);
-        // Merge mappings: user mappings take precedence/addition
         const mergedMapping = { ...(mappingData[STYLES_MAPPING_KEY]?.mapping || {}) };
         if (userMappingData[USER_STYLES_MAPPING_KEY]?.mapping) {
           for (const [src, targets] of Object.entries(userMappingData[USER_STYLES_MAPPING_KEY].mapping)) {
@@ -830,25 +780,19 @@ new (class ExtensionPopup {
             currentSiteKey = sourceStyle;
             isMappedStyle = true;
             mappedSourceStyle = sourceStyle;
-            console.log(`Found mapped style: ${sourceStyle} for ${this.normalizedCurrentSiteHostname}`);
             break;
           }
         }
       }
 
-      // Check if we have any styles at all, including example.com
       const hasExampleSite = "example.com.css" in styles;
       const hasNoStyles = Object.keys(styles).length === 0;
 
-      // Only collapse if we found a specific theme for this site
-      // Otherwise keep it expanded to show the request theme button
       const hasSpecificTheme =
         currentSiteKey && (currentSiteKey !== "example.com.css" || isMappedStyle);
 
-      // Special: If this site is mapped (custom or not) to example.com.css, suppress request theme and warning
       const isMappedToExample = isMappedStyle && mappedSourceStyle === "example.com.css";
 
-      // Add mapped theme indicator if this is a mapped style
       if (isMappedStyle && mappedSourceStyle) {
         const sourceWebsite = mappedSourceStyle.replace('.css', '');
         const mappedIndicator = document.createElement("div");
@@ -862,7 +806,6 @@ new (class ExtensionPopup {
         this.currentSiteFeatures.appendChild(mappedIndicator);
       }
 
-      // Apply collapsed class based on whether we have a theme
       const featuresList = $("current-site-toggles");
       const actionsContainer = $("current-site-actions");
 
@@ -870,46 +813,39 @@ new (class ExtensionPopup {
         featuresList.classList.add("collapsed");
         if (actionsContainer) actionsContainer.classList.add("collapsed");
 
-        // Hide the entire skip force theming toggle container when we have a specific theme
         const skipForceThemingContainer =
           this.skipForceThemingSwitch.closest(".toggle-container");
         if (skipForceThemingContainer) {
           skipForceThemingContainer.style.display = "none";
         }
 
-        // show the skip theming toggle
         const skipThemingContainer =
           this.skipThemingSwitch.closest(".toggle-container");
         if (skipThemingContainer) {
           skipThemingContainer.style.display = "flex";
         }
 
-        // Update the icon to show collapsed state
         const toggleButton = $("toggle-features");
         if (toggleButton) {
           const icon = toggleButton.querySelector("i");
           if (icon) icon.className = "fas fa-chevron-down";
         }
       } else {
-        // Show the skip force theming toggle container when no specific theme
         const skipForceThemingContainer =
           this.skipForceThemingSwitch.closest(".toggle-container");
         if (skipForceThemingContainer) {
           skipForceThemingContainer.style.display = "flex";
         }
 
-        // hide the skip theming toggle
         const skipThemingContainer =
           this.skipThemingSwitch.closest(".toggle-container");
         if (skipThemingContainer) {
           skipThemingContainer.style.display = "none";
         }
 
-        // Keep expanded when no theme was found or using default
         featuresList.classList.remove("collapsed");
         if (actionsContainer) actionsContainer.classList.remove("collapsed");
 
-        // Update the icon to show expanded state
         const toggleButton = $("toggle-features");
         if (toggleButton) {
           const icon = toggleButton.querySelector("i");
@@ -917,19 +853,16 @@ new (class ExtensionPopup {
         }
       }
 
-      // Set the forcing section's initial collapsed state
       const forcingContent = $("forcing-content");
       const toggleForcingButton = $("toggle-forcing");
 
       if (hasSpecificTheme) {
-        // We have a specific theme, collapse the forcing section
         forcingContent.classList.add("collapsed");
         if (toggleForcingButton) {
           const icon = toggleForcingButton.querySelector("i");
           if (icon) icon.className = "fas fa-chevron-down";
         }
       } else {
-        // No specific theme found, expand the forcing section
         forcingContent.classList.remove("collapsed");
         if (toggleForcingButton) {
           const icon = toggleForcingButton.querySelector("i");
@@ -937,53 +870,45 @@ new (class ExtensionPopup {
         }
       }
 
-     // If this site is mapped to example.com.css, do NOT show request theme or warning, even in forced mode
      if (!isMappedToExample) {
-       if (!currentSiteKey && this.globalSettings.forceStyling) {
-         currentSiteKey = Object.keys(styles).find(
-           (site) => site === "example.com.css"
-         );
-       }
-       // Only show the request theme button if we have at least the example.com style
-       // but no specific theme for this site
-       if (
-         (!currentSiteKey || currentSiteKey === "example.com.css") &&
-         hasExampleSite
-       ) {
-         const requestThemeButton = document.createElement("button");
-         requestThemeButton.className = "action-button primary";
-         requestThemeButton.innerHTML = `Request Theme for ${this.currentSiteHostname}`;
-         requestThemeButton.addEventListener("click", () => {
-           this.showThemeRequestOverlay();
-         });
-         this.currentSiteFeatures.appendChild(requestThemeButton);
-       } else if (hasNoStyles) {
-         // No styles at all, suggest to fetch first
-         const fetchFirstMessage = document.createElement("div");
-         fetchFirstMessage.className = "toggle-container";
-         fetchFirstMessage.innerHTML = `
-           <div class="actions secondary">
-             <span class="toggle-label warning">Please fetch styles first using the \"Refetch latest styles\" button</span>
-           </div>
-         `;
-         this.currentSiteFeatures.appendChild(fetchFirstMessage);
-       }
-     }
+        if (!currentSiteKey && this.globalSettings.forceStyling) {
+          currentSiteKey = Object.keys(styles).find(
+            (site) => site === "example.com.css"
+          );
+        }
+        if (
+          (!currentSiteKey || currentSiteKey === "example.com.css") &&
+          hasExampleSite
+        ) {
+          const requestThemeButton = document.createElement("button");
+          requestThemeButton.className = "action-button primary";
+          requestThemeButton.innerHTML = `Request Theme for ${this.currentSiteHostname}`;
+          requestThemeButton.addEventListener("click", () => {
+            this.showThemeRequestOverlay();
+          });
+          this.currentSiteFeatures.appendChild(requestThemeButton);
+        } else if (hasNoStyles) {
+          const fetchFirstMessage = document.createElement("div");
+          fetchFirstMessage.className = "toggle-container";
+          fetchFirstMessage.innerHTML = `
+            <div class="actions secondary">
+              <span class="toggle-label warning">Please fetch styles first using the \"Refetch latest styles\" button</span>
+            </div>
+          `;
+          this.currentSiteFeatures.appendChild(fetchFirstMessage);
+        }
+      }
 
       if (!currentSiteKey) {
         return;
       }
 
-      // Load site-specific settings before creating toggles
-      // UPDATED: Use normalized hostname for consistent settings retrieval
       const siteKey = `${this.BROWSER_STORAGE_KEY}.${this.normalizedCurrentSiteHostname}`;
       const siteData = await browser.storage.local.get(siteKey);
       this.siteSettings = siteData[siteKey] || {};
-      console.log("Loaded site settings from:", siteKey, this.siteSettings);
 
       const features = styles[currentSiteKey];
 
-      // Only show the 'No specific theme found' message if NOT mapped to example.com.css
       if (currentSiteKey === "example.com.css" && !isMappedToExample) {
         const skipForceThemingToggle = document.createElement("div");
         skipForceThemingToggle.className = "toggle-container";
@@ -995,14 +920,12 @@ new (class ExtensionPopup {
         this.currentSiteFeatures.appendChild(skipForceThemingToggle);
       }
 
-      // Check if transparency is globally disabled
       const isTransparencyDisabled =
         this.globalSettings.disableTransparency === true;
       const isHoverDisabled = this.globalSettings.disableHover === true;
       const isFooterDisabled = this.globalSettings.disableFooter === true;
 
       for (const [feature, css] of Object.entries(features)) {
-        // Split feature name and caption if $ is present
         let displayFeatureName = feature.includes("-")
           ? feature.split("-")[1]
           : feature;
@@ -1028,14 +951,9 @@ new (class ExtensionPopup {
         const featureToggle = document.createElement("div");
         featureToggle.className = "feature-toggle";
 
-        // Unique ID for the description card and button
-        const featureId = `feature-desc-${currentSiteKey.replace(/[^a-zA-Z0-9]/g, "_")}-${displayFeatureName.replace(/[^a-zA-Z0-9]/g, "_")}`;
-
-        // Create a flex row for name and toggle
         const featureRow = document.createElement("div");
         featureRow.className = "feature-toggle-row";
 
-        // Feature name
         const nameSpan = document.createElement("span");
         nameSpan.className = "feature-name feature-title-ellipsis";
         nameSpan.innerHTML = displayFeatureName + (isOverridden ? ' <span class="overridden-label">[overridden]</span>' : "");
@@ -1045,7 +963,6 @@ new (class ExtensionPopup {
         }
         featureRow.appendChild(nameSpan);
 
-        // Toggle
         const toggleLabel = document.createElement("label");
         toggleLabel.className = `toggle-switch${isOverridden ? " disabled-toggle" : ""}`;
         toggleLabel.innerHTML = `<input type="checkbox" name="${currentSiteKey}|${feature}" ${isChecked ? "checked" : ""} ${isOverridden ? "disabled" : ""}><span class="slider round"></span>`;
@@ -1056,7 +973,6 @@ new (class ExtensionPopup {
         }
 
         featureToggle.appendChild(featureRow);
-
         this.currentSiteFeatures.appendChild(featureToggle);
       }
     } catch (error) {
@@ -1066,74 +982,51 @@ new (class ExtensionPopup {
     }
   }
 
+  /**
+   * Checks if a site name matches the current website.
+   */
   isCurrentSite(siteName) {
-    if (logging) console.log("isCurrentSite called with", siteName);
     if (!this.normalizedCurrentSiteHostname) return false;
 
-    // Normalize the site name too
     const normalizedSiteName = normalizeHostname(siteName);
 
-    if (logging)
-      console.log(
-        `Comparing: current=${this.normalizedCurrentSiteHostname}, style=${normalizedSiteName}`
-      );
-
-    // Exact match has priority
     if (this.normalizedCurrentSiteHostname === normalizedSiteName) {
-      if (logging) console.log("✓ Exact match!");
       return true;
     }
 
-    // Wildcard match (with proper domain boundary)
     if (siteName.startsWith("+")) {
       const baseSiteName = siteName.slice(1);
       const normalizedBaseSiteName = normalizeHostname(baseSiteName);
 
-      const isMatch =
+      return (
         this.normalizedCurrentSiteHostname === normalizedBaseSiteName ||
         this.normalizedCurrentSiteHostname.endsWith(
           `.${normalizedBaseSiteName}`
-        );
-
-      if (isMatch && logging) console.log("✓ Wildcard match!");
-      return isMatch;
+        )
+      );
     }
 
-    // TLD suffix match (match domain regardless of TLD)
     if (siteName.startsWith("-")) {
       const baseSiteName = siteName.slice(1);
-
-      // Extract domain name without the TLD
-      // For site name: Use everything before the last dot(s)
       const cachedDomain = baseSiteName.split(".").slice(0, -1).join(".");
-
-      // For current hostname: Similarly extract the domain without the TLD
       const hostParts = this.normalizedCurrentSiteHostname.split(".");
       const hostDomain =
         hostParts.length > 1
           ? hostParts.slice(0, -1).join(".")
           : this.normalizedCurrentSiteHostname;
 
-      if (logging)
-        console.log(
-          `isCurrentSite comparing domains - cached: ${cachedDomain}, host: ${hostDomain}`
-        );
-
-      // Match if the domain part (without TLD) matches
-      const isMatch = cachedDomain && hostDomain && hostDomain === cachedDomain;
-      if (isMatch && logging) console.log("✓ TLD suffix match!");
-      return isMatch;
+      return !!(cachedDomain && hostDomain && hostDomain === cachedDomain);
     }
 
-    // Don't match partial domain names
     return false;
   }
 
+  /**
+   * Triggers a manual refresh of all styles.
+   */
   async refetchCSS() {
-    if (logging) console.log("refetchCSS called");
     this.refetchCSSButton.textContent = "Fetching...";
     try {
-      // Get the repository URL from storage or use the default one
       const DEFAULT_REPOSITORY_URL =
         "https://sameerasw.github.io/my-internet/styles.json";
       const repoUrlData = await browser.storage.local.get(
@@ -1141,8 +1034,6 @@ new (class ExtensionPopup {
       );
       const repositoryUrl =
         repoUrlData.stylesRepositoryUrl || DEFAULT_REPOSITORY_URL;
-
-      console.log("Fetching styles from:", repositoryUrl);
 
       const response = await fetch(repositoryUrl, {
         headers: {
@@ -1153,18 +1044,14 @@ new (class ExtensionPopup {
         throw new Error(`Failed to fetch styles (Status: ${response.status})`);
       const styles = await response.json();
 
-      // Check if the fetched data includes mappings
       const hasNewMappings = styles.mapping && Object.keys(styles.mapping).length > 0;
 
-      // If new mappings are found, use them; otherwise preserve existing mappings
       let mappingData;
       if (hasNewMappings) {
         mappingData = { mapping: styles.mapping };
-        console.log("Popup: Using new mappings from repository:", styles.mapping);
       } else {
         const existingData = await browser.storage.local.get(STYLES_MAPPING_KEY);
         mappingData = existingData[STYLES_MAPPING_KEY] || { mapping: {} };
-        console.log("Popup: Preserving existing mappings:", mappingData);
       }
 
       await browser.storage.local.set({
@@ -1172,12 +1059,10 @@ new (class ExtensionPopup {
         [STYLES_MAPPING_KEY]: mappingData
       });
 
-      // Check if we need to initialize default settings
       const settingsData = await browser.storage.local.get(
         this.BROWSER_STORAGE_KEY
       );
       if (!settingsData[this.BROWSER_STORAGE_KEY]) {
-        // Initialize default settings if none exist
         const defaultSettings = {
           enableStyling: true,
           autoUpdate: true,
@@ -1187,32 +1072,25 @@ new (class ExtensionPopup {
           lastFetchedTime: Date.now(),
         };
 
-        // Save default settings
         await browser.storage.local.set({
           [this.BROWSER_STORAGE_KEY]: defaultSettings,
         });
-        console.info("Initialized default settings during first fetch");
 
-        // Update our internal global settings
         this.globalSettings = defaultSettings;
 
-        // Update UI to reflect these defaults
         this.enableStylingSwitch.checked = true;
         this.autoUpdateSwitch.checked = false;
         this.forceStylingSwitch.checked = false;
         this.whitelistModeSwitch.checked = false;
         this.whitelistStylingModeSwitch.checked = false;
 
-        // Update labels
         this.updateModeLabels();
       } else {
-        // Update the lastFetchedTime in settings
         const currentSettings = settingsData[this.BROWSER_STORAGE_KEY];
         currentSettings.lastFetchedTime = Date.now();
         await browser.storage.local.set({
           [this.BROWSER_STORAGE_KEY]: currentSettings,
         });
-        // Update our internal settings
         this.globalSettings.lastFetchedTime = Date.now();
       }
 
@@ -1223,20 +1101,20 @@ new (class ExtensionPopup {
       setTimeout(() => {
         this.refetchCSSButton.textContent = "Refetch latest styles";
       }, 2000);
-      console.info(`All styles refetched and updated from ${repositoryUrl}`);
       this.displayLastFetchedTime();
     } catch (error) {
       this.refetchCSSButton.textContent = "Error!";
       setTimeout(() => {
         this.refetchCSSButton.textContent = "Refetch latest styles";
       }, 2000);
-      console.error("Error refetching styles:", error);
       alert(`Error fetching styles: ${error.message}`);
     }
   }
 
+  /**
+   * Re-evaluates styling for the currently active tab.
+   */
   async updateActiveTabStyling() {
-    if (logging) console.log("updateActiveTabStyling called");
     const tabs = await browser.tabs.query({
       active: true,
       currentWindow: true,
@@ -1246,37 +1124,35 @@ new (class ExtensionPopup {
     }
   }
 
+  /**
+   * Applies CSS to the specified tab using messaging.
+   */
   async applyCSSToTab(tab) {
-    if (logging) console.log("applyCSSToTab called with", tab);
     const url = new URL(tab.url);
     const hostname = url.hostname;
     const normalizedHostname = normalizeHostname(hostname);
 
-    if (logging)
-      console.log(
-        "Applying CSS to tab with hostname:",
-        normalizedHostname,
-        "(original:",
-        hostname,
-        ")"
-      );
+    const sendStyles = async (css) => {
+      try {
+        await browser.tabs.sendMessage(tab.id, { action: "applyStyles", css });
+      } catch (e) {}
+    };
+
+    const removeStyles = async () => {
+      try {
+        await browser.tabs.sendMessage(tab.id, { action: "removeStyles" });
+      } catch (e) {}
+    };
 
     try {
-      // Try to remove any existing CSS first
-      try {
-        await browser.tabs.removeCSS(tab.id, {
-          code: "/* Placeholder for removing CSS */",
-        });
-      } catch (error) {
-        // Ignore errors as they may occur if no CSS was previously applied
+      if (!this.shouldApplyCSS(hostname)) {
+        await removeStyles();
+        return;
       }
-
-      if (!this.shouldApplyCSS(hostname)) return;
 
       const stylesData = await browser.storage.local.get("styles");
       const styles = stylesData.styles?.website || {};
 
-      // First try to find a direct match for a CSS file
       let bestMatch = null;
       let bestMatchLength = 0;
 
@@ -1284,18 +1160,14 @@ new (class ExtensionPopup {
         const siteName = site.replace(/\.css$/, "");
         const normalizedSiteName = normalizeHostname(siteName);
 
-        // Exact match has highest priority
         if (normalizedHostname === normalizedSiteName) {
           bestMatch = site;
-          if (logging) console.log("Popup: Found exact match:", site);
           break;
         }
 
-        // Then check wildcard matches
         if (siteName.startsWith("+")) {
           const baseSiteName = siteName.slice(1);
           const normalizedBaseSiteName = normalizeHostname(baseSiteName);
-          // Ensure we're matching with proper domain boundary
           if (
             (normalizedHostname === normalizedBaseSiteName ||
               normalizedHostname.endsWith(`.${normalizedBaseSiteName}`)) &&
@@ -1303,38 +1175,22 @@ new (class ExtensionPopup {
           ) {
             bestMatch = site;
             bestMatchLength = normalizedBaseSiteName.length;
-            if (logging) console.log("Popup: Found wildcard match:", site);
           }
         }
-        // Check TLD suffix matches (-domain.com)
         else if (siteName.startsWith("-")) {
           const baseSiteName = siteName.slice(1);
-
-          // Extract domain name without the TLD
-          // For site name: Use everything before the last dot(s)
           const cachedDomain = baseSiteName.split(".").slice(0, -1).join(".");
-
-          // For hostname: Similarly extract the domain without the TLD
           const hostParts = hostname.split(".");
           const hostDomain =
             hostParts.length > 1 ? hostParts.slice(0, -1).join(".") : hostname;
 
-          if (logging)
-            console.log(
-              `Popup comparing domains - cached: ${cachedDomain}, host: ${hostDomain}`
-            );
-
-          // Match if the domain part (without TLD) matches
           if (cachedDomain && hostDomain && hostDomain === cachedDomain) {
-            // Use this match if it's better than what we have
             if (cachedDomain.length > bestMatchLength) {
               bestMatch = site;
               bestMatchLength = cachedDomain.length;
-              if (logging) console.log("Popup: Found TLD suffix match:", site);
             }
           }
         }
-        // Last, check subdomain matches with proper domain boundary
         else if (
           normalizedHostname !== normalizedSiteName &&
           normalizedHostname.endsWith(`.${normalizedSiteName}`) &&
@@ -1342,27 +1198,14 @@ new (class ExtensionPopup {
         ) {
           bestMatch = site;
           bestMatchLength = normalizedSiteName.length;
-          if (logging) console.log("Popup: Found subdomain match:", site);
         }
       }
 
-      // If we found a direct match, use it
       if (bestMatch) {
         const features = styles[bestMatch];
-        // UPDATED: Use normalized hostname for settings storage/retrieval
         const normalizedSiteStorageKey = `${this.BROWSER_STORAGE_KEY}.${normalizedHostname}`;
-        const siteData = await browser.storage.local.get(
-          normalizedSiteStorageKey
-        );
+        const siteData = await browser.storage.local.get(normalizedSiteStorageKey);
         const featureSettings = siteData[normalizedSiteStorageKey] || {};
-
-        if (logging)
-          console.log(
-            "Using settings from:",
-            normalizedSiteStorageKey,
-            "for match:",
-            bestMatch
-          );
 
         let combinedCSS = "";
         for (const [feature, css] of Object.entries(features)) {
@@ -1371,66 +1214,32 @@ new (class ExtensionPopup {
           }
         }
 
-        if (combinedCSS) {
-          await browser.tabs.insertCSS(tab.id, { code: combinedCSS });
-          console.info(`Applied CSS to ${hostname} (direct match)`);
+        if (combinedCSS.trim()) {
+          await sendStyles(combinedCSS);
+        } else {
+          await removeStyles();
         }
-      } else {
-        // Check for mapped styles if no direct match found
-        const mappingData = await browser.storage.local.get(STYLES_MAPPING_KEY);
-        const userMappingData = await browser.storage.local.get(USER_STYLES_MAPPING_KEY);
-        // Merge mappings: user mappings take precedence/addition
-        const mergedMapping = { ...(mappingData[STYLES_MAPPING_KEY]?.mapping || {}) };
-        if (userMappingData[USER_STYLES_MAPPING_KEY]?.mapping) {
-          for (const [src, targets] of Object.entries(userMappingData[USER_STYLES_MAPPING_KEY].mapping)) {
-            if (!mergedMapping[src]) mergedMapping[src] = [];
-            for (const t of targets) {
-              if (!mergedMapping[src].includes(t)) mergedMapping[src].push(t);
-            }
+        return;
+      }
+
+      const mappingData = await browser.storage.local.get(STYLES_MAPPING_KEY);
+      const userMappingData = await browser.storage.local.get(USER_STYLES_MAPPING_KEY);
+      const mergedMapping = { ...(mappingData[STYLES_MAPPING_KEY]?.mapping || {}) };
+      if (userMappingData[USER_STYLES_MAPPING_KEY]?.mapping) {
+        for (const [src, targets] of Object.entries(userMappingData[USER_STYLES_MAPPING_KEY].mapping)) {
+          if (!mergedMapping[src]) mergedMapping[src] = [];
+          for (const t of targets) {
+            if (!mergedMapping[src].includes(t)) mergedMapping[src].push(t);
           }
         }
-        for (const [sourceStyle, targetSites] of Object.entries(mergedMapping)) {
-          if (targetSites.includes(normalizedHostname)) {
-            // Get the CSS for the source style
-            if (styles[sourceStyle]) {
-              console.log(`Popup: Found mapped style (user or repo): ${sourceStyle} for ${normalizedHostname}`);
-              const features = styles[sourceStyle];
-              const normalizedSiteStorageKey = `${this.BROWSER_STORAGE_KEY}.${normalizedHostname}`;
-              const siteData = await browser.storage.local.get(normalizedSiteStorageKey);
-              const featureSettings = siteData[normalizedSiteStorageKey] || {};
-
-              let combinedCSS = "";
-              for (const [feature, css] of Object.entries(features)) {
-                if (featureSettings[feature] !== false) {
-                  combinedCSS += css + "\n";
-                }
-              }
-
-              if (combinedCSS) {
-                await browser.tabs.insertCSS(tab.id, { code: combinedCSS });
-                console.info(`Applied mapped CSS from ${sourceStyle} to ${hostname}`);
-                return; // Exit early since we found and applied a mapped style
-              }
-            }
-            break;
-          }
-        }
-
-        // If no mapped style found, check for forced styling
-        if (this.globalSettings.forceStyling) {
-          // Otherwise check for forced styling
-          const isInList = this.skipForceThemingList.includes(hostname);
-          const isWhitelistMode = this.globalSettings.whitelistMode;
-
-          // Determine if we should apply forced styling
-          const shouldApplyForcedStyling =
-            (isWhitelistMode && isInList) || (!isWhitelistMode && !isInList);
-
-          if (shouldApplyForcedStyling && styles["example.com.css"]) {
-            const features = styles["example.com.css"];
-            const siteStorageKey = `${this.BROWSER_STORAGE_KEY}.${hostname}`;
-            const siteData = await browser.storage.local.get(siteStorageKey);
-            const featureSettings = siteData[siteStorageKey] || {};
+      }
+      for (const [sourceStyle, targetSites] of Object.entries(mergedMapping)) {
+        if (targetSites.includes(normalizedHostname)) {
+          if (styles[sourceStyle]) {
+            const features = styles[sourceStyle];
+            const normalizedSiteStorageKey = `${this.BROWSER_STORAGE_KEY}.${normalizedHostname}`;
+            const siteData = await browser.storage.local.get(normalizedSiteStorageKey);
+            const featureSettings = siteData[normalizedSiteStorageKey] || {};
 
             let combinedCSS = "";
             for (const [feature, css] of Object.entries(features)) {
@@ -1439,35 +1248,71 @@ new (class ExtensionPopup {
               }
             }
 
-            if (combinedCSS) {
-              await browser.tabs.insertCSS(tab.id, { code: combinedCSS });
-              console.info(`Applied forced CSS to ${hostname}`);
+            if (combinedCSS.trim()) {
+              await sendStyles(combinedCSS);
+            } else {
+              await removeStyles();
             }
-          } else {
-            console.info(`Skipping forced styling for ${hostname}`);
+            return;
           }
+          break;
         }
+      }
+
+      if (this.globalSettings.forceStyling) {
+        const isInList = this.skipForceThemingList.includes(hostname);
+        const isWhitelistMode = this.globalSettings.whitelistMode;
+        const shouldApplyForcedStyling =
+          (isWhitelistMode && isInList) || (!isWhitelistMode && !isInList);
+
+        if (shouldApplyForcedStyling && styles["example.com.css"]) {
+          const features = styles["example.com.css"];
+          const siteStorageKey = `${this.BROWSER_STORAGE_KEY}.${hostname}`;
+          const siteData = await browser.storage.local.get(siteStorageKey);
+          const featureSettings = siteData[siteStorageKey] || {};
+
+          let combinedCSS = "";
+          for (const [feature, css] of Object.entries(features)) {
+            if (featureSettings[feature] !== false) {
+              combinedCSS += css + "\n";
+            }
+          }
+
+          if (combinedCSS.trim()) {
+            await sendStyles(combinedCSS);
+          } else {
+            await removeStyles();
+          }
+        } else {
+          await removeStyles();
+        }
+      } else {
+        await removeStyles();
       }
     } catch (error) {
       console.error(`Error applying CSS to ${hostname}:`, error);
     }
   }
 
+  /**
+   * Returns whether styling is currently enabled globally.
+   */
   shouldApplyCSS(hostname) {
-    if (logging) console.log("shouldApplyCSS called with", hostname);
-    // Use default if not explicitly set
     return this.globalSettings.enableStyling !== false;
   }
 
+  /**
+   * Displays the current version of the extension.
+   */
   async displayAddonVersion() {
-    if (logging) console.log("displayAddonVersion called");
     const manifest = browser.runtime.getManifest();
-    const version = manifest.version;
-    $("addon-version").textContent = `v${version}`;
+    $("addon-version").textContent = `v${manifest.version}`;
   }
 
+  /**
+   * Toggles the automatic update background process.
+   */
   setupAutoUpdate() {
-    if (logging) console.log("setupAutoUpdate called");
     if (this.autoUpdateSwitch.checked) {
       browser.runtime.sendMessage({ action: "enableAutoUpdate" });
     } else {
@@ -1475,8 +1320,10 @@ new (class ExtensionPopup {
     }
   }
 
+  /**
+   * Displays the time the styles were last successfully fetched.
+   */
   displayLastFetchedTime() {
-    if (logging) console.log("displayLastFetchedTime called");
     browser.storage.local.get(this.BROWSER_STORAGE_KEY).then((result) => {
       const settings = result[this.BROWSER_STORAGE_KEY] || {};
       if (settings.lastFetchedTime) {
@@ -1489,33 +1336,45 @@ new (class ExtensionPopup {
     });
   }
 
+  /**
+   * Reloads the currently active tab.
+   */
   reloadPage() {
-    if (logging) console.log("reloadPage called");
     browser.tabs.reload();
   }
 
+  /**
+   * Handles middle-click on the refetch button to clear all settings.
+   */
   handleMiddleClick(event) {
     if (event.button === 1) {
-      // Middle click
       if (confirm("Are you sure you want to clear all settings?")) {
         browser.storage.local.clear().then(() => {
-          alert("All settings have been cleared.");
-          location.reload(); // Reload the popup to reflect changes
+          location.reload();
         });
       }
     }
   }
 
+  /**
+   * Updates settings and UI when blacklist/whitelist mode changes.
+   */
   handleWhitelistModeChange() {
     this.updateModeLabels();
     this.saveSettings();
   }
 
+  /**
+   * Updates settings and UI when styling specific mode changes.
+   */
   handleWhitelistStyleModeChange() {
     this.updateModeLabels();
     this.saveSettings();
   }
 
+  /**
+   * Updates the visual indicator for current filtering mode.
+   */
   updateModeIndicator() {
     if (this.whitelistModeSwitch.checked) {
       this.modeIndicator.textContent =
@@ -1526,8 +1385,10 @@ new (class ExtensionPopup {
     }
   }
 
+  /**
+   * Updates the UI toggle label based on current mode.
+   */
   updateSiteToggleLabel() {
-    // Update the label based on the current mode
     if (this.whitelistModeSwitch.checked) {
       this.siteToggleLabel.textContent = "Enable for this Site";
     } else {
@@ -1535,6 +1396,9 @@ new (class ExtensionPopup {
     }
   }
 
+  /**
+   * Updates all mode-related labels in the UI.
+   */
   updateModeLabels() {
     if (this.whitelistModeSwitch.checked) {
       this.whitelistModeLabel.textContent = "Forced Whitelist Mode";
@@ -1553,21 +1417,27 @@ new (class ExtensionPopup {
     }
   }
 
-  // Open the What's New page
+  /**
+   * Opens the extension's version history page.
+   */
   openWhatsNew() {
     browser.tabs.create({
       url: "https://addons.mozilla.org/en-US/firefox/addon/zen-internet/versions/",
     });
   }
 
-  // Open the How to Use guide
+  /**
+   * Opens the extension's usage guide.
+   */
   openHowToUse() {
     browser.tabs.create({
       url: "https://www.sameerasw.com/zen",
     });
   }
 
-  // Toggle features section visibility
+  /**
+   * Expands or collapses the feature settings section.
+   */
   toggleFeatures() {
     const featuresList = $("current-site-toggles");
     const actionsContainer = $("current-site-actions");
@@ -1581,7 +1451,6 @@ new (class ExtensionPopup {
       );
     }
 
-    // Update the icon
     const icon = toggleButton.querySelector("i");
     if (featuresList.classList.contains("collapsed")) {
       icon.className = "fas fa-chevron-down";
@@ -1590,14 +1459,13 @@ new (class ExtensionPopup {
     }
   }
 
-  // Toggle forcing section visibility
+  /**
+   * Expands or collapses the forcing settings section.
+   */
   toggleForcing() {
     const forcingContent = $("forcing-content");
     const toggleButton = $("toggle-forcing");
-
     forcingContent.classList.toggle("collapsed");
-
-    // Update the icon
     const icon = toggleButton.querySelector("i");
     if (forcingContent.classList.contains("collapsed")) {
       icon.className = "fas fa-chevron-down";
@@ -1606,14 +1474,13 @@ new (class ExtensionPopup {
     }
   }
 
-  // Toggle FAQ section visibility
+  /**
+   * Expands or collapses the FAQ section.
+   */
   toggleFAQ() {
     const faqContent = $("faq-content");
     const toggleButton = $("toggle-faq");
-
     faqContent.classList.toggle("collapsed");
-
-    // Update the icon
     const icon = toggleButton.querySelector("i");
     if (faqContent.classList.contains("collapsed")) {
       icon.className = "fas fa-chevron-down";
@@ -1622,9 +1489,10 @@ new (class ExtensionPopup {
     }
   }
 
-  // Handle FAQ item clicks (only one open at a time)
+  /**
+   * Handles individual FAQ question expansion.
+   */
   handleFAQClick(event) {
-    // Find the closest FAQ item container
     const faqItem = event.target.closest(".faq-item");
     if (!faqItem) return;
 
@@ -1635,63 +1503,52 @@ new (class ExtensionPopup {
 
     const isCurrentlyActive = question.classList.contains("active");
 
-    // Close all FAQ items
     document.querySelectorAll(".faq-question").forEach((q) => {
       q.classList.remove("active");
       const a = q.nextElementSibling;
       if (a) a.classList.remove("active");
     });
 
-    // If the clicked item wasn't active, open it
     if (!isCurrentlyActive) {
       question.classList.add("active");
       answer.classList.add("active");
     }
   }
 
-  // Show bug report overlay
+  /**
+   * Displays the bug report selection overlay.
+   */
   showBugReportOverlay() {
     const overlay = $("bug-report-overlay");
     overlay.classList.remove("hidden");
 
-    // Reset all bug option selections
     document.querySelectorAll(".bug-option").forEach((option) => {
       option.classList.remove("selected");
     });
 
-    // Reset submit button
     const submitBtn = $("submit-bug-report");
     submitBtn.disabled = true;
 
-    // Setup bug option event listeners
     document.querySelectorAll(".bug-option").forEach((option) => {
       option.addEventListener("click", () => {
-        // Remove selected class from all options
         document.querySelectorAll(".bug-option").forEach((opt) => {
           opt.classList.remove("selected");
         });
-
-        // Add selected class to clicked option
         option.classList.add("selected");
-
-        // Enable submit button
         submitBtn.disabled = false;
       });
     });
 
-    // Cancel button event listener
     document
       .getElementById("cancel-bug-report")
       .addEventListener("click", () => {
         this.hideBugReportOverlay();
       });
 
-    // Submit button event listener
     submitBtn.addEventListener("click", () => {
       this.submitBugReport();
     });
 
-    // Close overlay when clicking outside
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) {
         this.hideBugReportOverlay();
@@ -1699,13 +1556,17 @@ new (class ExtensionPopup {
     });
   }
 
-  // Hide bug report overlay
+  /**
+   * Hides the bug report overlay.
+   */
   hideBugReportOverlay() {
     const overlay = $("bug-report-overlay");
     overlay.classList.add("hidden");
   }
 
-  // Submit bug report
+  /**
+   * Gathers extension state and redirects to GitHub for bug reporting.
+   */
   async submitBugReport() {
     const selectedOption = document.querySelector(".bug-option.selected");
     if (!selectedOption) return;
@@ -1713,54 +1574,41 @@ new (class ExtensionPopup {
     const bugType = selectedOption.getAttribute("data-type");
     const submitBtn = $("submit-bug-report");
 
-    // Show loading state
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
     submitBtn.disabled = true;
 
     try {
-      // Collect relevant data based on bug type
       const bugData = await this.collectDataForBugType(bugType);
-
-      // Get repository information
       const repoInfo = this.getRepositoryForBugType(bugType);
-
-      // Create issue body
       const issueBody = this.createBugReportBodyForType(bugType, bugData);
 
-      // Create GitHub issue URL with proper template
       let issueUrl = `https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/new`;
-
-      // Add template parameter if available
       if (repoInfo.template) {
         issueUrl += `?template=${repoInfo.template}.md`;
       }
 
-      // Add title and body parameters
       const urlParams = new URLSearchParams();
       urlParams.append("title", repoInfo.title);
       urlParams.append("body", issueBody);
 
-      // Combine URL with parameters
       const separator = repoInfo.template ? "&" : "?";
       issueUrl += separator + urlParams.toString();
 
-      // Open the URL
       browser.tabs.create({ url: issueUrl });
-
-      // Hide overlay
       this.hideBugReportOverlay();
     } catch (error) {
       console.error("Error submitting bug report:", error);
       alert("Failed to create bug report. Please try again.");
     } finally {
-      // Restore button state
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
     }
   }
 
-  // Get repository information based on bug type
+  /**
+   * Returns repository metadata based on bug report category.
+   */
   getRepositoryForBugType(bugType) {
     const repos = {
       1: {
@@ -1797,7 +1645,9 @@ new (class ExtensionPopup {
     return repos[bugType] || repos["5"];
   }
 
-  // Collect data based on bug type
+  /**
+   * Collects settings and environment details for troubleshooting.
+   */
   async collectDataForBugType(bugType) {
     try {
       const allData = await browser.storage.local.get(null);
@@ -1808,7 +1658,6 @@ new (class ExtensionPopup {
       });
       const currentTab = tabs[0];
 
-      // Base data for all types
       const baseData = {
         reportDate: new Date().toISOString(),
         addonVersion: manifest.version,
@@ -1822,14 +1671,13 @@ new (class ExtensionPopup {
         },
       };
 
-      // Global settings
       const globalSettings = allData[this.BROWSER_STORAGE_KEY] || {};
       const skipForceList = allData[SKIP_FORCE_THEMING_KEY] || [];
       const skipThemingList = allData[SKIP_THEMING_KEY] || [];
       const fallbackBackgroundList = allData[FALLBACK_BACKGROUND_KEY] || [];
 
       switch (bugType) {
-        case "1": // Current website's theme - include site-specific settings
+        case "1":
           const currentHostname = currentTab
             ? normalizeHostname(new URL(currentTab.url).hostname)
             : null;
@@ -1848,9 +1696,9 @@ new (class ExtensionPopup {
             },
           };
 
-        case "2": // Extension issue - global settings only
-        case "3": // Transparency issue - global settings only
-        case "5": // Other - global settings only
+        case "2":
+        case "3":
+        case "5":
           return {
             ...baseData,
             settings: {
@@ -1861,19 +1709,20 @@ new (class ExtensionPopup {
             },
           };
 
-        case "4": // Feature request - no settings data
+        case "4":
           return baseData;
 
         default:
           return baseData;
       }
     } catch (error) {
-      console.error("Error collecting bug data:", error);
       return { error: "Failed to collect data: " + error.message };
     }
   }
 
-  // Create bug report body for specific type
+  /**
+   * Generates markdown body for GitHub bug reports.
+   */
   createBugReportBodyForType(bugType, data) {
     const typeDescriptions = {
       1: "Website Theme Issue",
@@ -1915,7 +1764,6 @@ new (class ExtensionPopup {
       body += `<!-- Why would this feature be useful? -->\n\n`;
     }
 
-    // Add settings data if available
     if (data.settings && bugType !== "4") {
       body += `## ZenInternet Settings Data\n`;
       body += `*This data was automatically collected to help with debugging.*\n\n`;
@@ -1945,23 +1793,18 @@ new (class ExtensionPopup {
     return body;
   }
 
-  // Collect all extension data for bug report (legacy method - still used by export)
+  /**
+   * Legacy data collection method for backups.
+   */
   async collectBugReportData() {
     try {
-      // Get all storage data
       const allData = await browser.storage.local.get(null);
-
-      // Get addon version
       const manifest = browser.runtime.getManifest();
-
-      // Get current tab info
       const tabs = await browser.tabs.query({
         active: true,
         currentWindow: true,
       });
       const currentTab = tabs[0];
-
-      // Extract the same data structure as the export function, but exclude site-specific settings
       const fallbackBackgroundList = allData[FALLBACK_BACKGROUND_KEY] || [];
 
       const settingsToInclude = {
@@ -1974,17 +1817,14 @@ new (class ExtensionPopup {
           "https://sameerasw.github.io/my-internet/styles.json",
       };
 
-      // Remove fallbackBackgroundList from global settings if it exists there
       if (settingsToInclude[this.BROWSER_STORAGE_KEY].fallbackBackgroundList) {
         delete settingsToInclude[this.BROWSER_STORAGE_KEY]
           .fallbackBackgroundList;
       }
 
-      // Get styles count for context (but don't include the actual styles data)
       const stylesData = allData.styles || {};
       const websiteStylesCount = Object.keys(stylesData.website || {}).length;
 
-      // Count site-specific settings without including them
       let siteSettingsCount = 0;
       for (const key of Object.keys(allData)) {
         if (key.startsWith(this.BROWSER_STORAGE_KEY + ".")) {
@@ -2005,14 +1845,12 @@ new (class ExtensionPopup {
         },
         extensionData: {
           settings: settingsToInclude,
-          siteSettingsCount: siteSettingsCount, // Just the count, not the actual data
+          siteSettingsCount: siteSettingsCount,
           stylesCount: websiteStylesCount,
           hasStyles: websiteStylesCount > 0,
         },
       };
     } catch (error) {
-      console.error("Error collecting bug report data:", error);
-      // Return minimal data if collection fails
       const manifest = browser.runtime.getManifest();
       return {
         reportDate: new Date().toISOString(),
@@ -2022,77 +1860,28 @@ new (class ExtensionPopup {
     }
   }
 
-  // Create formatted issue body for bug report
-  createBugReportBody(jsonData, currentUrl) {
-    return `## Describe the bug
-<!-- A clear and concise description of what the bug is. -->
-
-## Steps to reproduce
-Steps to reproduce the behavior:
-1.
-2.
-3.
-
-## Expected behavior
-<!-- A clear and concise description of what you expected to happen. -->
-
-## Actual behavior
-<!-- Describe what actually happened. -->
-
-## ZenInternet Backup JSON (Auto-Generated)
-*This data was automatically collected to help with debugging.*
-
-<details>
-<summary>Click to expand JSON data</summary>
-
-\`\`\`json
-${jsonData}
-\`\`\`
-
-</details>
-
-## Zen Browser Version
-<!-- Please specify the version of the Zen browser you are using -->
-
-## Platform
-<!-- What platform are you using? (e.g., Windows, macOS, Linux, Android, iOS, etc.) -->
-
-## Website (if applicable)
-${
-  currentUrl
-    ? `Current tab: ${currentUrl}`
-    : "<!-- If this bug relates to a specific website, please provide its URL -->"
-}
-
-## Additional context
-<!-- Add any other context about the problem here. -->`;
-  }
-
-  // Add welcome screen check method
+  /**
+   * Checks whether the welcome screen should be displayed.
+   */
   async checkWelcomeScreen() {
     try {
-      // Check if welcome screen should be shown
       const shouldShow = await window.checkAndShowWelcome();
 
       if (shouldShow) {
-        // Hide the main popup content while welcome is shown
         const container = document.querySelector(".container");
         if (container) {
           container.style.opacity = "0.3";
           container.style.pointerEvents = "none";
         }
 
-        // Listen for welcome screen completion
         const checkWelcomeComplete = setInterval(() => {
           const welcomeOverlay = $("welcome-overlay");
           if (!welcomeOverlay || welcomeOverlay.classList.contains("hidden")) {
             clearInterval(checkWelcomeComplete);
-            // Restore main popup content
             if (container) {
               container.style.opacity = "1";
               container.style.pointerEvents = "auto";
             }
-            // Reload settings to reflect welcome screen changes
             this.loadSettings().then(() => {
               this.restoreSettings();
               this.updateModeLabels();
@@ -2101,8 +1890,6 @@ ${
           }
         }, 100);
       }
-    } catch (error) {
-      console.error("Error checking welcome screen:", error);
-    }
+    } catch (error) {}
   }
 })();

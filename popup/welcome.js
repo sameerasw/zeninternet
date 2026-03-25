@@ -1,4 +1,7 @@
 class WelcomeScreen {
+  /**
+   * Initializes the welcome screen and shows the first step.
+   */
   constructor() {
     this.currentStep = 1;
     this.totalSteps = 5;
@@ -9,6 +12,9 @@ class WelcomeScreen {
     this.bindEvents();
   }
 
+  /**
+   * Creates the HTML structure for the welcome overlay and appends it to the body.
+   */
   createWelcomeOverlay() {
     const overlay = document.createElement("div");
     overlay.id = "welcome-overlay";
@@ -24,7 +30,6 @@ class WelcomeScreen {
           <div class="progress-dot"></div>
         </div>
 
-        <!-- Step 1: Welcome -->
         <div class="welcome-step step-welcome active" data-step="1">
           <img src="../assets/images/logo.png" alt="Zen Internet Logo" class="welcome-logo">
           <h1 class="welcome-title">Zen Internet</h1>
@@ -37,7 +42,6 @@ class WelcomeScreen {
           </div>
         </div>
 
-        <!-- Step 2: Disclaimer -->
         <div class="welcome-step step-disclaimer" data-step="2">
           <h2 class="disclaimer-title">Important Disclaimer</h2>
           <div class="disclaimer-content">
@@ -79,7 +83,6 @@ class WelcomeScreen {
           </div>
         </div>
 
-        <!-- Step 3: Theme Mode Selection -->
         <div class="welcome-step step-theme-mode" data-step="3">
           <h2 class="theme-mode-title">Choose Your Theming Preference</h2>
           <p class="theme-mode-description">How would you like themes to be applied?</p>
@@ -107,7 +110,6 @@ class WelcomeScreen {
           </div>
         </div>
 
-        <!-- Step 4: Fetch Styles -->
         <div class="welcome-step step-fetch-styles" data-step="4">
           <h2 class="fetch-styles-title">Download Latest Themes</h2>
           <p class="fetch-styles-description">Click below to fetch the latest themes from our repository.</p>
@@ -141,7 +143,6 @@ class WelcomeScreen {
           </div>
         </div>
 
-        <!-- Step 5: Complete -->
         <div class="welcome-step step-complete" data-step="5">
           <div class="complete-icon">
             <i class="fas fa-check-circle"></i>
@@ -165,13 +166,14 @@ class WelcomeScreen {
     document.body.appendChild(overlay);
   }
 
+  /**
+   * Binds user interaction events to the welcome screen elements.
+   */
   bindEvents() {
-    // Step 1: Setup start
     document.getElementById("setup-start").addEventListener("click", () => {
       this.nextStep();
     });
 
-    // Step 2: Disclaimer
     const understandCheckbox = document.getElementById("understand-checkbox");
     const disclaimerNext = document.getElementById("disclaimer-next");
 
@@ -188,7 +190,6 @@ class WelcomeScreen {
       this.nextStep();
     });
 
-    // Step 3: Theme mode selection
     const themeModeOptions = document.querySelectorAll(".theme-mode-option");
     const themeModeNext = document.getElementById("theme-mode-next");
 
@@ -210,7 +211,6 @@ class WelcomeScreen {
       this.nextStep();
     });
 
-    // Step 4: Fetch styles
     document
       .getElementById("welcome-fetch-styles")
       .addEventListener("click", () => {
@@ -229,12 +229,14 @@ class WelcomeScreen {
         this.nextStep();
       });
 
-    // Step 5: Complete
     document.getElementById("welcome-close").addEventListener("click", () => {
       this.closeWelcome();
     });
   }
 
+  /**
+   * Advances the welcome screen to the next step.
+   */
   nextStep() {
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;
@@ -243,6 +245,9 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Returns the welcome screen to the previous step.
+   */
   previousStep() {
     if (this.currentStep > 1) {
       this.currentStep--;
@@ -251,6 +256,9 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Updates the visibility of step containers based on current step index.
+   */
   updateStep() {
     const steps = document.querySelectorAll(".welcome-step");
     steps.forEach((step, index) => {
@@ -258,6 +266,9 @@ class WelcomeScreen {
     });
   }
 
+  /**
+   * Updates the progress indicator dots.
+   */
   updateProgress() {
     const dots = document.querySelectorAll(".progress-dot");
     dots.forEach((dot, index) => {
@@ -270,13 +281,15 @@ class WelcomeScreen {
     });
   }
 
+  /**
+   * Saves the user's chosen theme mode to storage.
+   */
   async applyThemeMode() {
     try {
       const BROWSER_STORAGE_KEY = "transparentZenSettings";
       const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
       const settings = data[BROWSER_STORAGE_KEY] || {};
 
-      // Apply theme mode settings
       if (this.selectedThemeMode === "whitelist") {
         settings.whitelistStyleMode = true;
         settings.forceStyling = false;
@@ -285,7 +298,6 @@ class WelcomeScreen {
         settings.forceStyling = false;
       }
 
-      // Ensure other default settings
       settings.enableStyling = true;
       settings.autoUpdate = document.getElementById(
         "welcome-auto-update"
@@ -297,12 +309,14 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Fetches latest theme styles from the repository.
+   */
   async fetchStyles() {
     const fetchButton = document.getElementById("welcome-fetch-styles");
     const fetchStatus = document.getElementById("welcome-fetch-status");
     const nextButton = document.getElementById("fetch-styles-next");
 
-    // Show loading state
     fetchButton.disabled = true;
     fetchButton.innerHTML =
       '<i class="fas fa-spinner fa-spin"></i> Fetching...';
@@ -311,7 +325,6 @@ class WelcomeScreen {
     fetchStatus.textContent = "Downloading latest themes...";
 
     try {
-      // Get the repository URL from storage or use the default one
       const DEFAULT_REPOSITORY_URL =
         "https://sameerasw.github.io/my-internet/styles.json";
       const repoUrlData = await browser.storage.local.get(
@@ -329,7 +342,6 @@ class WelcomeScreen {
 
       const styles = await response.json();
 
-      // Handle mappings (same as refetchCSS in popup.js)
       const STYLES_MAPPING_KEY = "stylesMapping";
       let mappingData;
       if (styles.mapping && Object.keys(styles.mapping).length > 0) {
@@ -341,7 +353,6 @@ class WelcomeScreen {
 
       await browser.storage.local.set({ styles, [STYLES_MAPPING_KEY]: mappingData });
 
-      // Update auto-update setting
       const BROWSER_STORAGE_KEY = "transparentZenSettings";
       const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
       const settings = data[BROWSER_STORAGE_KEY] || {};
@@ -351,7 +362,6 @@ class WelcomeScreen {
       settings.lastFetchedTime = Date.now();
       await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
 
-      // Show success state
       fetchStatus.className = "fetch-status success";
       fetchStatus.textContent = `Successfully downloaded ${
         Object.keys(styles.website || {}).length
@@ -359,12 +369,10 @@ class WelcomeScreen {
       fetchButton.innerHTML = '<i class="fas fa-check"></i> Download Complete';
       nextButton.disabled = false;
 
-      // Enable auto-update if selected
       if (settings.autoUpdate) {
         try {
           await browser.runtime.sendMessage({ action: "enableAutoUpdate" });
         } catch (e) {
-          // Background script might not be ready, ignore
         }
       }
     } catch (error) {
@@ -377,19 +385,23 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Closes the welcome screen overlay.
+   */
   closeWelcome() {
     const overlay = document.getElementById("welcome-overlay");
     overlay.classList.add("hidden");
 
-    // Mark welcome as shown
     this.markWelcomeAsShown();
 
-    // Remove the overlay after animation completes
     setTimeout(() => {
       overlay.remove();
     }, 300);
   }
 
+  /**
+   * Persists the fact that the welcome screen has been viewed.
+   */
   async markWelcomeAsShown() {
     try {
       const BROWSER_STORAGE_KEY = "transparentZenSettings";
@@ -403,16 +415,16 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Configures the overlay to show only the agreement flow.
+   */
   showAgreementOnly() {
-    // Show the overlay first
     this.show();
 
-    // Set up for agreement-only flow (steps 2 and 5)
     this.currentStep = 2;
-    this.totalSteps = 2; // Only agreement and completion steps
+    this.totalSteps = 2;
     this.isAgreementOnlyFlow = true;
 
-    // Update the progress dots for agreement-only flow
     const progressContainer = document.querySelector(".welcome-progress");
     if (progressContainer) {
       progressContainer.innerHTML = `
@@ -421,13 +433,13 @@ class WelcomeScreen {
       `;
     }
 
-    // Update steps visibility
     this.updateStepForAgreementFlow();
-
-    // Update the disclaimer navigation for agreement-only flow
     this.updateDisclaimerForAgreementFlow();
   }
 
+  /**
+   * Updates step visibility specifically for the agreement flow.
+   */
   updateStepForAgreementFlow() {
     const steps = document.querySelectorAll(".welcome-step");
     steps.forEach((step) => {
@@ -435,29 +447,28 @@ class WelcomeScreen {
     });
 
     if (this.currentStep === 2) {
-      // Show disclaimer step
       document.querySelector(".step-disclaimer").classList.add("active");
     } else if (this.currentStep === 5) {
-      // Show completion step
       document.querySelector(".step-complete").classList.add("active");
     }
   }
 
+  /**
+   * Updates UI buttons for the agreement flow.
+   */
   updateDisclaimerForAgreementFlow() {
     const disclaimerNext = document.getElementById("disclaimer-next");
     const disclaimerBack = document.getElementById("disclaimer-back");
 
-    // Hide back button in agreement-only flow
     if (disclaimerBack) {
       disclaimerBack.style.display = "none";
     }
 
-    // Update next button event for agreement-only flow
     if (disclaimerNext) {
       disclaimerNext.removeEventListener("click", this.nextStep);
       disclaimerNext.addEventListener("click", () => {
         if (this.isAgreementOnlyFlow) {
-          this.currentStep = 5; // Jump to completion step
+          this.currentStep = 5;
           this.updateStepForAgreementFlow();
           this.updateProgressForAgreementFlow();
         } else {
@@ -467,6 +478,9 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Updates progress dots for the agreement flow.
+   */
   updateProgressForAgreementFlow() {
     const dots = document.querySelectorAll(".progress-dot");
     if (this.isAgreementOnlyFlow) {
@@ -481,6 +495,9 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Shows the welcome overlay.
+   */
   show() {
     const overlay = document.getElementById("welcome-overlay");
     if (overlay) {
@@ -488,6 +505,9 @@ class WelcomeScreen {
     }
   }
 
+  /**
+   * Hides the welcome overlay.
+   */
   hide() {
     const overlay = document.getElementById("welcome-overlay");
     if (overlay) {
@@ -496,7 +516,9 @@ class WelcomeScreen {
   }
 }
 
-// Function to check if user is first-time and show welcome screen
+/**
+ * Checks extension state and determines if the welcome screen should be shown.
+ */
 async function checkAndShowWelcome() {
   try {
     const BROWSER_STORAGE_KEY = "transparentZenSettings";
@@ -512,27 +534,24 @@ async function checkAndShowWelcome() {
       Object.keys(data.styles.website).length > 0;
     const welcomeShown = settings.welcomeShown;
 
-    // New users (no styles fetched) - show full welcome flow
     if (!hasStyles) {
       const welcome = new WelcomeScreen();
       welcome.show();
-      return true; // Welcome screen is shown
+      return true;
     }
 
-    // Existing users who haven't seen the new agreement - show agreement-only flow
     if (hasStyles && (welcomeShown === undefined || welcomeShown === false)) {
       const welcome = new WelcomeScreen();
       welcome.showAgreementOnly();
-      return true; // Welcome screen is shown
+      return true;
     }
 
-    return false; // Welcome screen not needed
+    return false;
   } catch (error) {
     console.error("Error checking welcome screen status:", error);
     return false;
   }
 }
 
-// Export for use in other files
 window.WelcomeScreen = WelcomeScreen;
 window.checkAndShowWelcome = checkAndShowWelcome;
