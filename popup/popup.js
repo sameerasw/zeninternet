@@ -99,6 +99,7 @@ new (class ExtensionPopup {
   howToUseButton = $("how-to-use");
   fallbackBackgroundSwitch = $("fallback-background");
   fallbackBackgroundList = [];
+  hasLoadedFeaturesOnce = false;
 
   constructor() {
     log("Initializing popup class...");
@@ -247,8 +248,14 @@ new (class ExtensionPopup {
 
     this.currentSiteFeatures.addEventListener("change", (event) => {
       if (event.target.type === "checkbox") {
+        const checkbox = event.target;
+        const row = checkbox.closest(".feature-toggle-row");
+        const nameSpan = row ? row.querySelector(".feature-name") : null;
+        const featureName = nameSpan ? nameSpan.textContent.replace("[overridden]", "").trim() : "Feature";
+        
         this.saveSettings();
         this.updateActiveTabStyling();
+        this.showToast(`${featureName}: ${checkbox.checked ? 'On' : 'Off'}`, checkbox.checked);
       }
     });
 
@@ -373,7 +380,7 @@ new (class ExtensionPopup {
       .then(() => {
         this.updateActiveTabStyling();
         if (prevEnable !== this.globalSettings.enableStyling) {
-            this.showToast("Global Styling", this.globalSettings.enableStyling);
+            this.showToast(`Global Styling: ${this.globalSettings.enableStyling ? 'On' : 'Off'}`, this.globalSettings.enableStyling);
         }
       });
 
@@ -395,7 +402,6 @@ new (class ExtensionPopup {
         })
         .then(() => {
           this.updateActiveTabStyling();
-          this.showToast("Feature updated", true);
         });
     }
   }
@@ -472,7 +478,7 @@ new (class ExtensionPopup {
       })
       .then(() => {
         this.updateActiveTabStyling();
-        this.showToast("Forced Styling", !isChecked);
+        this.showToast(`Forced Styling: ${!isChecked ? 'On' : 'Off'}`, !isChecked);
       });
   }
 
@@ -497,7 +503,7 @@ new (class ExtensionPopup {
       })
       .then(() => {
         this.updateActiveTabStyling();
-        this.showToast("Site Styling", !isChecked);
+        this.showToast(`Site Styling: ${!isChecked ? 'On' : 'Off'}`, !isChecked);
       });
   }
 
@@ -872,11 +878,32 @@ new (class ExtensionPopup {
 
       const featuresList = $("current-site-toggles");
       const actionsContainer = $("current-site-actions");
+      const toggleButton = $("toggle-features");
+
+      const isFirstLoad = !this.hasLoadedFeaturesOnce;
+      this.hasLoadedFeaturesOnce = true;
+
+      if (isFirstLoad) {
+        if (hasSpecificTheme) {
+          featuresList.classList.add("collapsed");
+          if (actionsContainer) actionsContainer.classList.add("collapsed");
+          if (toggleButton) {
+            const icon = toggleButton.querySelector("i");
+            if (icon) icon.className = "fas fa-chevron-down";
+            toggleButton.classList.remove("active");
+          }
+        } else {
+          featuresList.classList.remove("collapsed");
+          if (actionsContainer) actionsContainer.classList.remove("collapsed");
+          if (toggleButton) {
+            const icon = toggleButton.querySelector("i");
+            if (icon) icon.className = "fas fa-chevron-up";
+            toggleButton.classList.add("active");
+          }
+        }
+      }
 
       if (hasSpecificTheme) {
-        featuresList.classList.add("collapsed");
-        if (actionsContainer) actionsContainer.classList.add("collapsed");
-
         const skipForceThemingContainer =
           this.skipForceThemingSwitch.closest(".toggle-container");
         if (skipForceThemingContainer) {
@@ -887,12 +914,6 @@ new (class ExtensionPopup {
           this.skipThemingSwitch.closest(".toggle-container");
         if (skipThemingContainer) {
           skipThemingContainer.style.display = "flex";
-        }
-
-        const toggleButton = $("toggle-features");
-        if (toggleButton) {
-          const icon = toggleButton.querySelector("i");
-          if (icon) icon.className = "fas fa-chevron-down";
         }
       } else {
         const skipForceThemingContainer =
@@ -906,31 +927,26 @@ new (class ExtensionPopup {
         if (skipThemingContainer) {
           skipThemingContainer.style.display = "none";
         }
-
-        featuresList.classList.remove("collapsed");
-        if (actionsContainer) actionsContainer.classList.remove("collapsed");
-
-        const toggleButton = $("toggle-features");
-        if (toggleButton) {
-          const icon = toggleButton.querySelector("i");
-          if (icon) icon.className = "fas fa-chevron-up";
-        }
       }
 
       const forcingContent = $("forcing-content");
       const toggleForcingButton = $("toggle-forcing");
 
-      if (hasSpecificTheme) {
-        forcingContent.classList.add("collapsed");
-        if (toggleForcingButton) {
-          const icon = toggleForcingButton.querySelector("i");
-          if (icon) icon.className = "fas fa-chevron-down";
-        }
-      } else {
-        forcingContent.classList.remove("collapsed");
-        if (toggleForcingButton) {
-          const icon = toggleForcingButton.querySelector("i");
-          if (icon) icon.className = "fas fa-chevron-up";
+      if (isFirstLoad) {
+        if (hasSpecificTheme) {
+          forcingContent.classList.add("collapsed");
+          if (toggleForcingButton) {
+            const icon = toggleForcingButton.querySelector("i");
+            if (icon) icon.className = "fas fa-chevron-down";
+            toggleForcingButton.classList.remove("active");
+          }
+        } else {
+          forcingContent.classList.remove("collapsed");
+          if (toggleForcingButton) {
+            const icon = toggleForcingButton.querySelector("i");
+            if (icon) icon.className = "fas fa-chevron-up";
+            toggleForcingButton.classList.add("active");
+          }
         }
       }
 
