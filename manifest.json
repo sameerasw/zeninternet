@@ -49,5 +49,25 @@
     "popup/welcome.css",
     "popup/welcome.js",
     "shared/*"
-  ]
+  ],
+  "commands": {
+    "toggle-current-site": {
+      "suggested_key": {
+        "default": "Alt+Shift+U"
+      },
+      "description": "Toggle Zen Internet for the current website"
+    },
+    "toggle-global-styling": {
+      "suggested_key": {
+        "default": "Alt+Shift+G"
+      },
+      "description": "Toggle Zen Internet global styling"
+    },
+    "toggle-global-transparency": {
+      "suggested_key": {
+        "default": "Alt+Shift+O"
+      },
+      "description": "Toggle Zen Internet global transparency"
+    }
+  }
 }

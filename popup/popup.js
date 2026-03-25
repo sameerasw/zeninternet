@@ -167,6 +167,28 @@ new (class ExtensionPopup {
         }
       });
     });
+
+    browser.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === "local") {
+        const isRelevant = 
+          changes[this.BROWSER_STORAGE_KEY] || 
+          changes[SKIP_THEMING_KEY] || 
+          changes[SKIP_FORCE_THEMING_KEY] ||
+          changes[FALLBACK_BACKGROUND_KEY];
+        
+        if (isRelevant) {
+          this.loadSettings().then(() => {
+            this.loadSkipForceThemingList().then(() => {
+              this.loadSkipThemingList().then(() => {
+                this.loadFallbackBackgroundList().then(() => {
+                  this.restoreSettings();
+                });
+              });
+            });
+          });
+        }
+      }
+    });
   }
 
   /**

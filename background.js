@@ -766,6 +766,20 @@ browser.tabs.onActivated.addListener((activeInfo) => {
   updateIconForTab(activeInfo.tabId);
 });
 
+/**
+ * Refreshes style on all relevant tabs.
+ */
+async function refreshAllTabs() {
+  stylingStateCache.clear();
+  await preloadStyles();
+  const tabs = await browser.tabs.query({});
+  for (const tab of tabs) {
+    if (tab.url && tab.url.startsWith("http")) {
+      await applyCSSToTab(tab).catch(() => {});
+    }
+  }
+}
+
 browser.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === "local") {
     const isRelevantChange =
@@ -778,16 +792,7 @@ browser.storage.onChanged.addListener((changes, areaName) => {
       changes[FALLBACK_BACKGROUND_KEY];
 
     if (isRelevantChange) {
-      stylingStateCache.clear();
-      preloadStyles().then(() => {
-        browser.tabs.query({}).then((tabs) => {
-          for (const tab of tabs) {
-            if (tab.url && tab.url.startsWith("http")) {
-              applyCSSToTab(tab).catch(() => {});
-            }
-          }
-        });
-      });
+      refreshAllTabs().catch(() => {});
     }
   }
 });
@@ -930,3 +935,52 @@ browser.webNavigation.onCommitted.addListener((details) => {
 });
 
 initializeExtension();
+/**
+ * Handles extension keyboard shortcuts.
+ */
+browser.commands.onCommand.addListener(async (command) => {
+  try {
+    const settingsData = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+    const settings = ensureDefaultSettings(
+      settingsData[BROWSER_STORAGE_KEY] || {}
+    );
+
+    let changed = false;
+
+    if (command === "toggle-global-styling") {
+      settings.enableStyling = !settings.enableStyling;
+      await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
+      changed = true;
+    } else if (command === "toggle-global-transparency") {
+      settings.disableTransparency = !settings.disableTransparency;
+      await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
+      changed = true;
+    } else if (command === "toggle-current-site") {
+      const activeTabs = await browser.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      if (activeTabs.length > 0 && activeTabs[0].url?.startsWith("http")) {
+        const hostname = normalizeHostname(new URL(activeTabs[0].url).hostname);
+        const data = await browser.storage.local.get(SKIP_THEMING_KEY);
+        const skipList = data[SKIP_THEMING_KEY] || [];
+        const index = skipList.indexOf(hostname);
+
+        if (index === -1) {
+          skipList.push(hostname);
+        } else {
+          skipList.splice(index, 1);
+        }
+
+        await browser.storage.local.set({ [SKIP_THEMING_KEY]: skipList });
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      await refreshAllTabs().catch(() => {});
+    }
+  } catch (error) {
+    console.error("Error handling command:", error);
+  }
+});
