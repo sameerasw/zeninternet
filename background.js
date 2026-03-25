@@ -3,6 +3,7 @@ let SKIP_THEMING_KEY = "skipThemingList";
 let FALLBACK_BACKGROUND_KEY = "fallbackBackgroundList";
 let BROWSER_STORAGE_KEY = "transparentZenSettings";
 let STYLES_MAPPING_KEY = "stylesMapping";
+let USER_STYLES_MAPPING_KEY = "userStylesMapping";
 let logging = false;
 
 const cssCache = new Map();
@@ -122,13 +123,22 @@ async function shouldApplyStyling(hostname) {
     }
 
     if (!hasSpecificStyle) {
-      const mappingData = await browser.storage.local.get(STYLES_MAPPING_KEY);
-      if (mappingData[STYLES_MAPPING_KEY]?.mapping) {
-        for (const [sourceStyle, targetSites] of Object.entries(mappingData[STYLES_MAPPING_KEY].mapping)) {
-          if (targetSites.includes(normalizedHostname)) {
-            hasSpecificStyle = true;
-            break;
+      const mappingData = await browser.storage.local.get([STYLES_MAPPING_KEY, USER_STYLES_MAPPING_KEY]);
+      const mergedMapping = { ...(mappingData[STYLES_MAPPING_KEY]?.mapping || {}) };
+      
+      if (mappingData[USER_STYLES_MAPPING_KEY]?.mapping) {
+        for (const [source, targets] of Object.entries(mappingData[USER_STYLES_MAPPING_KEY].mapping)) {
+          if (!mergedMapping[source]) mergedMapping[source] = [];
+          for (const target of targets) {
+            if (!mergedMapping[source].includes(target)) mergedMapping[source].push(target);
           }
+        }
+      }
+
+      for (const [sourceStyle, targetSites] of Object.entries(mergedMapping)) {
+        if (targetSites.includes(normalizedHostname)) {
+          hasSpecificStyle = true;
+          break;
         }
       }
     }
@@ -242,6 +252,7 @@ async function preloadStyles() {
       "styles",
       BROWSER_STORAGE_KEY,
       STYLES_MAPPING_KEY,
+      USER_STYLES_MAPPING_KEY,
     ]);
 
     const settings = ensureDefaultSettings(data[BROWSER_STORAGE_KEY] || {});
@@ -257,12 +268,20 @@ async function preloadStyles() {
     cssCache.clear();
 
     if (data.styles?.website) {
-      const reverseMapping = {};
-      if (data[STYLES_MAPPING_KEY]?.mapping) {
-        for (const [sourceStyle, targetSites] of Object.entries(data[STYLES_MAPPING_KEY].mapping)) {
-          for (const targetSite of targetSites) {
-            reverseMapping[targetSite] = sourceStyle;
+      const mergedMapping = { ...(data[STYLES_MAPPING_KEY]?.mapping || {}) };
+      if (data[USER_STYLES_MAPPING_KEY]?.mapping) {
+        for (const [source, targets] of Object.entries(data[USER_STYLES_MAPPING_KEY].mapping)) {
+          if (!mergedMapping[source]) mergedMapping[source] = [];
+          for (const target of targets) {
+            if (!mergedMapping[source].includes(target)) mergedMapping[source].push(target);
           }
+        }
+      }
+
+      const reverseMapping = {};
+      for (const [sourceStyle, targetSites] of Object.entries(mergedMapping)) {
+        for (const targetSite of targetSites) {
+          reverseMapping[targetSite] = sourceStyle;
         }
       }
 
@@ -275,8 +294,8 @@ async function preloadStyles() {
         const websiteKey = website.replace(".css", "");
         cssCache.set(websiteKey, combinedCSS);
 
-        if (data[STYLES_MAPPING_KEY]?.mapping && data[STYLES_MAPPING_KEY].mapping[website]) {
-          const mappedSites = data[STYLES_MAPPING_KEY].mapping[website];
+        if (mergedMapping[website]) {
+          const mappedSites = mergedMapping[website];
           for (const mappedSite of mappedSites) {
             const normalizedMappedSite = normalizeHostname(mappedSite);
             cssCache.set(normalizedMappedSite, combinedCSS);
@@ -385,9 +404,19 @@ async function getStylesForHostname(hostname, settings) {
       }
     }
 
-    const mappingData = await browser.storage.local.get(STYLES_MAPPING_KEY);
-    if (mappingData[STYLES_MAPPING_KEY]?.mapping) {
-      for (const [sourceStyle, targetSites] of Object.entries(mappingData[STYLES_MAPPING_KEY].mapping)) {
+    const mappingData = await browser.storage.local.get([STYLES_MAPPING_KEY, USER_STYLES_MAPPING_KEY]);
+    const mergedMapping = { ...(mappingData[STYLES_MAPPING_KEY]?.mapping || {}) };
+    if (mappingData[USER_STYLES_MAPPING_KEY]?.mapping) {
+      for (const [source, targets] of Object.entries(mappingData[USER_STYLES_MAPPING_KEY].mapping)) {
+        if (!mergedMapping[source]) mergedMapping[source] = [];
+        for (const target of targets) {
+          if (!mergedMapping[source].includes(target)) mergedMapping[source].push(target);
+        }
+      }
+    }
+
+    if (mergedMapping) {
+      for (const [sourceStyle, targetSites] of Object.entries(mergedMapping)) {
         if (targetSites.includes(hostname)) {
           const sourceStyleKey = sourceStyle.replace(".css", "");
           if (cssCache.has(sourceStyleKey)) {
@@ -454,6 +483,11 @@ async function applyCSSToTab(tab) {
     const url = new URL(tab.url);
     const originalHostname = url.hostname;
     const hostname = normalizeHostname(originalHostname);
+
+    const settingsData = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+    const globalSettings = ensureDefaultSettings(
+      settingsData[BROWSER_STORAGE_KEY] || {}
+    );
 
     const stylingState = await shouldApplyStyling(hostname);
     setIcon(tab.id, stylingState.shouldApply);
@@ -560,7 +594,6 @@ html {
     }
 
     if (stylingState.shouldApply) {
-      const settings = await browser.storage.local.get(BROWSER_STORAGE_KEY);
       const data = await browser.storage.local.get("styles");
 
       let bestMatch = null;
@@ -614,16 +647,24 @@ html {
         await applyCSS(tab.id, hostname, data.styles.website[bestMatch]);
         return;
       } else {
-        const mappingData = await browser.storage.local.get(STYLES_MAPPING_KEY);
-        if (mappingData[STYLES_MAPPING_KEY]?.mapping) {
-          for (const [sourceStyle, targetSites] of Object.entries(mappingData[STYLES_MAPPING_KEY].mapping)) {
-            if (targetSites.includes(hostname)) {
-              if (data.styles.website[sourceStyle]) {
-                await applyCSS(tab.id, hostname, data.styles.website[sourceStyle]);
-                return;
-              }
-              break;
+        const mappingData = await browser.storage.local.get([STYLES_MAPPING_KEY, USER_STYLES_MAPPING_KEY]);
+        const mergedMapping = { ...(mappingData[STYLES_MAPPING_KEY]?.mapping || {}) };
+        if (mappingData[USER_STYLES_MAPPING_KEY]?.mapping) {
+          for (const [source, targets] of Object.entries(mappingData[USER_STYLES_MAPPING_KEY].mapping)) {
+            if (!mergedMapping[source]) mergedMapping[source] = [];
+            for (const target of targets) {
+              if (!mergedMapping[source].includes(target)) mergedMapping[source].push(target);
             }
+          }
+        }
+
+        for (const [sourceStyle, targetSites] of Object.entries(mergedMapping)) {
+          if (targetSites.includes(hostname)) {
+            if (data.styles.website[sourceStyle]) {
+              await applyCSS(tab.id, hostname, data.styles.website[sourceStyle]);
+              return;
+            }
+            break;
           }
         }
 
@@ -732,17 +773,20 @@ browser.storage.onChanged.addListener((changes, areaName) => {
       changes[SKIP_THEMING_KEY] ||
       changes[SKIP_FORCE_THEMING_KEY] ||
       changes[STYLES_MAPPING_KEY] ||
+      changes[USER_STYLES_MAPPING_KEY] ||
       Object.keys(changes).some((k) => k.startsWith(`${BROWSER_STORAGE_KEY}.`)) ||
       changes[FALLBACK_BACKGROUND_KEY];
 
     if (isRelevantChange) {
       stylingStateCache.clear();
-      browser.tabs.query({}).then((tabs) => {
-        for (const tab of tabs) {
-          if (tab.url && tab.url.startsWith("http")) {
-            applyCSSToTab(tab).catch(() => {});
+      preloadStyles().then(() => {
+        browser.tabs.query({}).then((tabs) => {
+          for (const tab of tabs) {
+            if (tab.url && tab.url.startsWith("http")) {
+              applyCSSToTab(tab).catch(() => {});
+            }
           }
-        }
+        });
       });
     }
   }
