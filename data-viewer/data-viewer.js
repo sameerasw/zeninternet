@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   const disableHoverToggle = document.getElementById("disable-hover");
   const disableFooterToggle = document.getElementById("disable-footer");
+  const disableDarkReaderToggle = document.getElementById("disable-darkreader");
 
   const repositoryUrlInput = document.getElementById("repository-url");
   const setRepositoryUrlButton = document.getElementById("set-repository-url");
@@ -46,6 +47,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   disableFooterToggle.addEventListener("change", function () {
     saveFooterSettings(this.checked);
+  });
+
+  disableDarkReaderToggle.addEventListener("change", function () {
+    saveDarkReaderSettings(this.checked);
   });
 
   deleteAllButton.addEventListener("click", function () {
@@ -233,6 +238,20 @@ document.addEventListener("DOMContentLoaded", function () {
       await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
     } catch (error) {
       console.error("Error saving footer settings:", error);
+    }
+  }
+
+  /**
+   * Saves darkreader preference to storage.
+   */
+  async function saveDarkReaderSettings(isDisabled) {
+    try {
+      const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+      const settings = data[BROWSER_STORAGE_KEY] || {};
+      settings.disableDarkReader = isDisabled;
+      await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
+    } catch (error) {
+      console.error("Error saving darkreader settings:", error);
     }
   }
 
@@ -429,6 +448,7 @@ document.addEventListener("DOMContentLoaded", function () {
     disableTransparencyToggle.checked = settings.disableTransparency || false;
     disableHoverToggle.checked = settings.disableHover || false;
     disableFooterToggle.checked = settings.disableFooter || false;
+    disableDarkReaderToggle.checked = settings.disableDarkReader || false;
 
     globalSettingsElement.innerHTML = "";
     const table = document.createElement("table");

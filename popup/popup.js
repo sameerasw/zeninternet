@@ -965,6 +965,7 @@ new (class ExtensionPopup {
         this.globalSettings.disableTransparency === true;
       const isHoverDisabled = this.globalSettings.disableHover === true;
       const isFooterDisabled = this.globalSettings.disableFooter === true;
+      const isDarkReaderDisabled = this.globalSettings.disableDarkReader === true;
 
       for (const [feature, css] of Object.entries(features)) {
         let displayFeatureName = feature.includes("-")
@@ -982,12 +983,13 @@ new (class ExtensionPopup {
           .toLowerCase()
           .includes("transparency");
         const isHoverFeature = feature.toLowerCase().includes("hover");
-        const isFooterFeature = feature.toLowerCase().includes("footer");
+        const isDarkReaderFeature = feature.toLowerCase().includes("darkreader") || css.toLowerCase().includes("darkreader");
 
         const isOverridden =
           (isTransparencyDisabled && isTransparencyFeature) ||
           (isHoverDisabled && isHoverFeature) ||
-          (isFooterDisabled && isFooterFeature);
+          (isFooterDisabled && isFooterFeature) ||
+          (isDarkReaderDisabled && isDarkReaderFeature);
 
         const featureToggle = document.createElement("div");
         featureToggle.className = "feature-toggle";

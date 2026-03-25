@@ -28,6 +28,7 @@ const DEFAULT_SETTINGS = {
   disableTransparency: false,
   disableHover: false,
   disableFooter: false,
+  disableDarkReader: false,
   fallbackBackgroundList: [],
 };
 
@@ -728,6 +729,14 @@ async function applyCSS(tabId, hostname, features) {
     }
 
     if (isFooterFeature && globalSettings.disableFooter) {
+      continue;
+    }
+
+    const isDarkReaderFeature = 
+      feature.toLowerCase().includes("darkreader") || 
+      css.toLowerCase().includes("darkreader");
+
+    if (isDarkReaderFeature && globalSettings.disableDarkReader) {
       continue;
     }
 
