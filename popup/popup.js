@@ -14,6 +14,8 @@ const DEFAULT_SETTINGS = {
   disableTransparency: false,
   disableHover: false,
   disableFooter: false,
+  disableDarkReader: false,
+  enableLogs: false,
   fallbackBackgroundList: [],
 };
 
@@ -40,6 +42,19 @@ function normalizeHostname(hostname) {
 const $ = (selector) => document.getElementById(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const on = (el, event, handler) => el && el.addEventListener(event, handler);
+
+/**
+ * Centralized logging helper that respects the enableLogs setting.
+ */
+async function log(...args) {
+  try {
+    const data = await browser.storage.local.get("transparentZenSettings");
+    const settings = data["transparentZenSettings"] || {};
+    if (settings.enableLogs) {
+      console.log("[ZenInternet]", ...args);
+    }
+  } catch (e) {}
+}
 
 /**
  * Sets up a modal overlay with common handlers.
@@ -86,6 +101,7 @@ new (class ExtensionPopup {
   fallbackBackgroundList = [];
 
   constructor() {
+    log("Initializing popup class...");
     this.loadSettings().then(() => {
       this.loadSkipForceThemingList().then(() => {
         this.loadSkipThemingList().then(() => {
@@ -195,6 +211,7 @@ new (class ExtensionPopup {
    * Retrieves information about the currently active tab.
    */
   async getCurrentTabInfo() {
+    log("Fetching current tab info...");
     try {
       const tabs = await browser.tabs.query({
         active: true,
@@ -262,6 +279,7 @@ new (class ExtensionPopup {
    * Restores UI state from stored settings.
    */
   restoreSettings() {
+    log("Restoring settings to UI...");
     this.enableStylingSwitch.checked =
       this.globalSettings.enableStyling ?? true;
     this.autoUpdateSwitch.checked = this.globalSettings.autoUpdate ?? false;
@@ -382,6 +400,7 @@ new (class ExtensionPopup {
    * Sends a toast notification to the active tab.
    */
   async showToast(text, isEnabled) {
+    log("Showing toast:", text, isEnabled ? "On" : "Off");
     try {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       if (tabs.length > 0 && tabs[0].url?.startsWith("http")) {

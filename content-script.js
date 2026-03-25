@@ -3,6 +3,19 @@
   let observer = null;
 
   /**
+   * Centralized logging helper that respects the enableLogs setting.
+   */
+  async function log(...args) {
+    try {
+      const result = await browser.storage.local.get("transparentZenSettings");
+      const settings = result["transparentZenSettings"] || {};
+      if (settings.enableLogs) {
+        console.log("[ZenInternet]", ...args);
+      }
+    } catch (e) {}
+  }
+
+  /**
    * Returns our style element or creates it if it doesn't exist.
    */
   function getOrCreateStyleEl() {
@@ -38,6 +51,7 @@
             (n) => n.id === STYLE_ID
           );
           if (!addedOurs) {
+            log("Head mutation detected, re-applying styles...");
             ensureLastInHead();
           }
           break;
@@ -51,6 +65,7 @@
    * Updates style content and ensures they are applied with top priority.
    */
   function applyStyles(css) {
+    log("Applying styles to page...");
     const el = getOrCreateStyleEl();
     el.textContent = css || "";
     ensureLastInHead();

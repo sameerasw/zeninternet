@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const disableHoverToggle = document.getElementById("disable-hover");
   const disableFooterToggle = document.getElementById("disable-footer");
   const disableDarkReaderToggle = document.getElementById("disable-darkreader");
+  const enableLogsToggle = document.getElementById("enable-logs");
 
   const repositoryUrlInput = document.getElementById("repository-url");
   const setRepositoryUrlButton = document.getElementById("set-repository-url");
@@ -51,6 +52,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   disableDarkReaderToggle.addEventListener("change", function () {
     saveDarkReaderSettings(this.checked);
+  });
+
+  enableLogsToggle.addEventListener("change", function () {
+    saveLogSettings(this.checked);
   });
 
   deleteAllButton.addEventListener("click", function () {
@@ -256,6 +261,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
+   * Saves logging preference to storage.
+   */
+  async function saveLogSettings(isEnabled) {
+    try {
+      const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+      const settings = data[BROWSER_STORAGE_KEY] || {};
+      settings.enableLogs = isEnabled;
+      await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
+    } catch (error) {
+      console.error("Error saving log settings:", error);
+    }
+  }
+
+  /**
    * Saves individual feature toggle preference for a website.
    */
   async function saveFeatureToggle(websiteDomain, feature, isEnabled) {
@@ -427,6 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
    * Loads all stored data and updates the UI.
    */
   async function loadAllData() {
+    log("Loading all extension data for viewer...");
     try {
       const data = await browser.storage.local.get(null);
       displayGlobalSettings(data);
@@ -449,6 +469,7 @@ document.addEventListener("DOMContentLoaded", function () {
     disableHoverToggle.checked = settings.disableHover || false;
     disableFooterToggle.checked = settings.disableFooter || false;
     disableDarkReaderToggle.checked = settings.disableDarkReader || false;
+    enableLogsToggle.checked = settings.enableLogs || false;
 
     globalSettingsElement.innerHTML = "";
     const table = document.createElement("table");
@@ -1026,6 +1047,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
     });
+  }
+
+  /**
+   * Centralized logging helper that respects the enableLogs setting.
+   */
+  async function log(...args) {
+    try {
+      const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+      const settings = data[BROWSER_STORAGE_KEY] || {};
+      if (settings.enableLogs) {
+        console.log("[ZenInternet]", ...args);
+      }
+    } catch (e) {}
   }
 
   /**

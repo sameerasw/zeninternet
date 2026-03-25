@@ -29,8 +29,22 @@ const DEFAULT_SETTINGS = {
   disableHover: false,
   disableFooter: false,
   disableDarkReader: false,
+  enableLogs: false,
   fallbackBackgroundList: [],
 };
+
+/**
+ * Centralized logging helper that respects the enableLogs setting.
+ */
+async function log(...args) {
+  try {
+    const data = await browser.storage.local.get(BROWSER_STORAGE_KEY);
+    const settings = data[BROWSER_STORAGE_KEY] || {};
+    if (settings.enableLogs) {
+      console.log("[ZenInternet]", ...args);
+    }
+  } catch (e) {}
+}
 
 /**
  * Normalizes hostnames by removing the www. prefix.
@@ -248,6 +262,7 @@ function setIcon(tabId, isEnabled) {
  * Compiles and caches styles for rapid injection.
  */
 async function preloadStyles() {
+  log("Preloading styles...");
   try {
     const data = await browser.storage.local.get([
       "styles",
@@ -756,6 +771,7 @@ html{
   }
 
   if (combinedCSS.trim()) {
+    log(`Sending styles to tab ${tabId} (${combinedCSS.length} bytes).`);
     await browser.tabs.sendMessage(tabId, {
       action: "applyStyles",
       css: combinedCSS,
