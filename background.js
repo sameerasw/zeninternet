@@ -757,13 +757,18 @@ html{
 }
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete") {
-    updateIconForTab(tabId, tab.url);
+  if (changeInfo.status === "complete" && tab.url?.startsWith("http")) {
+    applyCSSToTab(tab).catch(() => {});
   }
 });
 
-browser.tabs.onActivated.addListener((activeInfo) => {
-  updateIconForTab(activeInfo.tabId);
+browser.tabs.onActivated.addListener(async (activeInfo) => {
+  try {
+    const tab = await browser.tabs.get(activeInfo.tabId);
+    if (tab.url?.startsWith("http")) {
+      applyCSSToTab(tab).catch(() => {});
+    }
+  } catch (error) {}
 });
 
 /**
