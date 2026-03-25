@@ -81,9 +81,72 @@
   }
 
   /**
+   * Injects the required CSS for the  glow animations.
+   */
+  function injectAnimationCSS() {
+    const id = "zen-animations-styles";
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      @keyframes zen-glow-out {
+        0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0.6; }
+        100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
+      }
+      @keyframes zen-glow-in {
+        0% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
+        100% { transform: translate(-50%, -50%) scale(0.1); opacity: 0.6; }
+      }
+      @keyframes zen-toast-in {
+        0% { transform: translateX(120%) scale(0.9); opacity: 0; }
+        70% { transform: translateX(-10px) scale(1.02); opacity: 1; }
+        100% { transform: translateX(0) scale(1); opacity: 1; }
+      }
+      @keyframes zen-toast-out {
+        0% { transform: translateX(0) scale(1); opacity: 1; }
+        100% { transform: translateX(120%) scale(0.9); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  /**
+   * Creates a  glow ring animation originating from the toast position.
+   */
+  function createGlowRing(isEnabled) {
+    injectAnimationCSS();
+    const ring = document.createElement("div");
+    const accentColor = "#f98764";
+    
+    Object.assign(ring.style, {
+      position: "fixed",
+      top: "40px",
+      right: "40px",
+      width: "150px",
+      height: "150px",
+      borderRadius: "50%",
+      border: `4px solid ${accentColor}`,
+      boxShadow: `0 0 60px ${accentColor}, inset 0 0 60px ${accentColor}`,
+      filter: "blur(20px)",
+      pointerEvents: "none",
+      zIndex: "2147483646",
+      opacity: "0",
+      transform: "translate(-50%, -50%)"
+    });
+
+    ring.style.animation = isEnabled 
+      ? "zen-glow-out 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards" 
+      : "zen-glow-in 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+
+    document.documentElement.appendChild(ring);
+    setTimeout(() => ring.remove(), 1300);
+  }
+
+  /**
    * Displays a premium toast notification in the top-right corner.
    */
   function showToast(text, isEnabled) {
+    createGlowRing(isEnabled);
     const existing = document.getElementById("zeninternet-toast");
     if (existing) existing.remove();
 
@@ -115,13 +178,13 @@
       fontWeight: "500",
       boxShadow: `0 8px 32px ${shadowColor}, 0 0 0 1px ${borderColor}`,
       zIndex: "2147483647",
-      opacity: "0",
-      transform: "translateY(-10px) scale(0.95)",
-      transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-      pointerEvents: "none",
       display: "flex",
       alignItems: "center",
-      gap: "12px"
+      gap: "12px",
+      pointerEvents: "none",
+      transform: "translateX(120%) scale(0.9)",
+      opacity: "0",
+      animation: "zen-toast-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards"
     });
 
     const iconUrl = browser.runtime.getURL("assets/images/logo.png");
@@ -139,14 +202,13 @@
       ">
         <div style="
           position: absolute;
-          top: 2px;
-          left: 2px;
-          width: 14px;
-          height: 14px;
+          top: 3px;
+          ${isEnabled ? "right: 3px;" : "left: 3px;"}
+          width: 12px;
+          height: 12px;
           background-color: white;
           border-radius: 50%;
-          transition: transform 0.2s;
-          transform: translateX(${isEnabled ? "14px" : "0"});
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         "></div>
       </div>
@@ -154,18 +216,12 @@
 
     document.documentElement.appendChild(toast);
 
-    // Trigger animation
-    requestAnimationFrame(() => {
-      toast.style.opacity = "1";
-      toast.style.transform = "translateY(0) scale(1)";
-    });
+    const closeToast = () => {
+      toast.style.animation = "zen-toast-out 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+      setTimeout(() => toast.remove(), 500);
+    };
 
-    // Auto-remove
-    setTimeout(() => {
-      toast.style.opacity = "0";
-      toast.style.transform = "translateY(-10px) scale(0.95)";
-      setTimeout(() => toast.remove(), 400);
-    }, 2800);
+    setTimeout(closeToast, 3000);
   }
 
   browser.runtime.onMessage.addListener((message) => {
