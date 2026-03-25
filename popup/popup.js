@@ -271,6 +271,10 @@ new (class ExtensionPopup {
       ?.addEventListener("click", this.toggleFAQ.bind(this));
 
     document
+      .getElementById("toggle-developer")
+      ?.addEventListener("click", this.toggleDeveloper.bind(this));
+
+    document
       .getElementById("faq-content")
       ?.addEventListener("click", this.handleFAQClick.bind(this));
   }
@@ -1512,12 +1516,15 @@ new (class ExtensionPopup {
         featuresList.classList.contains("collapsed")
       );
     }
+    
+    if (toggleButton) {
+      toggleButton.classList.toggle("active", !featuresList.classList.contains("collapsed"));
+    }
 
-    const icon = toggleButton.querySelector("i");
-    if (featuresList.classList.contains("collapsed")) {
-      icon.className = "fas fa-chevron-down";
-    } else {
-      icon.className = "fas fa-chevron-up";
+    if (!featuresList.classList.contains("collapsed")) {
+      setTimeout(() => {
+        featuresList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
     }
   }
 
@@ -1528,11 +1535,15 @@ new (class ExtensionPopup {
     const forcingContent = $("forcing-content");
     const toggleButton = $("toggle-forcing");
     forcingContent.classList.toggle("collapsed");
-    const icon = toggleButton.querySelector("i");
-    if (forcingContent.classList.contains("collapsed")) {
-      icon.className = "fas fa-chevron-down";
-    } else {
-      icon.className = "fas fa-chevron-up";
+    
+    if (toggleButton) {
+      toggleButton.classList.toggle("active", !forcingContent.classList.contains("collapsed"));
+    }
+    
+    if (!forcingContent.classList.contains("collapsed")) {
+      setTimeout(() => {
+        forcingContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
     }
   }
 
@@ -1543,11 +1554,33 @@ new (class ExtensionPopup {
     const faqContent = $("faq-content");
     const toggleButton = $("toggle-faq");
     faqContent.classList.toggle("collapsed");
-    const icon = toggleButton.querySelector("i");
-    if (faqContent.classList.contains("collapsed")) {
-      icon.className = "fas fa-chevron-down";
-    } else {
-      icon.className = "fas fa-chevron-up";
+    
+    if (toggleButton) {
+      toggleButton.classList.toggle("active", !faqContent.classList.contains("collapsed"));
+    }
+
+    if (!faqContent.classList.contains("collapsed")) {
+      setTimeout(() => {
+        faqContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
+    }
+  }
+
+  toggleDeveloper() {
+    const devContent = $("developer-content");
+    const toggleButton = $("toggle-developer");
+    if (!devContent) return;
+
+    devContent.classList.toggle("collapsed");
+    
+    if (toggleButton) {
+      toggleButton.classList.toggle("active", !devContent.classList.contains("collapsed"));
+    }
+
+    if (!devContent.classList.contains("collapsed")) {
+      setTimeout(() => {
+        devContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
     }
   }
 

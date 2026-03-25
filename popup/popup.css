@@ -1479,3 +1479,167 @@ input:checked + .slider:before {
 .feature-has-tooltip {
   cursor: help;
 }
+/* Developer Section Styles */
+.developer-card {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+}
+
+.developer-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-color);
+  box-shadow: 0 0 8px rgba(249, 135, 100, 0.3);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.developer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  flex: 1;
+}
+
+.developer-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: font-size 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.developer-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  transition: font-size 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#developer-section:not(:has(#developer-content.collapsed)) .developer-card {
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px 0;
+  text-align: center;
+}
+
+#developer-section:not(:has(#developer-content.collapsed)) .developer-card .developer-img {
+  width: 80px;
+  height: 80px;
+  box-shadow: 0 0 15px rgba(249, 135, 100, 0.4);
+}
+
+#developer-section:not(:has(#developer-content.collapsed)) .developer-card .developer-text {
+  align-items: center;
+  flex: none;
+}
+
+#developer-section:not(:has(#developer-content.collapsed)) .developer-card .developer-name {
+  font-size: 16px;
+}
+
+#developer-section:not(:has(#developer-content.collapsed)) .developer-card .developer-subtitle {
+  font-size: 12px;
+}
+
+.developer-container {
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  border: none;
+}
+
+#developer-section:not(:has(#developer-content.collapsed)) .developer-container {
+  max-height: 400px;
+  border-top: 1px solid var(--border-color);
+  padding: 5px;
+}
+
+/* Developer Projects Showroom */
+.developer-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.projects-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+
+.project-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-button i {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+  color: var(--accent-color);
+  transition: transform 0.3s ease;
+}
+
+.project-button span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.project-button:hover {
+  background: rgba(249, 135, 100, 0.1);
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.project-button:hover i {
+  transform: scale(1.1);
+}
+
+.project-button:active {
+  transform: translateY(0);
+}
+
+.developer-section .collapsible-button i {
+  margin-left: auto;
+}
+
+.collapsible-button i,
+.faq-question i {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.collapsible-button.active i,
+.faq-question.active i {
+  transform: rotate(180deg);
+}
