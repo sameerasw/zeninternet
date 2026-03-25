@@ -336,6 +336,7 @@ new (class ExtensionPopup {
    * Saves current settings to storage.
    */
   saveSettings() {
+    const prevEnable = this.globalSettings.enableStyling;
     this.globalSettings.enableStyling = this.enableStylingSwitch.checked;
     this.globalSettings.autoUpdate = this.autoUpdateSwitch.checked;
     this.globalSettings.forceStyling = this.forceStylingSwitch.checked;
@@ -349,6 +350,9 @@ new (class ExtensionPopup {
       })
       .then(() => {
         this.updateActiveTabStyling();
+        if (prevEnable !== this.globalSettings.enableStyling) {
+            this.showToast("Global Styling", this.globalSettings.enableStyling);
+        }
       });
 
     if (this.currentSiteHostname) {
@@ -369,8 +373,21 @@ new (class ExtensionPopup {
         })
         .then(() => {
           this.updateActiveTabStyling();
+          this.showToast("Feature updated", true);
         });
     }
+  }
+
+  /**
+   * Sends a toast notification to the active tab.
+   */
+  async showToast(text, isEnabled) {
+    try {
+      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+      if (tabs.length > 0 && tabs[0].url?.startsWith("http")) {
+        browser.tabs.sendMessage(tabs[0].id, { action: "showToast", text, isEnabled }).catch(() => {});
+      }
+    } catch (e) {}
   }
 
   /**
@@ -432,6 +449,7 @@ new (class ExtensionPopup {
       })
       .then(() => {
         this.updateActiveTabStyling();
+        this.showToast("Forced Styling", !isChecked);
       });
   }
 
@@ -456,6 +474,7 @@ new (class ExtensionPopup {
       })
       .then(() => {
         this.updateActiveTabStyling();
+        this.showToast("Site Styling", !isChecked);
       });
   }
 

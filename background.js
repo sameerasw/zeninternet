@@ -979,6 +979,27 @@ browser.commands.onCommand.addListener(async (command) => {
 
     if (changed) {
       await refreshAllTabs().catch(() => {});
+      
+      // Notify active tab with a toast
+      const activeTabs = await browser.tabs.query({ active: true, currentWindow: true });
+      if (activeTabs.length > 0 && activeTabs[0].url?.startsWith("http")) {
+        let text = "Updated";
+        let isEnabled = false;
+        if (command === "toggle-global-styling") {
+          text = "Global Styling";
+          isEnabled = settings.enableStyling;
+        } else if (command === "toggle-global-transparency") {
+          text = "Global Transparency";
+          isEnabled = !settings.disableTransparency;
+        } else if (command === "toggle-current-site") {
+          const data = await browser.storage.local.get(SKIP_THEMING_KEY);
+          const skipList = data[SKIP_THEMING_KEY] || [];
+          const hostname = normalizeHostname(new URL(activeTabs[0].url).hostname);
+          isEnabled = !skipList.includes(hostname);
+          text = "Site Styling";
+        }
+        browser.tabs.sendMessage(activeTabs[0].id, { action: "showToast", text, isEnabled }).catch(() => {});
+      }
     }
   } catch (error) {
     console.error("Error handling command:", error);

@@ -48,7 +48,8 @@
     "data-viewer/data-viewer.css",
     "popup/welcome.css",
     "popup/welcome.js",
-    "shared/*"
+    "shared/*",
+    "assets/images/*"
   ],
   "commands": {
     "toggle-current-site": {
