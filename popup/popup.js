@@ -1022,8 +1022,9 @@ new (class ExtensionPopup {
           .toLowerCase()
           .includes("transparency");
         const isHoverFeature = feature.toLowerCase().includes("hover");
+        const isFooterFeature = feature.toLowerCase().includes("footer");
         const isDarkReaderFeature = feature.toLowerCase().includes("darkreader") || css.toLowerCase().includes("darkreader");
-
+        
         const isOverridden =
           (isTransparencyDisabled && isTransparencyFeature) ||
           (isHoverDisabled && isHoverFeature) ||
