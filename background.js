@@ -759,6 +759,13 @@ async function applyCSS(tabId, hostname, features) {
       continue;
     }
 
+    // Skip the static CSS-based chat overlay if the new movable JS-based chat is enabled
+    if (normalizedHostname === "youtube.com" && 
+        feature.toLowerCase().includes("transparent overlay chat") && 
+        featureSettings.movableLiveChat !== false) {
+      continue;
+    }
+
     combinedCSS += css + "\n";
   }
 

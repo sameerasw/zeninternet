@@ -402,6 +402,12 @@ new (class ExtensionPopup {
         })
         .then(() => {
           this.updateActiveTabStyling();
+          // Notify content script about potential JS feature change
+          browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+            if (tabs[0] && tabs[0].url.includes("youtube.com")) {
+              browser.tabs.sendMessage(tabs[0].id, { action: "refreshMovableChat" }).catch(() => {});
+            }
+          });
         });
     }
   }
@@ -1005,6 +1011,26 @@ new (class ExtensionPopup {
       const isHoverDisabled = this.globalSettings.disableHover === true;
       const isFooterDisabled = this.globalSettings.disableFooter === true;
       const isDarkReaderDisabled = this.globalSettings.disableDarkReader === true;
+
+      // Add "Movable Live Chat" toggle manually for YouTube
+      if (this.normalizedCurrentSiteHostname === "youtube.com") {
+        const movableChatToggle = document.createElement("div");
+        movableChatToggle.className = "feature-toggle";
+        const isChecked = this.siteSettings.movableLiveChat ?? true;
+        
+        movableChatToggle.innerHTML = `
+          <div class="feature-toggle-row">
+            <span class="feature-name feature-title-ellipsis feature-has-tooltip" title="Make the live chat window draggable in theater mode">
+              Movable Live Chat
+            </span>
+            <label class="toggle-switch">
+              <input type="checkbox" name="${currentSiteKey}|movableLiveChat" ${isChecked ? "checked" : ""}>
+              <span class="slider round"></span>
+            </label>
+          </div>
+        `;
+        this.currentSiteFeatures.appendChild(movableChatToggle);
+      }
 
       for (const [feature, css] of Object.entries(features)) {
         let displayFeatureName = feature.includes("-")
