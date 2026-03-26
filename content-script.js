@@ -236,6 +236,8 @@
       this.isEnabled = false;
       this.isTheater = false;
       this.opacity = 1.0;
+      this.inited = false;
+      this.checkInterval = null;
     }
 
     async init() {
@@ -256,10 +258,21 @@
       }
 
       this.injectMovableStyles();
-      this.observeChanges();
+      this.startWatchdog();
+      
+      if (!this.inited) {
+        this.inited = true;
+        // Listen for internal YouTube navigations
+        window.addEventListener("yt-navigate-finish", () => this.init());
+        window.addEventListener("popstate", () => this.init());
+        window.addEventListener("DOMContentLoaded", () => this.init());
+        window.addEventListener("load", () => this.init());
+      }
     }
 
     destroy() {
+      clearInterval(this.checkInterval);
+      this.checkInterval = null;
       if (this.chatElement) {
         this.chatElement.classList.remove("zen-movable");
         this.chatElement.classList.remove("zen-sticking");
@@ -272,6 +285,7 @@
         this.chatElement.style.removeProperty('bottom');
         this.chatElement.style.removeProperty('position');
         this.chatElement.style.removeProperty('opacity');
+        this.chatElement.style.removeProperty('display');
       }
       const handle = document.querySelector(".zen-drag-handle");
       if (handle) handle.remove();
@@ -301,6 +315,22 @@
           min-width: 200px !important;
           min-height: 200px !important;
         }
+        /* Fallback: ensure styles are reset when theater is off even if class remains */
+        ytd-watch-flexy:not([theater]) #chat.zen-movable {
+          position: relative !important;
+          z-index: auto !important;
+          margin: auto !important;
+          width: 100% !important;
+          height: 100% !important;
+          opacity: 1 !important;
+          display: block !important;
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          top: auto !important;
+          left: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+        }
         #chat.zen-movable.zen-dragging iframe {
           pointer-events: none !important;
         }
@@ -313,13 +343,16 @@
           width: 100% !important;
           background: rgba(249, 135, 100, 0.4) !important;
           cursor: move !important;
-          display: flex !important;
+          display: none !important;
           align-items: center !important;
           justify-content: center !important;
           opacity: 0 !important;
           transition: opacity 0.3s ease !important;
           z-index: 2002 !important;
           flex-shrink: 0 !important;
+        }
+        ytd-watch-flexy[theater] #chat.zen-movable .zen-drag-handle {
+          display: flex !important;
         }
         #chat.zen-movable:hover .zen-drag-handle {
           opacity: 1 !important;
@@ -335,7 +368,11 @@
           z-index: 2003 !important;
           border-radius: 0 0 12px 0 !important;
           opacity: 0 !important;
+          display: none !important;
           transition: opacity 0.3s ease !important;
+        }
+        ytd-watch-flexy[theater] #chat.zen-movable .zen-resize-handle {
+          display: block !important;
         }
         #chat.zen-movable:hover .zen-resize-handle {
           opacity: 1 !important;
@@ -344,37 +381,39 @@
       document.head.appendChild(style);
     }
 
-    observeChanges() {
-      const watchFlexy = document.querySelector("ytd-watch-flexy");
-      if (watchFlexy) {
-        this.isTheater = watchFlexy.hasAttribute("theater");
-        const attrObserver = new MutationObserver(() => {
-          const nowTheater = watchFlexy.hasAttribute("theater");
-          if (nowTheater !== this.isTheater) {
-            this.isTheater = nowTheater;
-            this.updateChatPosition();
-          }
-        });
-        attrObserver.observe(watchFlexy, { attributes: true, attributeFilter: ["theater"] });
-      }
-
-      const chatObserver = new MutationObserver(() => {
-        const chat = document.querySelector("#chat");
-        if (chat && (chat !== this.chatElement || !chat.classList.contains("zen-movable"))) {
-          this.setupDraggable(chat);
-        }
-      });
-      chatObserver.observe(document.body, { childList: true, subtree: true });
+    startWatchdog() {
+      if (this.checkInterval) return;
       
-      const chat = document.querySelector("#chat");
-      if (chat) this.setupDraggable(chat);
+      const check = () => {
+        const chat = document.querySelector("#chat");
+        if (chat) {
+          if (!chat.classList.contains("zen-movable") || !document.querySelector(".zen-drag-handle")) {
+             this.setupDraggable(chat);
+          }
+        }
+        
+        // Theater sync
+        const watchFlexy = document.querySelector("ytd-watch-flexy");
+        const nowTheater = watchFlexy && watchFlexy.hasAttribute("theater");
+        if (nowTheater !== this.isTheater) {
+          this.isTheater = nowTheater;
+          this.updateChatPosition();
+        }
+      };
+
+      this.checkInterval = setInterval(check, 1000);
+      check();
     }
 
     setupDraggable(chat) {
-      if (chat.classList.contains("zen-movable")) return;
       this.chatElement = chat;
       chat.classList.add("zen-movable");
-      this.chatElement.style.setProperty('opacity', this.opacity, 'important');
+
+      // Clear existing handles if any (to avoid duplicates from slow reload)
+      const existingHandle = chat.querySelector(".zen-drag-handle");
+      if (existingHandle) existingHandle.remove();
+      const existingRHandle = chat.querySelector(".zen-resize-handle");
+      if (existingRHandle) existingRHandle.remove();
 
       const handle = document.createElement("div");
       handle.className = "zen-drag-handle";
@@ -388,8 +427,8 @@
 
       this.updateChatPosition();
 
-      // Opacity scroll logic
       handle.onwheel = (e) => {
+        if (!this.isTheater) return;
         e.preventDefault();
         const delta = e.deltaY;
         if (delta < 0) {
@@ -424,7 +463,6 @@
         
         this.chatElement.classList.remove('zen-dragging');
 
-        // Simple Side Sticking
         const middle = window.innerWidth / 2;
         const chatRect = this.chatElement.getBoundingClientRect();
         const chatCenter = chatRect.left + chatRect.width / 2;
@@ -439,7 +477,6 @@
           this.chatElement.style.setProperty('right', '0px', 'important');
         }
         
-        // Final Top position
         const finalTop = this.chatElement.getBoundingClientRect().top;
         this.chatElement.style.setProperty('top', finalTop + "px", 'important');
 
@@ -450,9 +487,7 @@
       };
 
       handle.onmousedown = (e) => {
-        const isTheaterNow = document.querySelector("ytd-watch-flexy[theater]");
-        if (!isTheaterNow) return;
-        
+        if (!this.isTheater) return;
         e.preventDefault();
         startMouseX = e.clientX;
         startMouseY = e.clientY;
@@ -478,9 +513,7 @@
       };
 
       resizeHandle.onmousedown = (e) => {
-        const isTheaterNow = document.querySelector("ytd-watch-flexy[theater]");
-        if (!isTheaterNow) return;
-
+        if (!this.isTheater) return;
         e.preventDefault();
         startRX = e.clientX;
         startRY = e.clientY;
@@ -497,8 +530,11 @@
 
     updateChatPosition() {
       if (!this.chatElement) return;
-      const isActuallyTheater = document.querySelector("ytd-watch-flexy[theater]");
-      if (isActuallyTheater && this.savedPosition) {
+      
+      const watchFlexy = document.querySelector("ytd-watch-flexy");
+      this.isTheater = watchFlexy && watchFlexy.hasAttribute("theater");
+
+      if (this.isTheater && this.savedPosition) {
         if (this.savedPosition.right && this.savedPosition.right !== 'auto') {
           this.chatElement.style.setProperty('right', this.savedPosition.right, 'important');
           this.chatElement.style.setProperty('left', 'auto', 'important');
@@ -512,7 +548,9 @@
         if (this.savedPosition.height) this.chatElement.style.setProperty('height', this.savedPosition.height, 'important');
         this.chatElement.style.setProperty('bottom', 'auto', 'important');
         this.chatElement.style.setProperty('opacity', this.opacity, 'important');
+        this.chatElement.style.setProperty('display', 'flex', 'important');
       } else {
+        // Explicitly clear properties to avoid lingering fixed position outside theater
         this.chatElement.style.removeProperty('top');
         this.chatElement.style.removeProperty('left');
         this.chatElement.style.removeProperty('width');
@@ -520,11 +558,13 @@
         this.chatElement.style.removeProperty('right');
         this.chatElement.style.removeProperty('bottom');
         this.chatElement.style.removeProperty('opacity');
+        this.chatElement.style.removeProperty('display');
+        this.chatElement.style.removeProperty('position');
       }
     }
 
     async savePosition() {
-      if (!this.chatElement) return;
+      if (!this.chatElement || !this.isTheater) return;
       const position = {
         top: this.chatElement.style.top,
         left: this.chatElement.style.left,
