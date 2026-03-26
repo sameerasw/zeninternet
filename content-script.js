@@ -81,7 +81,7 @@
   }
 
   /**
-   * Injects the required CSS for the  glow animations.
+   * Injects the required CSS for the glow animations.
    */
   function injectAnimationCSS() {
     const id = "zen-animations-styles";
@@ -111,7 +111,7 @@
   }
 
   /**
-   * Creates a  glow ring animation originating from the toast position.
+   * Creates a glow ring animation originating from the toast position.
    */
   function createGlowRing(isEnabled) {
     injectAnimationCSS();
@@ -235,6 +235,7 @@
       this.savedPosition = null;
       this.isEnabled = false;
       this.isTheater = false;
+      this.opacity = 1.0;
     }
 
     async init() {
@@ -242,11 +243,12 @@
 
       const hostname = "youtube.com";
       const siteKey = `transparentZenSettings.${hostname}`;
-      const data = await browser.storage.local.get([siteKey, "liveChatPosition"]);
+      const data = await browser.storage.local.get([siteKey, "liveChatPosition", "liveChatOpacity"]);
       
       const siteSettings = data[siteKey] || {};
       this.isEnabled = siteSettings.movableLiveChat !== false;
       this.savedPosition = data.liveChatPosition || null;
+      this.opacity = data.liveChatOpacity || 1.0;
 
       if (!this.isEnabled) {
         this.destroy();
@@ -255,12 +257,13 @@
 
       this.injectMovableStyles();
       this.observeChanges();
-      this.checkIframeTransparency();
     }
 
     destroy() {
       if (this.chatElement) {
         this.chatElement.classList.remove("zen-movable");
+        this.chatElement.classList.remove("zen-sticking");
+        this.chatElement.classList.remove("zen-dragging");
         this.chatElement.style.removeProperty('top');
         this.chatElement.style.removeProperty('left');
         this.chatElement.style.removeProperty('width');
@@ -268,6 +271,7 @@
         this.chatElement.style.removeProperty('right');
         this.chatElement.style.removeProperty('bottom');
         this.chatElement.style.removeProperty('position');
+        this.chatElement.style.removeProperty('opacity');
       }
       const handle = document.querySelector(".zen-drag-handle");
       if (handle) handle.remove();
@@ -288,7 +292,6 @@
           z-index: 2001 !important;
           margin: 0 !important;
           transform: none !important;
-          transition: none !important;
           display: flex !important;
           flex-direction: column !important;
           background: var(--bg-color, #1e1e2e) !important;
@@ -297,6 +300,13 @@
           box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
           min-width: 200px !important;
           min-height: 200px !important;
+        }
+        #chat.zen-movable.zen-dragging iframe {
+          pointer-events: none !important;
+        }
+        #chat.zen-movable.zen-sticking {
+          transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                      right 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
         #chat.zen-movable .zen-drag-handle {
           height: 12px !important;
@@ -334,20 +344,6 @@
       document.head.appendChild(style);
     }
 
-    checkIframeTransparency() {
-      if (window.location.pathname.startsWith("/live_chat")) {
-        const style = document.createElement("style");
-        style.textContent = `
-          yt-live-chat-renderer {
-            background: none !important;
-            background-color: transparent !important;
-          }
-          #separator { display: none !important; }
-        `;
-        document.head.appendChild(style);
-      }
-    }
-
     observeChanges() {
       const watchFlexy = document.querySelector("ytd-watch-flexy");
       if (watchFlexy) {
@@ -378,6 +374,7 @@
       if (chat.classList.contains("zen-movable")) return;
       this.chatElement = chat;
       chat.classList.add("zen-movable");
+      this.chatElement.style.setProperty('opacity', this.opacity, 'important');
 
       const handle = document.createElement("div");
       handle.className = "zen-drag-handle";
@@ -391,17 +388,28 @@
 
       this.updateChatPosition();
 
-      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      // Opacity scroll logic
+      handle.onwheel = (e) => {
+        e.preventDefault();
+        const delta = e.deltaY;
+        if (delta < 0) {
+          this.opacity = Math.min(1.0, this.opacity + 0.05);
+        } else {
+          this.opacity = Math.max(0.1, this.opacity - 0.05);
+        }
+        this.chatElement.style.setProperty('opacity', this.opacity, 'important');
+        browser.storage.local.set({ liveChatOpacity: this.opacity });
+      };
+
+      let startMouseX, startMouseY, startElementX, startElementY;
 
       const elementDrag = (e) => {
         e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-
-        const newTop = this.chatElement.offsetTop - pos2;
-        const newLeft = this.chatElement.offsetLeft - pos1;
+        const dx = e.clientX - startMouseX;
+        const dy = e.clientY - startMouseY;
+        
+        const newTop = startElementY + dy;
+        const newLeft = startElementX + dx;
 
         this.chatElement.style.setProperty('top', newTop + "px", 'important');
         this.chatElement.style.setProperty('left', newLeft + "px", 'important');
@@ -413,7 +421,32 @@
         document.removeEventListener('mouseup', closeDragElement);
         document.removeEventListener('mousemove', elementDrag);
         document.removeEventListener('mousemove', elementResize);
-        this.savePosition();
+        
+        this.chatElement.classList.remove('zen-dragging');
+
+        // Simple Side Sticking
+        const middle = window.innerWidth / 2;
+        const chatRect = this.chatElement.getBoundingClientRect();
+        const chatCenter = chatRect.left + chatRect.width / 2;
+        
+        this.chatElement.classList.add('zen-sticking');
+        
+        if (chatCenter < middle) {
+          this.chatElement.style.setProperty('left', '0px', 'important');
+          this.chatElement.style.setProperty('right', 'auto', 'important');
+        } else {
+          this.chatElement.style.setProperty('left', 'auto', 'important');
+          this.chatElement.style.setProperty('right', '0px', 'important');
+        }
+        
+        // Final Top position
+        const finalTop = this.chatElement.getBoundingClientRect().top;
+        this.chatElement.style.setProperty('top', finalTop + "px", 'important');
+
+        setTimeout(() => {
+          this.chatElement.classList.remove('zen-sticking');
+          this.savePosition();
+        }, 300);
       };
 
       handle.onmousedown = (e) => {
@@ -421,18 +454,24 @@
         if (!isTheaterNow) return;
         
         e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
+        startMouseX = e.clientX;
+        startMouseY = e.clientY;
+        const rect = this.chatElement.getBoundingClientRect();
+        startElementX = rect.left;
+        startElementY = rect.top;
+        
+        this.chatElement.classList.add('zen-dragging');
+
         document.addEventListener('mouseup', closeDragElement);
         document.addEventListener('mousemove', elementDrag);
       };
 
-      let startWidth, startHeight, startX, startY;
+      let startWidth, startHeight, startRX, startRY;
 
       const elementResize = (e) => {
         e.preventDefault();
-        const newWidth = startWidth + (e.clientX - startX);
-        const newHeight = startHeight + (e.clientY - startY);
+        const newWidth = startWidth + (e.clientX - startRX);
+        const newHeight = startHeight + (e.clientY - startRY);
         
         if (newWidth > 200) this.chatElement.style.setProperty('width', newWidth + "px", 'important');
         if (newHeight > 200) this.chatElement.style.setProperty('height', newHeight + "px", 'important');
@@ -443,11 +482,14 @@
         if (!isTheaterNow) return;
 
         e.preventDefault();
-        startX = e.clientX;
-        startY = e.clientY;
+        startRX = e.clientX;
+        startRY = e.clientY;
         const rect = this.chatElement.getBoundingClientRect();
         startWidth = rect.width;
         startHeight = rect.height;
+        
+        this.chatElement.classList.add('zen-dragging'); 
+
         document.addEventListener('mouseup', closeDragElement);
         document.addEventListener('mousemove', elementResize);
       };
@@ -457,12 +499,19 @@
       if (!this.chatElement) return;
       const isActuallyTheater = document.querySelector("ytd-watch-flexy[theater]");
       if (isActuallyTheater && this.savedPosition) {
+        if (this.savedPosition.right && this.savedPosition.right !== 'auto') {
+          this.chatElement.style.setProperty('right', this.savedPosition.right, 'important');
+          this.chatElement.style.setProperty('left', 'auto', 'important');
+        } else {
+          this.chatElement.style.setProperty('left', this.savedPosition.left || "0px", 'important');
+          this.chatElement.style.setProperty('right', 'auto', 'important');
+        }
+
         this.chatElement.style.setProperty('top', this.savedPosition.top || "50px", 'important');
-        this.chatElement.style.setProperty('left', this.savedPosition.left || "50px", 'important');
-        this.chatElement.style.setProperty('width', this.savedPosition.width || "400px", 'important');
-        this.chatElement.style.setProperty('height', this.savedPosition.height || "600px", 'important');
-        this.chatElement.style.setProperty('right', 'auto', 'important');
+        if (this.savedPosition.width) this.chatElement.style.setProperty('width', this.savedPosition.width, 'important');
+        if (this.savedPosition.height) this.chatElement.style.setProperty('height', this.savedPosition.height, 'important');
         this.chatElement.style.setProperty('bottom', 'auto', 'important');
+        this.chatElement.style.setProperty('opacity', this.opacity, 'important');
       } else {
         this.chatElement.style.removeProperty('top');
         this.chatElement.style.removeProperty('left');
@@ -470,6 +519,7 @@
         this.chatElement.style.removeProperty('height');
         this.chatElement.style.removeProperty('right');
         this.chatElement.style.removeProperty('bottom');
+        this.chatElement.style.removeProperty('opacity');
       }
     }
 
@@ -478,10 +528,11 @@
       const position = {
         top: this.chatElement.style.top,
         left: this.chatElement.style.left,
+        right: this.chatElement.style.right,
         width: this.chatElement.style.width,
         height: this.chatElement.style.height
       };
-      await browser.storage.local.set({ liveChatPosition: position });
+      await browser.storage.local.set({ liveChatPosition: position, liveChatOpacity: this.opacity });
       this.savedPosition = position;
     }
   }
