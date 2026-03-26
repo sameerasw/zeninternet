@@ -274,6 +274,7 @@
       clearInterval(this.checkInterval);
       this.checkInterval = null;
       if (this.chatElement) {
+        this.chatElement.classList.remove("zen-movable-inited");
         this.chatElement.classList.remove("zen-movable");
         this.chatElement.classList.remove("zen-sticking");
         this.chatElement.classList.remove("zen-dragging");
@@ -314,45 +315,48 @@
           box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
           min-width: 200px !important;
           min-height: 200px !important;
+          /* Optimization for movement */
+          -webkit-backface-visibility: hidden !important;
+          backface-visibility: hidden !important;
         }
-        /* Fallback: ensure styles are reset when theater is off even if class remains */
-        ytd-watch-flexy:not([theater]) #chat.zen-movable {
-          position: relative !important;
-          z-index: auto !important;
-          margin: auto !important;
-          width: 100% !important;
+        #chat.zen-movable iframe {
+          margin-top: -50px !important;
+          height: calc(100% + 50px) !important;
+          transition: margin-top 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                      height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                      opacity 0.3s ease !important;
+          opacity: 0.95 !important;
+        }
+        #chat.zen-movable:hover iframe {
+          margin-top: 0 !important;
           height: 100% !important;
           opacity: 1 !important;
-          display: block !important;
-          box-shadow: none !important;
-          border-radius: 0 !important;
-          top: auto !important;
-          left: auto !important;
-          right: auto !important;
-          bottom: auto !important;
         }
+        /* KILL transitions and revealed mode during drag/resize for zero glitchiness */
         #chat.zen-movable.zen-dragging iframe {
           pointer-events: none !important;
+          transition: none !important;
+          margin-top: 0 !important;
+          height: 100% !important;
+          opacity: 1 !important;
         }
         #chat.zen-movable.zen-sticking {
           transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
-                      right 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                      right 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                      top 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
         #chat.zen-movable .zen-drag-handle {
           height: 12px !important;
           width: 100% !important;
           background: rgba(249, 135, 100, 0.4) !important;
           cursor: move !important;
-          display: none !important;
+          display: flex !important;
           align-items: center !important;
           justify-content: center !important;
           opacity: 0 !important;
           transition: opacity 0.3s ease !important;
           z-index: 2002 !important;
           flex-shrink: 0 !important;
-        }
-        ytd-watch-flexy[theater] #chat.zen-movable .zen-drag-handle {
-          display: flex !important;
         }
         #chat.zen-movable:hover .zen-drag-handle {
           opacity: 1 !important;
@@ -368,11 +372,7 @@
           z-index: 2003 !important;
           border-radius: 0 0 12px 0 !important;
           opacity: 0 !important;
-          display: none !important;
           transition: opacity 0.3s ease !important;
-        }
-        ytd-watch-flexy[theater] #chat.zen-movable .zen-resize-handle {
-          display: block !important;
         }
         #chat.zen-movable:hover .zen-resize-handle {
           opacity: 1 !important;
@@ -387,16 +387,17 @@
       const check = () => {
         const chat = document.querySelector("#chat");
         if (chat) {
-          if (!chat.classList.contains("zen-movable") || !document.querySelector(".zen-drag-handle")) {
+          if (!chat.classList.contains("zen-movable-inited") || !document.querySelector(".zen-drag-handle")) {
              this.setupDraggable(chat);
           }
         }
         
-        // Theater sync
         const watchFlexy = document.querySelector("ytd-watch-flexy");
         const nowTheater = watchFlexy && watchFlexy.hasAttribute("theater");
-        if (nowTheater !== this.isTheater) {
+        
+        if (nowTheater !== this.isTheater || (this.chatElement && this.chatElement.getAttribute('theater-synced') !== String(nowTheater))) {
           this.isTheater = nowTheater;
+          if (this.chatElement) this.chatElement.setAttribute('theater-synced', String(nowTheater));
           this.updateChatPosition();
         }
       };
@@ -406,10 +407,13 @@
     }
 
     setupDraggable(chat) {
+      if (chat.classList.contains("zen-movable-inited")) {
+          this.updateChatPosition();
+          return;
+      }
       this.chatElement = chat;
-      chat.classList.add("zen-movable");
+      chat.classList.add("zen-movable-inited");
 
-      // Clear existing handles if any (to avoid duplicates from slow reload)
       const existingHandle = chat.querySelector(".zen-drag-handle");
       if (existingHandle) existingHandle.remove();
       const existingRHandle = chat.querySelector(".zen-resize-handle");
@@ -535,6 +539,8 @@
       this.isTheater = watchFlexy && watchFlexy.hasAttribute("theater");
 
       if (this.isTheater && this.savedPosition) {
+        this.chatElement.classList.add("zen-movable");
+        
         if (this.savedPosition.right && this.savedPosition.right !== 'auto') {
           this.chatElement.style.setProperty('right', this.savedPosition.right, 'important');
           this.chatElement.style.setProperty('left', 'auto', 'important');
@@ -550,7 +556,8 @@
         this.chatElement.style.setProperty('opacity', this.opacity, 'important');
         this.chatElement.style.setProperty('display', 'flex', 'important');
       } else {
-        // Explicitly clear properties to avoid lingering fixed position outside theater
+        this.chatElement.classList.remove("zen-movable");
+        
         this.chatElement.style.removeProperty('top');
         this.chatElement.style.removeProperty('left');
         this.chatElement.style.removeProperty('width');
