@@ -100,6 +100,7 @@ new (class ExtensionPopup {
   fallbackBackgroundSwitch = $("fallback-background");
   fallbackBackgroundList = [];
   hasLoadedFeaturesOnce = false;
+  isInternalUpdate = false;
 
   constructor() {
     log("Initializing popup class...");
@@ -194,6 +195,10 @@ new (class ExtensionPopup {
           changes[FALLBACK_BACKGROUND_KEY];
         
         if (isRelevant) {
+          if (this.isInternalUpdate) {
+            this.isInternalUpdate = false;
+            return;
+          }
           this.loadSettings().then(() => {
             this.loadSkipForceThemingList().then(() => {
               this.loadSkipThemingList().then(() => {
@@ -351,13 +356,9 @@ new (class ExtensionPopup {
         originalData[originalSiteKey] ||
         {};
 
-      if (!normalizedData[normalizedSiteKey] && originalData[originalSiteKey]) {
-        await browser.storage.local.set({
-          [normalizedSiteKey]: this.siteSettings,
-        });
-      }
-
-      await this.loadCurrentSiteFeatures();
+      await browser.storage.local.set({
+        [normalizedSiteKey]: this.siteSettings,
+      });
     }
   }
 
@@ -369,20 +370,9 @@ new (class ExtensionPopup {
     this.globalSettings.enableStyling = this.enableStylingSwitch.checked;
     this.globalSettings.autoUpdate = this.autoUpdateSwitch.checked;
     this.globalSettings.forceStyling = this.forceStylingSwitch.checked;
-    this.globalSettings.whitelistMode = this.whitelistModeSwitch.checked;
-    this.globalSettings.whitelistStyleMode =
-      this.whitelistStylingModeSwitch.checked;
+    this.globalSettings.whitelistStyleMode = this.whitelistStylingModeSwitch.checked;
 
-    browser.storage.local
-      .set({
-        [this.BROWSER_STORAGE_KEY]: this.globalSettings,
-      })
-      .then(() => {
-        this.updateActiveTabStyling();
-        if (prevEnable !== this.globalSettings.enableStyling) {
-            this.showToast(`Global Styling: ${this.globalSettings.enableStyling ? 'On' : 'Off'}`, this.globalSettings.enableStyling);
-        }
-      });
+    const updateObj = { [this.BROWSER_STORAGE_KEY]: this.globalSettings };
 
     if (this.currentSiteHostname) {
       const siteKey = `${this.BROWSER_STORAGE_KEY}.${this.normalizedCurrentSiteHostname}`;
@@ -396,20 +386,25 @@ new (class ExtensionPopup {
         });
 
       this.siteSettings = featureSettings;
-      browser.storage.local
-        .set({
-          [siteKey]: featureSettings,
-        })
-        .then(() => {
-          this.updateActiveTabStyling();
-          // Notify content script about potential JS feature change
-          browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-            if (tabs[0] && tabs[0].url.includes("youtube.com")) {
-              browser.tabs.sendMessage(tabs[0].id, { action: "refreshMovableChat" }).catch(() => {});
-            }
-          });
-        });
+      updateObj[siteKey] = featureSettings;
     }
+
+    this.isInternalUpdate = true;
+    browser.storage.local.set(updateObj).then(() => {
+      this.updateActiveTabStyling();
+      if (prevEnable !== this.globalSettings.enableStyling) {
+        this.showToast(`Global Styling: ${this.globalSettings.enableStyling ? 'On' : 'Off'}`, this.globalSettings.enableStyling);
+      }
+      
+      // Notify content script about potential JS feature change
+      if (this.currentSiteHostname?.includes("youtube.com")) {
+        browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+          if (tabs[0]) {
+            browser.tabs.sendMessage(tabs[0].id, { action: "refreshMovableChat" }).catch(() => {});
+          }
+        });
+      }
+    });
   }
 
   /**
@@ -478,6 +473,7 @@ new (class ExtensionPopup {
       this.skipForceThemingList.splice(index, 1);
     }
 
+    this.isInternalUpdate = true;
     browser.storage.local
       .set({
         [SKIP_FORCE_THEMING_KEY]: this.skipForceThemingList,
@@ -503,6 +499,7 @@ new (class ExtensionPopup {
       this.skipThemingList.splice(index, 1);
     }
 
+    this.isInternalUpdate = true;
     browser.storage.local
       .set({
         [SKIP_THEMING_KEY]: this.skipThemingList,
@@ -530,6 +527,7 @@ new (class ExtensionPopup {
       this.fallbackBackgroundList.splice(index, 1);
     }
 
+    this.isInternalUpdate = true;
     browser.storage.local
       .set({
         [FALLBACK_BACKGROUND_KEY]: this.fallbackBackgroundList,
@@ -1563,12 +1561,6 @@ new (class ExtensionPopup {
     if (toggleButton) {
       toggleButton.classList.toggle("active", !featuresList.classList.contains("collapsed"));
     }
-
-    if (!featuresList.classList.contains("collapsed")) {
-      setTimeout(() => {
-        featuresList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 300);
-    }
   }
 
   /**
@@ -1582,12 +1574,6 @@ new (class ExtensionPopup {
     if (toggleButton) {
       toggleButton.classList.toggle("active", !forcingContent.classList.contains("collapsed"));
     }
-    
-    if (!forcingContent.classList.contains("collapsed")) {
-      setTimeout(() => {
-        forcingContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 300);
-    }
   }
 
   /**
@@ -1600,12 +1586,6 @@ new (class ExtensionPopup {
     
     if (toggleButton) {
       toggleButton.classList.toggle("active", !faqContent.classList.contains("collapsed"));
-    }
-
-    if (!faqContent.classList.contains("collapsed")) {
-      setTimeout(() => {
-        faqContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 300);
     }
   }
 
