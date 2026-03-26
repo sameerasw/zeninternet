@@ -950,15 +950,6 @@ async function initializeExtension() {
 
   await preloadStyles();
 
-  // Initial fetch if styles are missing or empty
-  const stylesData = await browser.storage.local.get("styles");
-  const hasNoStyles = !stylesData.styles || !stylesData.styles.website || Object.keys(stylesData.styles.website).length === 0;
-  
-  if (hasNoStyles) {
-    log("No styles found, performing initial fetch...");
-    refetchCSS().catch(e => console.error("Initial refetch failed:", e));
-  }
-
   if (validatedSettings.autoUpdate) {
     startAutoUpdate();
   }
@@ -977,12 +968,6 @@ browser.webNavigation.onCommitted.addListener((details) => {
         applyCSSToTab(tab);
       })
       .catch(() => {});
-  }
-});
-
-browser.runtime.onInstalled.addListener((details) => {
-  if (details.reason === "install") {
-    refetchCSS().catch(e => console.error("Install refetch failed:", e));
   }
 });
 

@@ -983,32 +983,13 @@ new (class ExtensionPopup {
         }
       }
 
-      const siteKey = `${this.BROWSER_STORAGE_KEY}.${this.normalizedCurrentSiteHostname}`;
-      const siteData = await browser.storage.local.get(siteKey);
-      this.siteSettings = siteData[siteKey] || {};
-
-      if (this.normalizedCurrentSiteHostname === "youtube.com") {
-        const movableChatToggle = document.createElement("div");
-        movableChatToggle.className = "feature-toggle";
-        const isChecked = this.siteSettings.movableLiveChat ?? true;
-        
-        movableChatToggle.innerHTML = `
-          <div class="feature-toggle-row">
-            <span class="feature-name feature-title-ellipsis feature-has-tooltip" title="Make the live chat window draggable in theater mode">
-              Floating Live Chat
-            </span>
-            <label class="toggle-switch">
-              <input type="checkbox" name="${(currentSiteKey || 'youtube.com')}|movableLiveChat" ${isChecked ? "checked" : ""}>
-              <span class="slider round"></span>
-            </label>
-          </div>
-        `;
-        this.currentSiteFeatures.appendChild(movableChatToggle);
-      }
-
       if (!currentSiteKey) {
         return;
       }
+
+      const siteKey = `${this.BROWSER_STORAGE_KEY}.${this.normalizedCurrentSiteHostname}`;
+      const siteData = await browser.storage.local.get(siteKey);
+      this.siteSettings = siteData[siteKey] || {};
 
       const features = styles[currentSiteKey];
 
@@ -1028,6 +1009,26 @@ new (class ExtensionPopup {
       const isHoverDisabled = this.globalSettings.disableHover === true;
       const isFooterDisabled = this.globalSettings.disableFooter === true;
       const isDarkReaderDisabled = this.globalSettings.disableDarkReader === true;
+
+      // Add "Movable Live Chat" toggle manually for YouTube
+      if (this.normalizedCurrentSiteHostname === "youtube.com") {
+        const movableChatToggle = document.createElement("div");
+        movableChatToggle.className = "feature-toggle";
+        const isChecked = this.siteSettings.movableLiveChat ?? true;
+        
+        movableChatToggle.innerHTML = `
+          <div class="feature-toggle-row">
+            <span class="feature-name feature-title-ellipsis feature-has-tooltip" title="Make the live chat window draggable in theater mode">
+              Movable Live Chat
+            </span>
+            <label class="toggle-switch">
+              <input type="checkbox" name="${currentSiteKey}|movableLiveChat" ${isChecked ? "checked" : ""}>
+              <span class="slider round"></span>
+            </label>
+          </div>
+        `;
+        this.currentSiteFeatures.appendChild(movableChatToggle);
+      }
 
       for (const [feature, css] of Object.entries(features)) {
         let displayFeatureName = feature.includes("-")

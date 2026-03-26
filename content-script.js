@@ -538,34 +538,36 @@
       const watchFlexy = document.querySelector("ytd-watch-flexy");
       this.isTheater = watchFlexy && watchFlexy.hasAttribute("theater");
 
-      if (this.isTheater && this.isEnabled) {
+      if (this.isTheater) {
         this.chatElement.classList.add("zen-movable");
         
-        const pos = this.savedPosition || {
-          right: '0px',
-          top: '56px',
-          width: '400px',
-          height: '600px'
+        // Provide robust defaults if no position is saved yet
+        const pos = this.savedPosition || { 
+            right: "0px", 
+            top: "60px", 
+            width: "400px", 
+            height: "600px" 
         };
 
         if (pos.right && pos.right !== 'auto') {
           this.chatElement.style.setProperty('right', pos.right, 'important');
           this.chatElement.style.setProperty('left', 'auto', 'important');
-        } else if (pos.left && pos.left !== 'auto') {
-          this.chatElement.style.setProperty('left', pos.left, 'important');
-          this.chatElement.style.setProperty('right', 'auto', 'important');
         } else {
-          // Default to right side
-          this.chatElement.style.setProperty('right', '0px', 'important');
-          this.chatElement.style.setProperty('left', 'auto', 'important');
+          this.chatElement.style.setProperty('left', pos.left || "0px", 'important');
+          this.chatElement.style.setProperty('right', 'auto', 'important');
         }
 
-        this.chatElement.style.setProperty('top', pos.top || "56px", 'important');
-        this.chatElement.style.setProperty('width', pos.width || "400px", 'important');
-        this.chatElement.style.setProperty('height', pos.height || "600px", 'important');
+        this.chatElement.style.setProperty('top', pos.top || "60px", 'important');
+        if (pos.width) this.chatElement.style.setProperty('width', pos.width, 'important');
+        if (pos.height) this.chatElement.style.setProperty('height', pos.height, 'important');
         this.chatElement.style.setProperty('bottom', 'auto', 'important');
         this.chatElement.style.setProperty('opacity', this.opacity, 'important');
         this.chatElement.style.setProperty('display', 'flex', 'important');
+        
+        // If it was the first run, save these defaults
+        if (!this.savedPosition) {
+           this.savePosition();
+        }
       } else {
         this.chatElement.classList.remove("zen-movable");
         
