@@ -1241,13 +1241,13 @@ new (class ExtensionPopup {
 
     const sendStyles = async (css) => {
       try {
-        await browser.tabs.sendMessage(tab.id, { action: "applyStyles", css });
+        await browser.tabs.sendMessage(tab.id, { action: "applyStyles", css }).catch(() => {});
       } catch (e) {}
     };
 
     const removeStyles = async () => {
       try {
-        await browser.tabs.sendMessage(tab.id, { action: "removeStyles" });
+        await browser.tabs.sendMessage(tab.id, { action: "removeStyles" }).catch(() => {});
       } catch (e) {}
     };
 
@@ -1421,9 +1421,9 @@ new (class ExtensionPopup {
    */
   setupAutoUpdate() {
     if (this.autoUpdateSwitch.checked) {
-      browser.runtime.sendMessage({ action: "enableAutoUpdate" });
+      browser.runtime.sendMessage({ action: "enableAutoUpdate" }).catch(() => {});
     } else {
-      browser.runtime.sendMessage({ action: "disableAutoUpdate" });
+      browser.runtime.sendMessage({ action: "disableAutoUpdate" }).catch(() => {});
     }
   }
 

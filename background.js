@@ -252,10 +252,13 @@ async function updateIconForTab(tabId, url) {
  */
 function setIcon(tabId, isEnabled) {
   const iconSet = isEnabled ? ICON_ON : ICON_OFF;
-  browser.browserAction.setIcon({
-    path: iconSet,
-    tabId: tabId,
-  });
+  const action = browser.action || browser.browserAction;
+  if (action && action.setIcon) {
+    action.setIcon({
+      path: iconSet,
+      tabId: tabId,
+    });
+  }
 }
 
 /**
@@ -840,16 +843,22 @@ let autoUpdateInterval;
  * Initializes the automatic style update interval.
  */
 function startAutoUpdate() {
-  if (autoUpdateInterval) clearInterval(autoUpdateInterval);
-  autoUpdateInterval = setInterval(refetchCSS, 2 * 60 * 60 * 1000);
+  browser.alarms.create("autoUpdateStyles", { periodInMinutes: 120 });
 }
 
 /**
  * Stops the automatic style update interval.
  */
 function stopAutoUpdate() {
-  if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+  // alarms are automatically handled by browser.alarms.clear
 }
+
+// Listen for alarms
+browser.alarms?.onAlarm.addListener((alarm) => {
+  if (alarm.name === "autoUpdateStyles") {
+    refetchCSS();
+  }
+});
 
 /**
  * Fetches the latest styles from the remote repository.

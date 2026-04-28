@@ -1,8 +1,8 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Zen Internet",
   "version": "3.1.2",
-  "description": "Make the internet feel native and elegant. Zen Internet is a browser extension that enhances your browsing experience by providing a clean and minimalistic interface with transparency and a focus on content. Customize the features in the addon popup.",
+  "description": "Immersive, minimal and transparent internet. Learn more at sameerasw.com/zen",
   "browser_specific_settings": {
     "gecko": {
       "id": "{91aa3897-2634-4a8a-9092-279db23a7689}"
@@ -12,16 +12,9 @@
     "48": "assets/images/logo_48.png",
     "96": "assets/images/logo_96.png"
   },
-  "permissions": [
-    "activeTab",
-    "storage",
-    "tabs",
-    "<all_urls>",
-    "webNavigation",
-    "webRequest",
-    "webRequestBlocking"
-  ],
-  "browser_action": {
+  "permissions": ["activeTab", "storage", "tabs", "webNavigation", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
     "default_popup": "popup/popup.html",
     "default_title": "Zen Internet",
     "default_icon": {
@@ -32,24 +25,28 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content-script.js"],
+      "js": ["shared/polyfill.js", "content-script.js"],
       "run_at": "document_start",
       "all_frames": false
     }
   ],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": true
+    "service_worker": "background-wrapper.js"
   },
   "web_accessible_resources": [
-    "theme.css",
-    "data-viewer/data-viewer.html",
-    "data-viewer/data-viewer.js",
-    "data-viewer/data-viewer.css",
-    "popup/welcome.css",
-    "popup/welcome.js",
-    "shared/*",
-    "assets/images/*"
+    {
+      "resources": [
+        "theme.css",
+        "data-viewer/data-viewer.html",
+        "data-viewer/data-viewer.js",
+        "data-viewer/data-viewer.css",
+        "popup/welcome.css",
+        "popup/welcome.js",
+        "shared/*",
+        "assets/images/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
   ],
   "commands": {
     "toggle-current-site": {
