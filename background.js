@@ -1021,6 +1021,26 @@ browser.commands.onCommand.addListener(async (command) => {
         await browser.storage.local.set({ [SKIP_THEMING_KEY]: skipList });
         changed = true;
       }
+    } else if (command === "toggle-fallback-background") {
+      const activeTabs = await browser.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      if (activeTabs.length > 0 && activeTabs[0].url?.startsWith("http")) {
+        const hostname = normalizeHostname(new URL(activeTabs[0].url).hostname);
+        const data = await browser.storage.local.get(FALLBACK_BACKGROUND_KEY);
+        const fallbackList = data[FALLBACK_BACKGROUND_KEY] || [];
+        const index = fallbackList.indexOf(hostname);
+
+        if (index === -1) {
+          fallbackList.push(hostname);
+        } else {
+          fallbackList.splice(index, 1);
+        }
+
+        await browser.storage.local.set({ [FALLBACK_BACKGROUND_KEY]: fallbackList });
+        changed = true;
+      }
     }
 
     if (changed) {
@@ -1043,6 +1063,12 @@ browser.commands.onCommand.addListener(async (command) => {
           const hostname = normalizeHostname(new URL(activeTabs[0].url).hostname);
           isEnabled = !skipList.includes(hostname);
           text = "Site Styling";
+        } else if (command === "toggle-fallback-background") {
+          const data = await browser.storage.local.get(FALLBACK_BACKGROUND_KEY);
+          const fallbackList = data[FALLBACK_BACKGROUND_KEY] || [];
+          const hostname = normalizeHostname(new URL(activeTabs[0].url).hostname);
+          isEnabled = fallbackList.includes(hostname);
+          text = "Fallback Background";
         }
         browser.tabs.sendMessage(activeTabs[0].id, { action: "showToast", text, isEnabled }).catch(() => {});
       }

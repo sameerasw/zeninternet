@@ -66,6 +66,12 @@
         "default": "Alt+Shift+O"
       },
       "description": "Toggle Zen Internet global transparency"
+    },
+    "toggle-fallback-background": {
+      "suggested_key": {
+        "default": "Alt+Shift+B"
+      },
+      "description": "Toggle fallback background for the current website"
     }
   }
 }
