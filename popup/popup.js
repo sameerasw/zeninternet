@@ -371,6 +371,7 @@ new (class ExtensionPopup {
     this.globalSettings.autoUpdate = this.autoUpdateSwitch.checked;
     this.globalSettings.forceStyling = this.forceStylingSwitch.checked;
     this.globalSettings.whitelistStyleMode = this.whitelistStylingModeSwitch.checked;
+    this.globalSettings.whitelistMode = this.whitelistModeSwitch.checked;
 
     const updateObj = { [this.BROWSER_STORAGE_KEY]: this.globalSettings };
 
