@@ -19,13 +19,18 @@ const ICON_OFF = {
   96: "assets/images/logo-off_96.png",
 };
 
+const isFirefox = typeof browser !== "undefined" && typeof browser.runtime !== "undefined" && (
+  (typeof browser.runtime.getBrowserInfo === "function") ||
+  (typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("firefox"))
+);
+
 const DEFAULT_SETTINGS = {
   enableStyling: true,
   autoUpdate: true,
   forceStyling: false,
   whitelistMode: false,
   whitelistStyleMode: false,
-  disableTransparency: false,
+  disableTransparency: !isFirefox,
   disableHover: false,
   disableFooter: false,
   disableDarkReader: false,
