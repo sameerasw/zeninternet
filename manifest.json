@@ -31,7 +31,8 @@
     }
   ],
   "background": {
-    "service_worker": "background-wrapper.js"
+    "service_worker": "background-wrapper.js",
+    "scripts": ["shared/polyfill.js", "background.js"]
   },
   "web_accessible_resources": [
     {
