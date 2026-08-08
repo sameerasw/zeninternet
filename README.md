@@ -14,11 +14,11 @@ A prettier Internet in Zen and Firefox.
 </p>
 <br>
 
-![CleanShot 2025-05-14 at 3  05 47@2x](https://github.com/user-attachments/assets/0f46a0b2-8857-4c54-98ca-8503f5fb933c)
-
-![CleanShot 2025-05-14 at 3  06 09@2x](https://github.com/user-attachments/assets/be7a8079-43a5-40f4-973c-fa2632d0fc25)
-
-<img width="1305" alt="image" src="https://github.com/user-attachments/assets/3086e330-df6e-4164-b4cd-ae102ebe7a4f" />
+<p align="center">
+    <img width="27%" alt="image" src="https://github.com/user-attachments/assets/0f46a0b2-8857-4c54-98ca-8503f5fb933c" />
+    <img width="27%" alt="image" src="https://github.com/user-attachments/assets/be7a8079-43a5-40f4-973c-fa2632d0fc25" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/3086e330-df6e-4164-b4cd-ae102ebe7a4f" />
+</p>
 
 ## [Guide](https://www.sameerasw.com/zen)
 
