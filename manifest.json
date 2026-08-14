@@ -28,6 +28,12 @@
       "js": ["shared/polyfill.js", "content-script.js"],
       "run_at": "document_start",
       "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["background-layer.js"],
+      "run_at": "document_start",
+      "all_frames": false
     }
   ],
   "background": {

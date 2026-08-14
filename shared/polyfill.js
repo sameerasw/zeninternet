@@ -41,6 +41,7 @@ if (typeof root.browser === "undefined" && typeof root.chrome !== "undefined") {
             local: {
                 get: wrapPromise(c.storage?.local?.get, c.storage?.local),
                 set: wrapPromise(c.storage?.local?.set, c.storage?.local),
+                remove: wrapPromise(c.storage?.local?.remove, c.storage?.local),
                 clear: wrapPromise(c.storage?.local?.clear, c.storage?.local),
             },
             onChanged: wrapEvent(c.storage?.onChanged),

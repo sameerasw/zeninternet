@@ -4,6 +4,7 @@ let SKIP_THEMING_KEY = "skipThemingList";
 let FALLBACK_BACKGROUND_KEY = "fallbackBackgroundList";
 let STYLES_MAPPING_KEY = "stylesMapping";
 const USER_STYLES_MAPPING_KEY = "userStylesMapping";
+const BG_DATA_KEY = "backgroundImageData";
 
 const isFirefox = typeof browser !== "undefined" && typeof browser.runtime !== "undefined" && (
   (typeof browser.runtime.getBrowserInfo === "function") ||
@@ -106,6 +107,8 @@ new (class ExtensionPopup {
   fallbackBackgroundList = [];
   hasLoadedFeaturesOnce = false;
   isInternalUpdate = false;
+  wallpaperInput = $("wallpaper-file");
+  clearWallpaperButton = $("clear-wallpaper");
 
   constructor() {
     log("Initializing popup class...");
@@ -124,6 +127,8 @@ new (class ExtensionPopup {
     });
 
     this.checkWelcomeScreen();
+    this.wallpaperInput.addEventListener("change", this.saveWallpaper.bind(this));
+    this.clearWallpaperButton.addEventListener("click", this.clearWallpaper.bind(this));
 
     this.refetchCSSButton.addEventListener("click", this.refetchCSS.bind(this));
     this.refetchCSSButton.addEventListener(
@@ -1420,6 +1425,21 @@ new (class ExtensionPopup {
   async displayAddonVersion() {
     const manifest = browser.runtime.getManifest();
     $("addon-version").textContent = `v${manifest.version}`;
+  }
+
+  saveWallpaper() {
+    const file = this.wallpaperInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      browser.storage.local.set({ [BG_DATA_KEY]: reader.result }).catch(() => {});
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearWallpaper() {
+    this.wallpaperInput.value = "";
+    browser.storage.local.remove(BG_DATA_KEY).catch(() => {});
   }
 
   /**
