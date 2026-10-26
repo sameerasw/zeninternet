@@ -619,6 +619,11 @@ body {
   border-color: var(--accent-color);
 }
 
+.language-select {
+  min-width: 240px;
+  cursor: pointer;
+}
+
 .repository-url-buttons {
   display: flex;
   gap: 12px;

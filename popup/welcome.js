@@ -1,3 +1,6 @@
+const i18nT = (key, substitutions) =>
+  window.ZenI18n.t(key, substitutions);
+
 class WelcomeScreen {
   /**
    * Initializes the welcome screen and shows the first step.
@@ -31,93 +34,93 @@ class WelcomeScreen {
         </div>
 
         <div class="welcome-step step-welcome active" data-step="1">
-          <img src="../assets/images/logo.png" alt="Zen Internet Logo" class="welcome-logo">
+          <img src="../assets/images/logo.png" alt="${i18nT("logoAlt")}" class="welcome-logo">
           <h1 class="welcome-title">Zen Internet</h1>
-          <p class="welcome-subtitle">Welcome to a cleaner, more elegant internet experience!</p>
+          <p class="welcome-subtitle">${i18nT("welcomeSubtitle")}</p>
           <div class="welcome-actions">
             <button class="welcome-button primary" id="setup-start">
               <i class="fas fa-arrow-right"></i>
-              Setup
+              ${i18nT("welcomeSetup")}
             </button>
           </div>
         </div>
 
         <div class="welcome-step step-disclaimer" data-step="2">
-          <h2 class="disclaimer-title">Important Disclaimer</h2>
+          <h2 class="disclaimer-title">${i18nT("welcomeDisclaimerTitle")}</h2>
           <div class="disclaimer-content">
             <div class="disclaimer-highlight">
-              <p><strong>⚠️ This is a third party modification.<br/> </strong> If you encounter any issues regarding transparency or website colors, <br/><strong>DO NOT</strong> report issues to the official browser repository or issue tracker.<br/>Instead use the built-in issue/bug report feature in this addon or report it directly to the developer.</p>
+              ${i18nT("welcomeDisclaimerHighlight")}
             </div>
 
-            <p><strong>Some common issues you may experience are:</strong></p>
+            <p><strong>${i18nT("welcomeDisclaimerIssuesIntro")}</strong></p>
             <ol class="disclaimer-list">
-              <li>White background</li>
-              <li>Unreadable text</li>
-              <li>No transparency</li>
-              <li>No blur</li>
-              <li>And many others</li>
+              <li>${i18nT("welcomeDisclaimerIssueWhiteBackground")}</li>
+              <li>${i18nT("welcomeDisclaimerIssueUnreadableText")}</li>
+              <li>${i18nT("welcomeDisclaimerIssueNoTransparency")}</li>
+              <li>${i18nT("welcomeDisclaimerIssueNoBlur")}</li>
+              <li>${i18nT("welcomeDisclaimerIssueManyOthers")}</li>
             </ol>
 
             <div class="disclaimer-instructions">
-              <p><strong>📖 Before reporting issues:</strong></p>
-              <p>First check the <strong>FAQ</strong> in the addon popup page at the bottom. <br/>If that does not solve your problem, then reach out to me through the proper channels.</p>
+              <p><strong>${i18nT("welcomeDisclaimerBeforeReporting")}</strong></p>
+              <p>${i18nT("welcomeDisclaimerFaqHint")}</p>
             </div>
 
             <div class="disclaimer-question">
-              <p><strong>Do you understand this disclaimer and agree to comply with the given options and <br/>not to bother the browser development and other developers?</strong></p>
+              <p>${i18nT("welcomeDisclaimerQuestion")}</p>
             </div>
 
           <div class="disclaimer-checkbox">
             <input type="checkbox" id="understand-checkbox">
-            <label for="understand-checkbox">Yes, <br/>I understand and agree</label>
+            <label for="understand-checkbox">${i18nT("welcomeDisclaimerAgree")}</label>
           </div></div>
           <div class="welcome-actions">
             <button class="welcome-button secondary" id="disclaimer-back">
               <i class="fas fa-arrow-left"></i>
-              Back
+              ${i18nT("commonBack")}
             </button>
             <button class="welcome-button primary" id="disclaimer-next" disabled>
-              Next
+              ${i18nT("commonNext")}
               <i class="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>
 
         <div class="welcome-step step-theme-mode" data-step="3">
-          <h2 class="theme-mode-title">Choose Your Theming Preference</h2>
-          <p class="theme-mode-description">How would you like themes to be applied?</p>
+          <h2 class="theme-mode-title">${i18nT("welcomeThemeModeTitle")}</h2>
+          <p class="theme-mode-description">${i18nT("welcomeThemeModeDescription")}</p>
 
           <div class="theme-mode-options">
             <div class="theme-mode-option" data-mode="blacklist">
-              <h4>Enable themes by default</h4>
-              <p>Themes will be applied to all websites automatically. You can skip websites if needed.</p>
+              <h4>${i18nT("welcomeThemeModeBlacklistTitle")}</h4>
+              <p>${i18nT("welcomeThemeModeBlacklistDescription")}</p>
             </div>
             <div class="theme-mode-option" data-mode="whitelist">
-              <h4>Only apply to websites I choose</h4>
-              <p>Themes will only be applied to websites you specifically select in the addon.</p>
+              <h4>${i18nT("welcomeThemeModeWhitelistTitle")}</h4>
+              <p>${i18nT("welcomeThemeModeWhitelistDescription")}</p>
             </div>
           </div>
 
           <div class="welcome-actions">
             <button class="welcome-button secondary" id="theme-mode-back">
               <i class="fas fa-arrow-left"></i>
-              Back
+              ${i18nT("commonBack")}
             </button>
             <button class="welcome-button primary" id="theme-mode-next" disabled>
-              Next
+              ${i18nT("commonNext")}
               <i class="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>
 
         <div class="welcome-step step-fetch-styles" data-step="4">
-          <h2 class="fetch-styles-title">Download Latest Themes</h2>
-          <p class="fetch-styles-description">Click below to fetch the latest themes from our repository.</p>
+          <h2 class="fetch-styles-title">${i18nT("welcomeFetchTitle")}</h2>
+          <p class="fetch-styles-description">${i18nT("welcomeFetchDescription")}</p>
 
           <div class="fetch-styles-actions">
             <button class="welcome-button primary fetch-styles-button" id="welcome-fetch-styles">
               <i class="fas fa-download"></i>
-              Fetch Latest Styles
+              ${i18nT("welcomeFetchStyles")}
             </button>
 
             <div class="auto-update-container">
@@ -125,7 +128,7 @@ class WelcomeScreen {
                 <input type="checkbox" id="welcome-auto-update" checked>
                 <span class="slider round"></span>
               </label>
-              <span class="toggle-label">Auto Update Styles (2h)</span>
+              <span class="toggle-label">${i18nT("welcomeAutoUpdate2h")}</span>
             </div>
           </div>
 
@@ -134,10 +137,10 @@ class WelcomeScreen {
           <div class="welcome-actions" style="margin-top: 32px;">
             <button class="welcome-button secondary" id="fetch-styles-back">
               <i class="fas fa-arrow-left"></i>
-              Back
+              ${i18nT("commonBack")}
             </button>
             <button class="welcome-button primary" id="fetch-styles-next" disabled>
-              Next
+              ${i18nT("commonNext")}
               <i class="fas fa-arrow-right"></i>
             </button>
           </div>
@@ -147,16 +150,15 @@ class WelcomeScreen {
           <div class="complete-icon">
             <i class="fas fa-check-circle"></i>
           </div>
-          <h2 class="complete-title">All Done!</h2>
+          <h2 class="complete-title">${i18nT("welcomeCompleteTitle")}</h2>
           <p class="complete-description">
-            Zen Internet extension is now ready to use!<br>
-            Read FAQ if you find anything confusing or reach out for help.
+            ${i18nT("welcomeCompleteDescription")}
           </p>
 
           <div class="welcome-actions">
             <button class="welcome-button primary" id="welcome-close">
               <i class="fas fa-check"></i>
-              Start Using Zen Internet
+              ${i18nT("welcomeStartUsing")}
             </button>
           </div>
         </div>
@@ -318,11 +320,10 @@ class WelcomeScreen {
     const nextButton = document.getElementById("fetch-styles-next");
 
     fetchButton.disabled = true;
-    fetchButton.innerHTML =
-      '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+    fetchButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${i18nT("welcomeFetching")}`;
     fetchStatus.style.display = "block";
     fetchStatus.className = "fetch-status loading";
-    fetchStatus.textContent = "Downloading latest themes...";
+    fetchStatus.textContent = i18nT("welcomeDownloading");
 
     try {
       const DEFAULT_REPOSITORY_URL =
@@ -363,10 +364,11 @@ class WelcomeScreen {
       await browser.storage.local.set({ [BROWSER_STORAGE_KEY]: settings });
 
       fetchStatus.className = "fetch-status success";
-      fetchStatus.textContent = `Successfully downloaded ${
+      fetchStatus.textContent = i18nT(
+        "welcomeFetchSuccess",
         Object.keys(styles.website || {}).length
-      } website themes!`;
-      fetchButton.innerHTML = '<i class="fas fa-check"></i> Download Complete';
+      );
+      fetchButton.innerHTML = `<i class="fas fa-check"></i> ${i18nT("welcomeDownloadComplete")}`;
       nextButton.disabled = false;
 
       if (settings.autoUpdate) {
@@ -378,9 +380,8 @@ class WelcomeScreen {
     } catch (error) {
       console.error("Error fetching styles:", error);
       fetchStatus.className = "fetch-status error";
-      fetchStatus.textContent = `Failed to download themes: ${error.message}`;
-      fetchButton.innerHTML =
-        '<i class="fas fa-exclamation-triangle"></i> Retry Download';
+      fetchStatus.textContent = i18nT("welcomeFetchFailed", error.message);
+      fetchButton.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${i18nT("welcomeRetryDownload")}`;
       fetchButton.disabled = false;
     }
   }

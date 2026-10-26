@@ -1,0 +1,776 @@
+{
+  "extensionName": {
+    "message": "Zen Internet",
+    "description": "Extension name shown in the browser and stores."
+  },
+  "extensionDescription": {
+    "message": "沉浸、简洁、透明的互联网。了解更多：sameerasw.com/zen",
+    "description": "Extension description shown in the browser and stores."
+  },
+  "commandToggleCurrentSite": {
+    "message": "切换当前网站的 Zen Internet",
+    "description": "Keyboard shortcut description."
+  },
+  "commandToggleGlobalStyling": {
+    "message": "切换 Zen Internet 全局样式",
+    "description": "Keyboard shortcut description."
+  },
+  "commandToggleGlobalTransparency": {
+    "message": "切换 Zen Internet 全局透明效果",
+    "description": "Keyboard shortcut description."
+  },
+  "commandToggleFallbackBackground": {
+    "message": "切换当前网站的兜底背景",
+    "description": "Keyboard shortcut description."
+  },
+  "commonOn": {
+    "message": "开"
+  },
+  "commonOff": {
+    "message": "关"
+  },
+  "commonCancel": {
+    "message": "取消"
+  },
+  "commonClose": {
+    "message": "关闭"
+  },
+  "commonBack": {
+    "message": "上一步"
+  },
+  "commonNext": {
+    "message": "下一步"
+  },
+  "commonNo": {
+    "message": "否"
+  },
+  "commonYes": {
+    "message": "是"
+  },
+  "commonUnset": {
+    "message": "未设置"
+  },
+  "commonBy": {
+    "message": "作者"
+  },
+  "commonFeatures": {
+    "message": "功能"
+  },
+  "logoAlt": {
+    "message": "Zen Internet 标志"
+  },
+  "popupHowToUseTitle": {
+    "message": "如何使用？"
+  },
+  "popupWhatsNewTitle": {
+    "message": "更新内容"
+  },
+  "popupReload": {
+    "message": "重新加载页面"
+  },
+  "popupReloadTitle": {
+    "message": "重新加载页面以应用更改。移除样式后通常需要重新加载。"
+  },
+  "popupSkipStylingForSite": {
+    "message": "此站点跳过样式"
+  },
+  "popupSkipStylingHelp": {
+    "message": "黑名单模式：启用后跳过以下功能。白名单模式：启用后包含以下功能"
+  },
+  "popupSkipForcingForSite": {
+    "message": "此站点跳过强制样式"
+  },
+  "popupSkipForcingHelp": {
+    "message": "黑名单模式：启用后跳过对此网站强制应用主题。白名单模式：启用后对此网站强制应用主题"
+  },
+  "popupGlobalStyling": {
+    "message": "全局样式"
+  },
+  "popupGlobalStylingHelp": {
+    "message": "所有 CSS 样式的总开关"
+  },
+  "popupBlacklistMode": {
+    "message": "黑名单模式"
+  },
+  "popupWhitelistMode": {
+    "message": "白名单模式"
+  },
+  "popupBlacklistModeHelp": {
+    "message": "黑名单模式：应用到所有网站，列表中的除外。白名单模式：仅应用到列表中的网站。"
+  },
+  "popupForceStylingSettings": {
+    "message": "强制样式设置"
+  },
+  "popupForceStyling": {
+    "message": "强制样式"
+  },
+  "popupForceStylingHelp": {
+    "message": "为没有专属预设主题和功能的网站应用基础样式。"
+  },
+  "popupForcedBlacklistMode": {
+    "message": "强制样式黑名单模式"
+  },
+  "popupForcedWhitelistMode": {
+    "message": "强制样式白名单模式"
+  },
+  "popupForceModeHelp": {
+    "message": "黑名单模式：对所有网站应用强制样式，列表中的除外。白名单模式：仅对列表中的网站应用强制样式。"
+  },
+  "popupFallbackBackground": {
+    "message": "兜底背景"
+  },
+  "popupFallbackBackgroundHelp": {
+    "message": "为原本没有正确背景色的网站添加纯白背景；跳过该网站后它仍会保持透明。"
+  },
+  "popupEnableForSite": {
+    "message": "为此站点启用"
+  },
+  "popupEnableForcingForSite": {
+    "message": "为此站点启用强制样式"
+  },
+  "popupRefetchStyles": {
+    "message": "重新获取最新样式"
+  },
+  "popupRefetchStylesTitle": {
+    "message": "从仓库获取最新样式"
+  },
+  "popupAutoUpdateStyles": {
+    "message": "自动更新样式"
+  },
+  "popupAutoUpdateHelp": {
+    "message": "每 2 小时自动检查并下载新样式，无需手动操作即可保持主题最新。"
+  },
+  "popupAdvancedSettings": {
+    "message": "高级设置"
+  },
+  "popupAdvancedSettingsTitle": {
+    "message": "在新标签页中打开高级设置"
+  },
+  "faqTitle": {
+    "message": "常见问题"
+  },
+  "faqTransparencyQuestion": {
+    "message": "为什么透明效果不生效？"
+  },
+  "faqTransparencyAnswer": {
+    "message": "<p><strong>系统兼容性：</strong>只有部分操作系统支持透明效果：</p><ul><li>macOS（原生支持）</li><li>Windows 11（原生 Mica 和亚克力效果）</li><li>使用 Mica for Everyone 或 DWM blur glass 等修改工具的 Windows 11</li><li>使用 DWM blur glass 的 Windows 10<strong>（效果不稳定）</strong></li><li>KDE Wayland 配合 Kvin blur</li><li>GTK GNOME 桌面环境（配合 blur my shell，实验性）</li></ul><p><strong>常见修复方法：</strong></p><ul><li>检查系统是否已开启透明效果</li><li>关闭节能模式</li><li>关闭 Windows 的<strong>“在窗口边框上显示强调色”</strong></li><li>禁用可能冲突的修改，如 better letterboxing 或自定义主题</li><li>调整 Zen 主题的对比度滑块以获得更明显的透明效果</li><li>尝试重新打开浏览器</li></ul>"
+  },
+  "faqSiteFeaturesQuestion": {
+    "message": "网站专属功能是如何工作的？"
+  },
+  "faqSiteFeaturesAnswer": {
+    "message": "<p>每个网站都可以拥有自定义功能，例如透明效果、悬停效果和布局调整。</p><ul><li>打开任意网站并查看扩展弹窗</li><li>你会看到该网站可用的功能</li><li>按需打开或关闭各项功能</li><li>禁用功能后可能需要重新加载页面</li><li>如需全局覆盖，请使用高级设置中的“全局功能控制”</li></ul>"
+  },
+  "faqTextUnreadableQuestion": {
+    "message": "文字难以辨认"
+  },
+  "faqTextUnreadableAnswer": {
+    "message": "<p>当网站的文字颜色在透明背景上过浅或过深时，就可能出现这种情况。</p><p>如果你所在的网站没有专门的深色主题，可以尝试使用 <strong>Dark Reader 扩展</strong>来获得更好的对比度。</p><ul><li>手动切换网站的深色/浅色主题</li><li>尝试调整 Zen 主题的对比度滑块</li><li>如有需要，为该网站禁用透明效果</li><li>反馈问题以请求专门的主题</li></ul>"
+  },
+  "faqModesQuestion": {
+    "message": "黑名单模式和白名单模式有什么区别？"
+  },
+  "faqModesAnswer": {
+    "message": "<p>这些模式决定内置主题、强制主题及功能的应用方式：</p><ul><li><strong>黑名单模式：</strong>应用到所有网站，但排除你手动跳过的网站</li><li><strong>白名单模式：</strong>仅应用到你明确选择的网站</li><p>通常建议使用白名单模式，以获得更好的性能和控制力，但每个网站都需要手动设置。</p></ul>"
+  },
+  "faqForceThemingQuestion": {
+    "message": "什么是强制主题？"
+  },
+  "faqForceThemingAnswer": {
+    "message": "<p>强制主题会为没有专属主题的网站应用基础透明效果：</p><ul><li>可与黑名单或白名单模式配合使用</li><li>配合 Dark Reader 扩展支持深色主题，获得更好的透明效果</li><li>在复杂网站上可能出现一些视觉问题</li></ul><p><strong>兜底背景：</strong>当透明效果不生效时，可对没有默认背景色的网站使用此选项。如果跳过网站后它仍然透明，请启用此选项。</p>"
+  },
+  "faqRequestQuestion": {
+    "message": "如何请求主题或反馈问题？"
+  },
+  "faqRequestAnswer": {
+    "message": "<p>你可以直接在扩展中请求主题和报告问题：</p><ul><li>使用当前网站页面上的内置“请求主题”按钮</li><li>点击页脚的“问题?”反馈扩展本身的问题</li><li>欢迎在 GitHub 上贡献主题</li></ul><p><strong>不支持的网站：</strong>Mozilla 扩展商店、设置页面、新标签页、PDF 查看器及其他受限页面无法应用主题。</p>"
+  },
+  "developerMadeBy": {
+    "message": "由 sameerasw.com 制作"
+  },
+  "developerSubtitle": {
+    "message": "来自 🇱🇰 的 ❤️"
+  },
+  "developerAlsoCheckOut": {
+    "message": "也来看看"
+  },
+  "projectWebsite": {
+    "message": "网站"
+  },
+  "footerStyles": {
+    "message": "样式"
+  },
+  "footerStylesTitle": {
+    "message": "访问项目样式仓库"
+  },
+  "footerBug": {
+    "message": "问题?"
+  },
+  "footerBugTitle": {
+    "message": "在扩展的 GitHub 仓库中反馈问题"
+  },
+  "requestTitle": {
+    "message": "主题请求"
+  },
+  "requestTriedForcingQuestion": {
+    "message": "尝试过强制应用主题吗？"
+  },
+  "requestTriedForcingHint": {
+    "message": "请为该网站启用强制样式，确认是否还需要专门的主题。"
+  },
+  "requestNeedsAccountQuestion": {
+    "message": "该网站需要登录账号吗？"
+  },
+  "requestNeedsAccountHint": {
+    "message": "如果我没有该网站的账号，可能需要等待其他人贡献主题。"
+  },
+  "requestSubmit": {
+    "message": "提交请求"
+  },
+  "requestChecking": {
+    "message": "正在检查…"
+  },
+  "requestExistingTitle": {
+    "message": "已找到现有请求"
+  },
+  "requestExistingDescription": {
+    "message": "已找到针对 $1 的现有主题请求"
+  },
+  "requestStateOpen": {
+    "message": "开放"
+  },
+  "requestStateClosed": {
+    "message": "已关闭"
+  },
+  "requestCreated": {
+    "message": "创建于：$1"
+  },
+  "requestComments": {
+    "message": "$1 条评论"
+  },
+  "requestAssignedTo": {
+    "message": "指派给 $1"
+  },
+  "requestDescription": {
+    "message": "描述："
+  },
+  "requestViewExisting": {
+    "message": "查看现有请求"
+  },
+  "requestSubmitAnyway": {
+    "message": "仍然提交"
+  },
+  "requestThemeFor": {
+    "message": "为 $1 请求主题"
+  },
+  "requestFeatureFallback": {
+    "message": "功能"
+  },
+  "bugTitle": {
+    "message": "问题反馈"
+  },
+  "bugCategoryQuestion": {
+    "message": "你的问题/故障与什么有关？"
+  },
+  "bugCategoryHint": {
+    "message": "请选择最符合你问题的类别："
+  },
+  "bugCategoryTheme": {
+    "message": "当前网站的主题"
+  },
+  "bugCategoryExtension": {
+    "message": "扩展程序本身的问题"
+  },
+  "bugCategoryTransparency": {
+    "message": "浏览器透明效果问题"
+  },
+  "bugCategoryFeature": {
+    "message": "功能建议"
+  },
+  "bugCategoryOther": {
+    "message": "其他…"
+  },
+  "bugCreating": {
+    "message": "正在创建…"
+  },
+  "bugFailed": {
+    "message": "创建问题反馈失败，请重试。"
+  },
+  "bugSubmit": {
+    "message": "提交反馈"
+  },
+  "popupFeatureToggleToast": {
+    "message": "$1：$2"
+  },
+  "popupToastGlobalStyling": {
+    "message": "全局样式：$1"
+  },
+  "popupToastForcedStyling": {
+    "message": "强制样式：$1"
+  },
+  "popupToastSiteStyling": {
+    "message": "站点样式：$1"
+  },
+  "popupMappedFrom": {
+    "message": "映射自 $1"
+  },
+  "popupFetchFirst": {
+    "message": "请先使用“重新获取最新样式”按钮获取样式"
+  },
+  "popupNoSpecificTheme": {
+    "message": "未找到此网站的专属主题，正在使用默认样式。"
+  },
+  "popupMovableLiveChat": {
+    "message": "可拖动实时聊天"
+  },
+  "popupMovableLiveChatTooltip": {
+    "message": "在影院模式下让实时聊天窗口可拖动"
+  },
+  "popupOverridden": {
+    "message": "[已被覆盖]"
+  },
+  "popupErrorLoadingFeatures": {
+    "message": "加载功能时出错。"
+  },
+  "popupFetching": {
+    "message": "正在获取…"
+  },
+  "popupFetchFailed": {
+    "message": "获取样式失败（状态码：$1）"
+  },
+  "popupDone": {
+    "message": "完成！"
+  },
+  "popupError": {
+    "message": "出错！"
+  },
+  "popupFetchErrorAlert": {
+    "message": "获取样式时出错：$1"
+  },
+  "popupLastFetched": {
+    "message": "上次获取：$1"
+  },
+  "popupLastFetchedNever": {
+    "message": "上次获取：从未"
+  },
+  "popupConfirmClearSettings": {
+    "message": "确定要清除所有设置吗？"
+  },
+  "popupModeIndicatorWhitelist": {
+    "message": "白名单模式（仅应用到列表中的网站）"
+  },
+  "popupModeIndicatorBlacklist": {
+    "message": "黑名单模式（应用到列表之外的所有网站）"
+  },
+  "welcomeSubtitle": {
+    "message": "欢迎体验更干净、更优雅的互联网！"
+  },
+  "welcomeSetup": {
+    "message": "开始设置"
+  },
+  "welcomeDisclaimerTitle": {
+    "message": "重要声明"
+  },
+  "welcomeDisclaimerHighlight": {
+    "message": "<p><strong>⚠️ 这是第三方修改。<br/> </strong>如果你遇到任何与透明效果或网站配色相关的问题，<br/><strong>请勿</strong>向浏览器官方仓库或问题追踪器反馈。<br/>请使用本扩展内置的问题反馈功能，或直接反馈给开发者。</p>"
+  },
+  "welcomeDisclaimerIssuesIntro": {
+    "message": "你可能会遇到的常见问题包括："
+  },
+  "welcomeDisclaimerIssueWhiteBackground": {
+    "message": "白色背景"
+  },
+  "welcomeDisclaimerIssueUnreadableText": {
+    "message": "文字难以辨认"
+  },
+  "welcomeDisclaimerIssueNoTransparency": {
+    "message": "没有透明效果"
+  },
+  "welcomeDisclaimerIssueNoBlur": {
+    "message": "没有模糊效果"
+  },
+  "welcomeDisclaimerIssueManyOthers": {
+    "message": "以及许多其他问题"
+  },
+  "welcomeDisclaimerBeforeReporting": {
+    "message": "📖 反馈问题之前："
+  },
+  "welcomeDisclaimerFaqHint": {
+    "message": "请先查看扩展弹窗底部的<strong>常见问题</strong>。<br/>如果仍未解决你的问题，请通过正确的渠道联系我。"
+  },
+  "welcomeDisclaimerQuestion": {
+    "message": "<strong>你是否已理解本声明，并同意遵守上述约定，<br/>不去打扰浏览器开发者及其他开发者？</strong>"
+  },
+  "welcomeDisclaimerAgree": {
+    "message": "是的，<br/>我已理解并同意"
+  },
+  "welcomeThemeModeTitle": {
+    "message": "选择主题应用方式"
+  },
+  "welcomeThemeModeDescription": {
+    "message": "你希望如何应用主题？"
+  },
+  "welcomeThemeModeBlacklistTitle": {
+    "message": "默认启用主题"
+  },
+  "welcomeThemeModeBlacklistDescription": {
+    "message": "主题会自动应用到所有网站。如有需要，你可以跳过某些网站。"
+  },
+  "welcomeThemeModeWhitelistTitle": {
+    "message": "仅应用到我选择的网站"
+  },
+  "welcomeThemeModeWhitelistDescription": {
+    "message": "主题只会应用到你在此扩展中明确选择的网站。"
+  },
+  "welcomeFetchTitle": {
+    "message": "下载最新主题"
+  },
+  "welcomeFetchDescription": {
+    "message": "点击下方按钮，从我们的仓库获取最新主题。"
+  },
+  "welcomeFetchStyles": {
+    "message": "获取最新样式"
+  },
+  "welcomeAutoUpdate2h": {
+    "message": "自动更新样式（每 2 小时）"
+  },
+  "welcomeCompleteTitle": {
+    "message": "全部完成！"
+  },
+  "welcomeCompleteDescription": {
+    "message": "Zen Internet 扩展已准备就绪！<br>如有疑问，请阅读常见问题或寻求帮助。"
+  },
+  "welcomeStartUsing": {
+    "message": "开始使用 Zen Internet"
+  },
+  "welcomeFetching": {
+    "message": "正在获取…"
+  },
+  "welcomeDownloading": {
+    "message": "正在下载最新主题…"
+  },
+  "welcomeFetchSuccess": {
+    "message": "已成功下载 $1 个网站主题！"
+  },
+  "welcomeDownloadComplete": {
+    "message": "下载完成"
+  },
+  "welcomeFetchFailed": {
+    "message": "主题下载失败：$1"
+  },
+  "welcomeRetryDownload": {
+    "message": "重试下载"
+  },
+  "settingsPageTitle": {
+    "message": "ZenInternet - 高级设置"
+  },
+  "settingsAppTitle": {
+    "message": "Zen Internet 设置"
+  },
+  "settingsBackupTitle": {
+    "message": "备份与恢复 ✨"
+  },
+  "settingsBackupDescription": {
+    "message": "将设置导出为 JSON 文件，或从之前导出的文件导入设置。<br><strong>注意：</strong>备份包含全局设置、网站列表和各网站的功能开关，但不包含实际样式数据（样式会重新获取）。"
+  },
+  "settingsExport": {
+    "message": "导出设置"
+  },
+  "settingsImport": {
+    "message": "导入设置"
+  },
+  "settingsGlobalControlsTitle": {
+    "message": "全局功能控制 ✨"
+  },
+  "settingsDisableTransparency": {
+    "message": "禁用透明效果"
+  },
+  "settingsDisableHover": {
+    "message": "禁用悬停效果"
+  },
+  "settingsKeepFooters": {
+    "message": "保留页脚"
+  },
+  "settingsDisableDarkReader": {
+    "message": "禁用 Dark Reader 支持"
+  },
+  "settingsGlobalControlsDescription": {
+    "message": "这些设置控制所有网站上的特定功能类型。更改仅对新建或重新加载的标签页生效。"
+  },
+  "settingsEnableLogs": {
+    "message": "启用日志"
+  },
+  "settingsGlobalSettingsTitle": {
+    "message": "全局设置"
+  },
+  "settingsSkipListTitle": {
+    "message": "跳过/启用列表"
+  },
+  "settingsRepositoryTitle": {
+    "message": "自定义样式仓库 ✨"
+  },
+  "settingsRepositoryDescription": {
+    "message": "更改获取样式所用的 URL。如果你想使用其他样式仓库，可在此修改。<br><strong>注意：</strong>更改 URL 后，建议清除现有样式数据以获得最佳效果。"
+  },
+  "settingsRepositoryPlaceholder": {
+    "message": "输入仓库 URL…"
+  },
+  "settingsSetUrl": {
+    "message": "设置 URL"
+  },
+  "settingsResetDefault": {
+    "message": "恢复默认"
+  },
+  "settingsDangerZone": {
+    "message": "危险区域"
+  },
+  "settingsDeleteAll": {
+    "message": "删除所有数据"
+  },
+  "settingsWebsitesTitle": {
+    "message": "网站与 CSS"
+  },
+  "settingsMappingsTitle": {
+    "message": "样式映射 ✨"
+  },
+  "settingsCustomMappingInstructions": {
+    "message": "<strong>自定义映射：</strong>在下方添加你自己的网站到样式映射。<br><em>请<b>不要</b>在网站字段中包含 <b>https://</b> 或 <b>www</b>，只填写域名（例如 <b>example.com</b>）。</em>"
+  },
+  "settingsSourcePlaceholder": {
+    "message": "源样式（例如 github.com.css）"
+  },
+  "settingsTargetPlaceholder": {
+    "message": "目标站点（例如 gist.github.com）"
+  },
+  "settingsAddMapping": {
+    "message": "添加映射"
+  },
+  "settingsStylesRepository": {
+    "message": "样式仓库"
+  },
+  "settingsProjectRepository": {
+    "message": "项目仓库"
+  },
+  "settingsInterfaceLanguage": {
+    "message": "界面语言"
+  },
+  "settingsInterfaceLanguageDescription": {
+    "message": "选择扩展界面使用的语言。重新加载页面后生效。"
+  },
+  "settingsLanguageAuto": {
+    "message": "跟随浏览器语言"
+  },
+  "settingsConfirmDeleteAll": {
+    "message": "警告：这将删除扩展的所有数据，且无法撤销！\n\n确定要继续吗？"
+  },
+  "settingsRepoUrlEmpty": {
+    "message": "仓库 URL 不能为空"
+  },
+  "settingsInvalidUrl": {
+    "message": "URL 格式无效"
+  },
+  "settingsRepoUrlSaved": {
+    "message": "仓库 URL 保存成功"
+  },
+  "settingsConfirmClearForNewRepo": {
+    "message": "是否清除现有样式数据，以避免与新仓库冲突？"
+  },
+  "settingsErrorSavingUrl": {
+    "message": "保存 URL 失败：$1"
+  },
+  "settingsRepoUrlReset": {
+    "message": "仓库 URL 已恢复默认"
+  },
+  "settingsConfirmClearStyles": {
+    "message": "是否清除现有样式数据以避免冲突？"
+  },
+  "settingsErrorResettingUrl": {
+    "message": "重置 URL 失败：$1"
+  },
+  "settingsStylesCleared": {
+    "message": "样式数据已清除"
+  },
+  "settingsErrorClearingData": {
+    "message": "清除数据失败：$1"
+  },
+  "settingsDeleteSuccess": {
+    "message": "所有数据已删除，页面即将重新加载。"
+  },
+  "settingsDeleteError": {
+    "message": "删除数据时出错：$1"
+  },
+  "settingsSettingsExported": {
+    "message": "设置导出成功！"
+  },
+  "settingsExportFailed": {
+    "message": "导出失败：$1"
+  },
+  "settingsInvalidFile": {
+    "message": "设置文件格式无效"
+  },
+  "settingsImportConfirm": {
+    "message": "确定要从 $1 导入设置吗？这会覆盖当前设置。"
+  },
+  "settingsImportSuccess": {
+    "message": "设置导入成功！正在重新加载…"
+  },
+  "settingsImportCancelled": {
+    "message": "已取消导入"
+  },
+  "settingsImportFailed": {
+    "message": "导入失败：$1"
+  },
+  "settingsVersion": {
+    "message": "版本：$1"
+  },
+  "settingsTableSetting": {
+    "message": "设置项"
+  },
+  "settingsTableValue": {
+    "message": "值"
+  },
+  "settingsTableWebsite": {
+    "message": "网站"
+  },
+  "settingsTableAction": {
+    "message": "操作"
+  },
+  "settingsNever": {
+    "message": "从未"
+  },
+  "settingsListsOverview": {
+    "message": "网站列表概览"
+  },
+  "settingsForceModeLabel": {
+    "message": "强制样式模式："
+  },
+  "settingsGeneralModeLabel": {
+    "message": "常规样式模式："
+  },
+  "settingsModeOnlyListed": {
+    "message": "仅应用到列表中的网站"
+  },
+  "settingsModeAllExceptListed": {
+    "message": "应用到列表之外的所有网站"
+  },
+  "settingsClearAllLists": {
+    "message": "清除所有列表"
+  },
+  "settingsForceListTitle": {
+    "message": "强制样式列表"
+  },
+  "settingsForceListApplied": {
+    "message": "应用强制样式的网站"
+  },
+  "settingsForceListSkipped": {
+    "message": "不应用强制样式的网站"
+  },
+  "settingsRegularListTitle": {
+    "message": "常规样式列表"
+  },
+  "settingsRegularListApplied": {
+    "message": "应用常规样式的网站"
+  },
+  "settingsRegularListSkipped": {
+    "message": "不应用常规样式的网站"
+  },
+  "settingsFallbackListTitle": {
+    "message": "兜底背景列表"
+  },
+  "settingsFallbackListDescription": {
+    "message": "添加了默认背景、不使用透明效果的网站"
+  },
+  "settingsEmptyList": {
+    "message": "此列表中没有网站"
+  },
+  "settingsRemoveFromList": {
+    "message": "从列表中移除"
+  },
+  "settingsConfirmClearLists": {
+    "message": "确定要清除所有网站列表吗？"
+  },
+  "settingsErrorClearingLists": {
+    "message": "清除列表时出错：$1"
+  },
+  "settingsErrorOccurred": {
+    "message": "发生错误：$1"
+  },
+  "settingsNoWebsites": {
+    "message": "未找到网站。请先获取样式。"
+  },
+  "settingsSearchPlaceholder": {
+    "message": "搜索网站…"
+  },
+  "settingsExpandAll": {
+    "message": "全部展开"
+  },
+  "settingsCollapseAll": {
+    "message": "全部折叠"
+  },
+  "settingsFeatureCount": {
+    "message": "$1 项功能"
+  },
+  "settingsNoCustomMappings": {
+    "message": "尚未添加自定义映射。"
+  },
+  "settingsNoStyleMappings": {
+    "message": "未找到样式映射。"
+  },
+  "settingsMappedSites": {
+    "message": "已映射 $1 个网站"
+  },
+  "settingsCustomMapping": {
+    "message": "自定义映射"
+  },
+  "settingsEnabled": {
+    "message": "已启用"
+  },
+  "settingsDisabled": {
+    "message": "已禁用"
+  },
+  "settingEnableStyling": {
+    "message": "启用样式"
+  },
+  "settingAutoUpdate": {
+    "message": "自动更新"
+  },
+  "settingForceStyling": {
+    "message": "强制样式"
+  },
+  "settingWhitelistMode": {
+    "message": "白名单模式"
+  },
+  "settingWhitelistStyleMode": {
+    "message": "白名单样式模式"
+  },
+  "settingDisableTransparency": {
+    "message": "禁用透明效果"
+  },
+  "settingDisableHover": {
+    "message": "禁用悬停效果"
+  },
+  "settingDisableFooter": {
+    "message": "禁用页脚"
+  },
+  "settingDisableDarkReader": {
+    "message": "禁用 Dark Reader"
+  },
+  "settingEnableLogs": {
+    "message": "启用日志"
+  },
+  "settingLastFetchedTime": {
+    "message": "上次获取时间"
+  },
+  "settingWelcomeShown": {
+    "message": "已显示欢迎页"
+  },
+  "settingUiLanguage": {
+    "message": "界面语言"
+  },
+  "settingFallbackBackgroundList": {
+    "message": "兜底背景列表"
+  },
+  "settingMovableLiveChat": {
+    "message": "可拖动实时聊天"
+  }
+}

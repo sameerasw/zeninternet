@@ -22,6 +22,28 @@ A prettier Internet in Zen and Firefox.
 
 ## [Guide](https://www.sameerasw.com/zen)
 
+## Localization 🌐
+
+The extension UI is translated with the standard WebExtension `_locales` format.
+
+- English (`en`) is the base language and the source of truth for message keys.
+- Translations live in `_locales/<locale>/messages.json`.
+- `_locales/languages.json` lists the languages offered by the in-app selector
+  (**Advanced Settings → Interface Language**). The selector overrides the browser
+  language for the addon UI without changing the browser itself.
+
+### Add or improve a translation
+
+1. Copy `_locales/en/messages.json` to `_locales/<locale>/messages.json`, where `<locale>` is a
+   [WebExtension locale code](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/i18n/Locale)
+   such as `de`, `ja`, or `pt_BR`.
+2. Translate the `message` values. Keep every key and every `$1`–`$9` placeholder.
+3. Add the language to `_locales/languages.json`, e.g. `"de": { "name": "Deutsch" }`.
+4. Run `node tools/check-i18n.mjs` to verify that all locale catalogs define the same keys.
+5. Open the advanced settings page and switch **Interface Language** to preview the translation.
+
+Brand names (Zen Internet, Transparent Zen, etc.) and the GitHub issue templates intentionally stay in English.
+
 ## Bug Reporting 🐛
 
 Found a bug? Use the "Bug?" button in the extension popup for streamlined reporting! It automatically includes your extension settings and configuration data to help us debug faster.

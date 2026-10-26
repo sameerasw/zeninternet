@@ -1,0 +1,776 @@
+{
+  "extensionName": {
+    "message": "Zen Internet",
+    "description": "Extension name shown in the browser and stores."
+  },
+  "extensionDescription": {
+    "message": "Immersive, minimal and transparent internet. Learn more at sameerasw.com/zen",
+    "description": "Extension description shown in the browser and stores."
+  },
+  "commandToggleCurrentSite": {
+    "message": "Toggle Zen Internet for the current website",
+    "description": "Keyboard shortcut description."
+  },
+  "commandToggleGlobalStyling": {
+    "message": "Toggle Zen Internet global styling",
+    "description": "Keyboard shortcut description."
+  },
+  "commandToggleGlobalTransparency": {
+    "message": "Toggle Zen Internet global transparency",
+    "description": "Keyboard shortcut description."
+  },
+  "commandToggleFallbackBackground": {
+    "message": "Toggle fallback background for the current website",
+    "description": "Keyboard shortcut description."
+  },
+  "commonOn": {
+    "message": "On"
+  },
+  "commonOff": {
+    "message": "Off"
+  },
+  "commonCancel": {
+    "message": "Cancel"
+  },
+  "commonClose": {
+    "message": "Close"
+  },
+  "commonBack": {
+    "message": "Back"
+  },
+  "commonNext": {
+    "message": "Next"
+  },
+  "commonNo": {
+    "message": "No"
+  },
+  "commonYes": {
+    "message": "Yes"
+  },
+  "commonUnset": {
+    "message": "Unset"
+  },
+  "commonBy": {
+    "message": "by"
+  },
+  "commonFeatures": {
+    "message": "Features"
+  },
+  "logoAlt": {
+    "message": "Zen Internet logo"
+  },
+  "popupHowToUseTitle": {
+    "message": "How to use?"
+  },
+  "popupWhatsNewTitle": {
+    "message": "What's New"
+  },
+  "popupReload": {
+    "message": "Reload the page"
+  },
+  "popupReloadTitle": {
+    "message": "Reload the page to apply changes. Most-likely will be needed when removing styling."
+  },
+  "popupSkipStylingForSite": {
+    "message": "Skip Styling for this Site"
+  },
+  "popupSkipStylingHelp": {
+    "message": "Blacklist mode: Enable to skip adding below features. Whitelist mode: Enable to include below features"
+  },
+  "popupSkipForcingForSite": {
+    "message": "Skip Forcing for this Site"
+  },
+  "popupSkipForcingHelp": {
+    "message": "Blacklist mode: Enable to skip force theming this website. Whitelist mode: Enable to force this website"
+  },
+  "popupGlobalStyling": {
+    "message": "Global Styling"
+  },
+  "popupGlobalStylingHelp": {
+    "message": "Master toggle for all the CSS styling"
+  },
+  "popupBlacklistMode": {
+    "message": "Blacklist Mode"
+  },
+  "popupWhitelistMode": {
+    "message": "Whitelist Mode"
+  },
+  "popupBlacklistModeHelp": {
+    "message": "Blacklist mode: apply styling to all sites except those in the list. Whitelist mode: only apply styling to sites in the list."
+  },
+  "popupForceStylingSettings": {
+    "message": "Force Styling Settings"
+  },
+  "popupForceStyling": {
+    "message": "Force Styling"
+  },
+  "popupForceStylingHelp": {
+    "message": "Applies basic styling to websites that don't have specific pre-made theme and features."
+  },
+  "popupForcedBlacklistMode": {
+    "message": "Forced Blacklist Mode"
+  },
+  "popupForcedWhitelistMode": {
+    "message": "Forced Whitelist Mode"
+  },
+  "popupForceModeHelp": {
+    "message": "Blacklist mode: apply forced styling to all sites except those in the list. Whitelist mode: only apply forced styling to sites in the list."
+  },
+  "popupFallbackBackground": {
+    "message": "Fallback Background"
+  },
+  "popupFallbackBackgroundHelp": {
+    "message": "Adds a solid white background color to websites which never had a proper background and skipping still keeps a transparent background."
+  },
+  "popupEnableForSite": {
+    "message": "Enable for this Site"
+  },
+  "popupEnableForcingForSite": {
+    "message": "Enable forcing for this Site"
+  },
+  "popupRefetchStyles": {
+    "message": "Refetch latest styles"
+  },
+  "popupRefetchStylesTitle": {
+    "message": "Fetch the latest styles from the repository"
+  },
+  "popupAutoUpdateStyles": {
+    "message": "Auto Update Styles"
+  },
+  "popupAutoUpdateHelp": {
+    "message": "Automatically checks for and downloads new styles every 2 hours. Keeps your themes up-to-date without manual intervention."
+  },
+  "popupAdvancedSettings": {
+    "message": "Advanced Settings"
+  },
+  "popupAdvancedSettingsTitle": {
+    "message": "Open advanced settings in a new tab"
+  },
+  "faqTitle": {
+    "message": "Frequently Asked Questions"
+  },
+  "faqTransparencyQuestion": {
+    "message": "Why is transparency not working?"
+  },
+  "faqTransparencyAnswer": {
+    "message": "<p><strong>OS Compatibility:</strong> Only some operating systems support transparency:</p><ul><li>macOS (native support)</li><li>Windows 11 (native mica and acrylic)</li><li>Windows 11 with mods like Mica for Everyone or DWM blur glass</li><li>Windows 10 with DWM blur glass <strong>(Questionable)</strong></li><li>Wayland on KDE with Kvin blur</li><li>GTK Gnome DE (experimental with blur my shell)</li></ul><p><strong>Common fixes:</strong></p><ul><li>Check if transparency enabled in the OS</li><li>Turn off power saving</li><li>Turn off <strong>\"Show accent color on window borders\"</strong> in Windows</li><li>Disable conflicting mods like better letterboxing or custom themes</li><li>Adjust Zen theme contrast slider for more transparency</li><li>Try re-opening the browser</li></ul>"
+  },
+  "faqSiteFeaturesQuestion": {
+    "message": "How do site-specific features work?"
+  },
+  "faqSiteFeaturesAnswer": {
+    "message": "<p>Each website can have customized features like transparency, hover effects, and layout adjustments.</p><ul><li>Browse to any website and check the addon popup</li><li>You'll see available features for that site</li><li>Toggle individual features on/off as needed</li><li>Disabling features may require a page reload</li><li>Use the \"Global Feature Controls\" in Advanced Settings for global overrides</li></ul>"
+  },
+  "faqTextUnreadableQuestion": {
+    "message": "Text is unreadable"
+  },
+  "faqTextUnreadableAnswer": {
+    "message": "<p>This can happen if the website's text color is too light or dark against a transparent background.</p><p>If you are on a website without a dedicated dark theme, you can try using <strong>darkreader addon</strong> for better contrast.</p><ul><li>Toggle website's dark/ light theme manually</li><li>Try adjusting the Zen theme contrast slider</li><li>Disable transparency for that site if needed</li><li>Report the issue to request a specific theme</li></ul>"
+  },
+  "faqModesQuestion": {
+    "message": "What is blacklist vs whitelist mode?"
+  },
+  "faqModesAnswer": {
+    "message": "<p>These modes control how built-in and forced themes and features are applied:</p><ul><li><strong>Blacklist Mode:</strong> Apply styles to all sites except those you manually skip</li><li><strong>Whitelist Mode:</strong> Only apply styles to sites you specifically select</li><p>Whitelist mode is generally recommended for better performance and control but may require more manual setup for each site.</p></ul>"
+  },
+  "faqForceThemingQuestion": {
+    "message": "What is force theming?"
+  },
+  "faqForceThemingAnswer": {
+    "message": "<p>Force theming applies basic transparency to websites without specific themes:</p><ul><li>Can be used with the blacklist or whitelist mode</li><li>Includes dark theme support with darkreader addon for better transparency</li><li>May cause some visual issues on complex sites</li></ul><p><strong>Fallback Background:</strong> Use this option for sites with no default background color when transparency doesn't take effect. Enable if skipping the website still leaves it transparent.</p>"
+  },
+  "faqRequestQuestion": {
+    "message": "How do I request themes or report issues?"
+  },
+  "faqRequestAnswer": {
+    "message": "<p>You can request themes and report bugs directly from the addon:</p><ul><li>Use the built-in \"Request Theme\" button for the active website</li><li>Click \"Bug?\" in the footer to report issues of the addon</li><li>Theme contributions are welcome on GitHub</li></ul><p><strong>Unsupported sites:</strong> Mozilla addons store, Settings pages, New tab page, PDF viewer, and other restricted pages cannot be themed.</p>"
+  },
+  "developerMadeBy": {
+    "message": "Made by sameerasw.com"
+  },
+  "developerSubtitle": {
+    "message": "with ❤️ from 🇱🇰"
+  },
+  "developerAlsoCheckOut": {
+    "message": "Also check out"
+  },
+  "projectWebsite": {
+    "message": "Website"
+  },
+  "footerStyles": {
+    "message": "Styles"
+  },
+  "footerStylesTitle": {
+    "message": "Visit the project styles repository"
+  },
+  "footerBug": {
+    "message": "Bug?"
+  },
+  "footerBugTitle": {
+    "message": "Report a bug or issue to the addon's GitHub repository"
+  },
+  "requestTitle": {
+    "message": "Theme Request"
+  },
+  "requestTriedForcingQuestion": {
+    "message": "Tried forcing the theme?"
+  },
+  "requestTriedForcingHint": {
+    "message": "Please enable forcing for the website and see if a theme is still needed."
+  },
+  "requestNeedsAccountQuestion": {
+    "message": "Does the website require an account?"
+  },
+  "requestNeedsAccountHint": {
+    "message": "If I do not have an account, might take some time for others to contribute."
+  },
+  "requestSubmit": {
+    "message": "Submit Request"
+  },
+  "requestChecking": {
+    "message": "Checking..."
+  },
+  "requestExistingTitle": {
+    "message": "Existing Request Found"
+  },
+  "requestExistingDescription": {
+    "message": "An existing theme request was found for $1"
+  },
+  "requestStateOpen": {
+    "message": "Open"
+  },
+  "requestStateClosed": {
+    "message": "Closed"
+  },
+  "requestCreated": {
+    "message": "Created: $1"
+  },
+  "requestComments": {
+    "message": "$1 comments"
+  },
+  "requestAssignedTo": {
+    "message": "Assigned to $1"
+  },
+  "requestDescription": {
+    "message": "Description:"
+  },
+  "requestViewExisting": {
+    "message": "View Existing Request"
+  },
+  "requestSubmitAnyway": {
+    "message": "Submit Anyway"
+  },
+  "requestThemeFor": {
+    "message": "Request Theme for $1"
+  },
+  "requestFeatureFallback": {
+    "message": "Feature"
+  },
+  "bugTitle": {
+    "message": "Bug Report"
+  },
+  "bugCategoryQuestion": {
+    "message": "What is your issue/bug related to?"
+  },
+  "bugCategoryHint": {
+    "message": "Select the category that best describes your issue:"
+  },
+  "bugCategoryTheme": {
+    "message": "Current website's theme"
+  },
+  "bugCategoryExtension": {
+    "message": "An issue with the extension"
+  },
+  "bugCategoryTransparency": {
+    "message": "Browser transparency issue"
+  },
+  "bugCategoryFeature": {
+    "message": "Feature request"
+  },
+  "bugCategoryOther": {
+    "message": "Other..."
+  },
+  "bugCreating": {
+    "message": "Creating..."
+  },
+  "bugFailed": {
+    "message": "Failed to create bug report. Please try again."
+  },
+  "bugSubmit": {
+    "message": "Submit Report"
+  },
+  "popupFeatureToggleToast": {
+    "message": "$1: $2"
+  },
+  "popupToastGlobalStyling": {
+    "message": "Global Styling: $1"
+  },
+  "popupToastForcedStyling": {
+    "message": "Forced Styling: $1"
+  },
+  "popupToastSiteStyling": {
+    "message": "Site Styling: $1"
+  },
+  "popupMappedFrom": {
+    "message": "Mapped from $1"
+  },
+  "popupFetchFirst": {
+    "message": "Please fetch styles first using the \"Refetch latest styles\" button"
+  },
+  "popupNoSpecificTheme": {
+    "message": "No specific theme found for this website. Using default styling."
+  },
+  "popupMovableLiveChat": {
+    "message": "Movable Live Chat"
+  },
+  "popupMovableLiveChatTooltip": {
+    "message": "Make the live chat window draggable in theater mode"
+  },
+  "popupOverridden": {
+    "message": "[overridden]"
+  },
+  "popupErrorLoadingFeatures": {
+    "message": "Error loading features."
+  },
+  "popupFetching": {
+    "message": "Fetching..."
+  },
+  "popupFetchFailed": {
+    "message": "Failed to fetch styles (Status: $1)"
+  },
+  "popupDone": {
+    "message": "Done!"
+  },
+  "popupError": {
+    "message": "Error!"
+  },
+  "popupFetchErrorAlert": {
+    "message": "Error fetching styles: $1"
+  },
+  "popupLastFetched": {
+    "message": "Last fetched: $1"
+  },
+  "popupLastFetchedNever": {
+    "message": "Last fetched: Never"
+  },
+  "popupConfirmClearSettings": {
+    "message": "Are you sure you want to clear all settings?"
+  },
+  "popupModeIndicatorWhitelist": {
+    "message": "In Whitelist Mode (apply only to listed sites)"
+  },
+  "popupModeIndicatorBlacklist": {
+    "message": "In Blacklist Mode (apply to all except listed sites)"
+  },
+  "welcomeSubtitle": {
+    "message": "Welcome to a cleaner, more elegant internet experience!"
+  },
+  "welcomeSetup": {
+    "message": "Setup"
+  },
+  "welcomeDisclaimerTitle": {
+    "message": "Important Disclaimer"
+  },
+  "welcomeDisclaimerHighlight": {
+    "message": "<p><strong>⚠️ This is a third party modification.<br/> </strong> If you encounter any issues regarding transparency or website colors, <br/><strong>DO NOT</strong> report issues to the official browser repository or issue tracker.<br/>Instead use the built-in issue/bug report feature in this addon or report it directly to the developer.</p>"
+  },
+  "welcomeDisclaimerIssuesIntro": {
+    "message": "Some common issues you may experience are:"
+  },
+  "welcomeDisclaimerIssueWhiteBackground": {
+    "message": "White background"
+  },
+  "welcomeDisclaimerIssueUnreadableText": {
+    "message": "Unreadable text"
+  },
+  "welcomeDisclaimerIssueNoTransparency": {
+    "message": "No transparency"
+  },
+  "welcomeDisclaimerIssueNoBlur": {
+    "message": "No blur"
+  },
+  "welcomeDisclaimerIssueManyOthers": {
+    "message": "And many others"
+  },
+  "welcomeDisclaimerBeforeReporting": {
+    "message": "📖 Before reporting issues:"
+  },
+  "welcomeDisclaimerFaqHint": {
+    "message": "First check the <strong>FAQ</strong> in the addon popup page at the bottom. <br/>If that does not solve your problem, then reach out to me through the proper channels."
+  },
+  "welcomeDisclaimerQuestion": {
+    "message": "<strong>Do you understand this disclaimer and agree to comply with the given options and <br/>not to bother the browser development and other developers?</strong>"
+  },
+  "welcomeDisclaimerAgree": {
+    "message": "Yes, <br/>I understand and agree"
+  },
+  "welcomeThemeModeTitle": {
+    "message": "Choose Your Theming Preference"
+  },
+  "welcomeThemeModeDescription": {
+    "message": "How would you like themes to be applied?"
+  },
+  "welcomeThemeModeBlacklistTitle": {
+    "message": "Enable themes by default"
+  },
+  "welcomeThemeModeBlacklistDescription": {
+    "message": "Themes will be applied to all websites automatically. You can skip websites if needed."
+  },
+  "welcomeThemeModeWhitelistTitle": {
+    "message": "Only apply to websites I choose"
+  },
+  "welcomeThemeModeWhitelistDescription": {
+    "message": "Themes will only be applied to websites you specifically select in the addon."
+  },
+  "welcomeFetchTitle": {
+    "message": "Download Latest Themes"
+  },
+  "welcomeFetchDescription": {
+    "message": "Click below to fetch the latest themes from our repository."
+  },
+  "welcomeFetchStyles": {
+    "message": "Fetch Latest Styles"
+  },
+  "welcomeAutoUpdate2h": {
+    "message": "Auto Update Styles (2h)"
+  },
+  "welcomeCompleteTitle": {
+    "message": "All Done!"
+  },
+  "welcomeCompleteDescription": {
+    "message": "Zen Internet extension is now ready to use!<br>Read FAQ if you find anything confusing or reach out for help."
+  },
+  "welcomeStartUsing": {
+    "message": "Start Using Zen Internet"
+  },
+  "welcomeFetching": {
+    "message": "Fetching..."
+  },
+  "welcomeDownloading": {
+    "message": "Downloading latest themes..."
+  },
+  "welcomeFetchSuccess": {
+    "message": "Successfully downloaded $1 website themes!"
+  },
+  "welcomeDownloadComplete": {
+    "message": "Download Complete"
+  },
+  "welcomeFetchFailed": {
+    "message": "Failed to download themes: $1"
+  },
+  "welcomeRetryDownload": {
+    "message": "Retry Download"
+  },
+  "settingsPageTitle": {
+    "message": "ZenInternet - Advanced Settings"
+  },
+  "settingsAppTitle": {
+    "message": "Zen Internet Settings"
+  },
+  "settingsBackupTitle": {
+    "message": "Backup & Restore ✨"
+  },
+  "settingsBackupDescription": {
+    "message": "Export your settings to a JSON file or import settings from a previously exported file.<br><strong>Note:</strong> This includes global settings, website lists, and website-specific feature toggles, but not the actual style data which will be re-fetched."
+  },
+  "settingsExport": {
+    "message": "Export Settings"
+  },
+  "settingsImport": {
+    "message": "Import Settings"
+  },
+  "settingsGlobalControlsTitle": {
+    "message": "Global Feature Controls ✨"
+  },
+  "settingsDisableTransparency": {
+    "message": "Disable Transparency"
+  },
+  "settingsDisableHover": {
+    "message": "Disable Hover Effects"
+  },
+  "settingsKeepFooters": {
+    "message": "Keep Footers"
+  },
+  "settingsDisableDarkReader": {
+    "message": "Disable DarkReader Support"
+  },
+  "settingsGlobalControlsDescription": {
+    "message": "These settings control specific feature types across all websites. Changes apply only to newly opened or reloaded tabs."
+  },
+  "settingsEnableLogs": {
+    "message": "Enable Logs"
+  },
+  "settingsGlobalSettingsTitle": {
+    "message": "Global Settings"
+  },
+  "settingsSkipListTitle": {
+    "message": "Skip/Enable List"
+  },
+  "settingsRepositoryTitle": {
+    "message": "Custom Styles Repository ✨"
+  },
+  "settingsRepositoryDescription": {
+    "message": "Change the URL where styles are fetched from. Use this if you want to use a different styles repository.<br><strong>Note:</strong> After changing the URL, you should clear existing styles data for best results."
+  },
+  "settingsRepositoryPlaceholder": {
+    "message": "Enter repository URL..."
+  },
+  "settingsSetUrl": {
+    "message": "Set URL"
+  },
+  "settingsResetDefault": {
+    "message": "Reset to Default"
+  },
+  "settingsDangerZone": {
+    "message": "Danger Zone"
+  },
+  "settingsDeleteAll": {
+    "message": "Delete All Data"
+  },
+  "settingsWebsitesTitle": {
+    "message": "Websites and CSS"
+  },
+  "settingsMappingsTitle": {
+    "message": "Style Mappings ✨"
+  },
+  "settingsCustomMappingInstructions": {
+    "message": "<strong>Custom Mapping:</strong> Add your own site-to-style mappings below.<br><em>Do <b>not</b> include <b>https://</b> or <b>www</b> in the site field. Use only the domain (e.g. <b>example.com</b>).</em>"
+  },
+  "settingsSourcePlaceholder": {
+    "message": "Source Style (e.g. github.com.css)"
+  },
+  "settingsTargetPlaceholder": {
+    "message": "Target Site (e.g. gist.github.com)"
+  },
+  "settingsAddMapping": {
+    "message": "Add Mapping"
+  },
+  "settingsStylesRepository": {
+    "message": "Styles Repository"
+  },
+  "settingsProjectRepository": {
+    "message": "Project Repository"
+  },
+  "settingsInterfaceLanguage": {
+    "message": "Interface Language"
+  },
+  "settingsInterfaceLanguageDescription": {
+    "message": "Choose the language used by the extension interface. Reload the page to apply."
+  },
+  "settingsLanguageAuto": {
+    "message": "Follow browser language"
+  },
+  "settingsConfirmDeleteAll": {
+    "message": "WARNING: This will delete ALL extension data. This action cannot be undone!\n\nAre you sure you want to proceed?"
+  },
+  "settingsRepoUrlEmpty": {
+    "message": "Repository URL cannot be empty"
+  },
+  "settingsInvalidUrl": {
+    "message": "Invalid URL format"
+  },
+  "settingsRepoUrlSaved": {
+    "message": "Repository URL saved successfully"
+  },
+  "settingsConfirmClearForNewRepo": {
+    "message": "Would you like to clear existing styles data to avoid conflicts with the new repository?"
+  },
+  "settingsErrorSavingUrl": {
+    "message": "Error saving URL: $1"
+  },
+  "settingsRepoUrlReset": {
+    "message": "Repository URL reset to default"
+  },
+  "settingsConfirmClearStyles": {
+    "message": "Would you like to clear existing styles data to avoid conflicts?"
+  },
+  "settingsErrorResettingUrl": {
+    "message": "Error resetting URL: $1"
+  },
+  "settingsStylesCleared": {
+    "message": "Styles data cleared successfully"
+  },
+  "settingsErrorClearingData": {
+    "message": "Error clearing data: $1"
+  },
+  "settingsDeleteSuccess": {
+    "message": "All data has been deleted successfully. The page will now reload."
+  },
+  "settingsDeleteError": {
+    "message": "An error occurred while trying to delete data: $1"
+  },
+  "settingsSettingsExported": {
+    "message": "Settings exported successfully!"
+  },
+  "settingsExportFailed": {
+    "message": "Export failed: $1"
+  },
+  "settingsInvalidFile": {
+    "message": "Invalid settings file format"
+  },
+  "settingsImportConfirm": {
+    "message": "Are you sure you want to import settings from $1? This will overwrite your current settings."
+  },
+  "settingsImportSuccess": {
+    "message": "Settings imported successfully! Reloading..."
+  },
+  "settingsImportCancelled": {
+    "message": "Import cancelled"
+  },
+  "settingsImportFailed": {
+    "message": "Import failed: $1"
+  },
+  "settingsVersion": {
+    "message": "Version: $1"
+  },
+  "settingsTableSetting": {
+    "message": "Setting"
+  },
+  "settingsTableValue": {
+    "message": "Value"
+  },
+  "settingsTableWebsite": {
+    "message": "Website"
+  },
+  "settingsTableAction": {
+    "message": "Action"
+  },
+  "settingsNever": {
+    "message": "Never"
+  },
+  "settingsListsOverview": {
+    "message": "Website Lists Overview"
+  },
+  "settingsForceModeLabel": {
+    "message": "Force Styling Mode:"
+  },
+  "settingsGeneralModeLabel": {
+    "message": "General Styling Mode:"
+  },
+  "settingsModeOnlyListed": {
+    "message": "only apply to sites in the list"
+  },
+  "settingsModeAllExceptListed": {
+    "message": "apply to all except sites in the list"
+  },
+  "settingsClearAllLists": {
+    "message": "Clear All Lists"
+  },
+  "settingsForceListTitle": {
+    "message": "Force Styling List"
+  },
+  "settingsForceListApplied": {
+    "message": "Sites where forced styling IS applied"
+  },
+  "settingsForceListSkipped": {
+    "message": "Sites where forced styling is NOT applied"
+  },
+  "settingsRegularListTitle": {
+    "message": "Regular Styling List"
+  },
+  "settingsRegularListApplied": {
+    "message": "Sites where regular styling IS applied"
+  },
+  "settingsRegularListSkipped": {
+    "message": "Sites where regular styling is NOT applied"
+  },
+  "settingsFallbackListTitle": {
+    "message": "Fallback Background List"
+  },
+  "settingsFallbackListDescription": {
+    "message": "Sites where a default background added, no transparency"
+  },
+  "settingsEmptyList": {
+    "message": "No websites in this list"
+  },
+  "settingsRemoveFromList": {
+    "message": "Remove from list"
+  },
+  "settingsConfirmClearLists": {
+    "message": "Are you sure you want to clear ALL website lists?"
+  },
+  "settingsErrorClearingLists": {
+    "message": "An error occurred while clearing the lists: $1"
+  },
+  "settingsErrorOccurred": {
+    "message": "An error occurred: $1"
+  },
+  "settingsNoWebsites": {
+    "message": "No websites found. Try fetching styles first."
+  },
+  "settingsSearchPlaceholder": {
+    "message": "Search websites..."
+  },
+  "settingsExpandAll": {
+    "message": "Expand All"
+  },
+  "settingsCollapseAll": {
+    "message": "Collapse All"
+  },
+  "settingsFeatureCount": {
+    "message": "$1 features"
+  },
+  "settingsNoCustomMappings": {
+    "message": "No custom mappings added."
+  },
+  "settingsNoStyleMappings": {
+    "message": "No style mappings found."
+  },
+  "settingsMappedSites": {
+    "message": "$1 mapped sites"
+  },
+  "settingsCustomMapping": {
+    "message": "Custom mapping"
+  },
+  "settingsEnabled": {
+    "message": "Enabled"
+  },
+  "settingsDisabled": {
+    "message": "Disabled"
+  },
+  "settingEnableStyling": {
+    "message": "Enable Styling"
+  },
+  "settingAutoUpdate": {
+    "message": "Auto Update"
+  },
+  "settingForceStyling": {
+    "message": "Force Styling"
+  },
+  "settingWhitelistMode": {
+    "message": "Whitelist Mode"
+  },
+  "settingWhitelistStyleMode": {
+    "message": "Whitelist Styling Mode"
+  },
+  "settingDisableTransparency": {
+    "message": "Disable Transparency"
+  },
+  "settingDisableHover": {
+    "message": "Disable Hover"
+  },
+  "settingDisableFooter": {
+    "message": "Disable Footer"
+  },
+  "settingDisableDarkReader": {
+    "message": "Disable DarkReader"
+  },
+  "settingEnableLogs": {
+    "message": "Enable Logs"
+  },
+  "settingLastFetchedTime": {
+    "message": "Last Fetched Time"
+  },
+  "settingWelcomeShown": {
+    "message": "Welcome Shown"
+  },
+  "settingUiLanguage": {
+    "message": "Interface Language"
+  },
+  "settingFallbackBackgroundList": {
+    "message": "Fallback Background List"
+  },
+  "settingMovableLiveChat": {
+    "message": "Movable Live Chat"
+  }
+}

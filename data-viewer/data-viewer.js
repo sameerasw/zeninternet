@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const BROWSER_STORAGE_KEY = "transparentZenSettings";
   const SKIP_FORCE_THEMING_KEY = "skipForceThemingList";
   const SKIP_THEMING_KEY = "skipThemingList";
@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const DEFAULT_REPOSITORY_URL =
     "https://sameerasw.github.io/my-internet/styles.json";
   const USER_STYLES_MAPPING_KEY = "userStylesMapping";
+
+  const t = (key, substitutions) => window.ZenI18n.t(key, substitutions);
 
   const globalSettingsElement = document.getElementById("global-settings-data");
   const skipListElement = document.getElementById("skip-list-data");
@@ -23,6 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const disableFooterToggle = document.getElementById("disable-footer");
   const disableDarkReaderToggle = document.getElementById("disable-darkreader");
   const enableLogsToggle = document.getElementById("enable-logs");
+  const interfaceLanguageSelect = document.getElementById("interface-language");
 
   const repositoryUrlInput = document.getElementById("repository-url");
   const setRepositoryUrlButton = document.getElementById("set-repository-url");
@@ -34,6 +37,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const exportButton = document.getElementById("export-settings");
   const importFileInput = document.getElementById("import-file");
   const importStatusElement = document.getElementById("import-status");
+
+  await window.ZenI18n.init();
+  window.ZenI18n.apply();
+  await loadInterfaceLanguage();
 
   loadAllData();
   displayAddonVersion();
@@ -59,11 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   deleteAllButton.addEventListener("click", function () {
-    if (
-      confirm(
-        "WARNING: This will delete ALL extension data. This action cannot be undone!\n\nAre you sure you want to proceed?"
-      )
-    ) {
+    if (confirm(t("settingsConfirmDeleteAll"))) {
       deleteAllData();
     }
   });
@@ -80,6 +83,37 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   loadRepositoryUrl();
+
+  /**
+   * Populates the interface language selector and saves the preference.
+   */
+  async function loadInterfaceLanguage() {
+    if (!interfaceLanguageSelect) return;
+
+    const languages = await window.ZenI18n.getLanguages();
+    const preference = await window.ZenI18n.getPreference();
+
+    interfaceLanguageSelect.innerHTML = "";
+
+    const autoOption = document.createElement("option");
+    autoOption.value = window.ZenI18n.AUTO;
+    autoOption.textContent = t("settingsLanguageAuto");
+    interfaceLanguageSelect.appendChild(autoOption);
+
+    for (const [localeId, info] of Object.entries(languages)) {
+      const option = document.createElement("option");
+      option.value = localeId;
+      option.textContent = (info && info.name) || localeId;
+      interfaceLanguageSelect.appendChild(option);
+    }
+
+    interfaceLanguageSelect.value = preference;
+
+    interfaceLanguageSelect.addEventListener("change", async function () {
+      await window.ZenI18n.setLanguage(this.value);
+      window.location.reload();
+    });
+  }
 
   /**
    * Loads the current repository URL from storage.
@@ -102,29 +136,28 @@ document.addEventListener("DOMContentLoaded", function () {
       const newUrl = repositoryUrlInput.value.trim();
 
       if (!newUrl) {
-        showRepositoryUrlStatus("Repository URL cannot be empty", "error");
+        showRepositoryUrlStatus(t("settingsRepoUrlEmpty"), "error");
         return;
       }
 
       try {
         new URL(newUrl);
       } catch (e) {
-        showRepositoryUrlStatus("Invalid URL format", "error");
+        showRepositoryUrlStatus(t("settingsInvalidUrl"), "error");
         return;
       }
 
       await browser.storage.local.set({ [REPOSITORY_URL_KEY]: newUrl });
-      showRepositoryUrlStatus("Repository URL saved successfully", "success");
+      showRepositoryUrlStatus(t("settingsRepoUrlSaved"), "success");
 
-      if (
-        confirm(
-          "Would you like to clear existing styles data to avoid conflicts with the new repository?"
-        )
-      ) {
+      if (confirm(t("settingsConfirmClearForNewRepo"))) {
         await clearStylesData();
       }
     } catch (error) {
-      showRepositoryUrlStatus(`Error saving URL: ${error.message}`, "error");
+      showRepositoryUrlStatus(
+        t("settingsErrorSavingUrl", error.message),
+        "error"
+      );
     }
   }
 
@@ -138,17 +171,16 @@ document.addEventListener("DOMContentLoaded", function () {
         [REPOSITORY_URL_KEY]: DEFAULT_REPOSITORY_URL,
       });
 
-      showRepositoryUrlStatus("Repository URL reset to default", "success");
+      showRepositoryUrlStatus(t("settingsRepoUrlReset"), "success");
 
-      if (
-        confirm(
-          "Would you like to clear existing styles data to avoid conflicts?"
-        )
-      ) {
+      if (confirm(t("settingsConfirmClearStyles"))) {
         await clearStylesData();
       }
     } catch (error) {
-      showRepositoryUrlStatus(`Error resetting URL: ${error.message}`, "error");
+      showRepositoryUrlStatus(
+        t("settingsErrorResettingUrl", error.message),
+        "error"
+      );
     }
   }
 
@@ -173,9 +205,12 @@ document.addEventListener("DOMContentLoaded", function () {
       await browser.storage.local.clear();
       await browser.storage.local.set(dataToKeep);
       loadAllData();
-      showRepositoryUrlStatus("Styles data cleared successfully", "success");
+      showRepositoryUrlStatus(t("settingsStylesCleared"), "success");
     } catch (error) {
-      showRepositoryUrlStatus(`Error clearing data: ${error.message}`, "error");
+      showRepositoryUrlStatus(
+        t("settingsErrorClearingData", error.message),
+        "error"
+      );
     }
   }
 
@@ -197,10 +232,10 @@ document.addEventListener("DOMContentLoaded", function () {
   async function deleteAllData() {
     try {
       await browser.storage.local.clear();
-      alert("All data has been deleted successfully. The page will now reload.");
+      alert(t("settingsDeleteSuccess"));
       window.location.reload();
     } catch (error) {
-      alert("An error occurred while trying to delete data: " + error.message);
+      alert(t("settingsDeleteError", error.message));
     }
   }
 
@@ -345,9 +380,9 @@ document.addEventListener("DOMContentLoaded", function () {
         URL.revokeObjectURL(url);
       }, 0);
 
-      showImportStatus("Settings exported successfully!", "success");
+      showImportStatus(t("settingsSettingsExported"), "success");
     } catch (error) {
-      showImportStatus(`Export failed: ${error.message}`, "error");
+      showImportStatus(t("settingsExportFailed", error.message), "error");
     }
   }
 
@@ -368,14 +403,10 @@ document.addEventListener("DOMContentLoaded", function () {
             !importData.settings ||
             !importData.settings[BROWSER_STORAGE_KEY]
           ) {
-            throw new Error("Invalid settings file format");
+            throw new Error(t("settingsInvalidFile"));
           }
 
-          if (
-            confirm(
-              `Are you sure you want to import settings from ${importData.exportDate}? This will overwrite your current settings.`
-            )
-          ) {
+          if (confirm(t("settingsImportConfirm", importData.exportDate))) {
             const importOperations = {
               [BROWSER_STORAGE_KEY]: importData.settings[BROWSER_STORAGE_KEY],
               [SKIP_FORCE_THEMING_KEY]:
@@ -399,26 +430,26 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             await browser.storage.local.set(importOperations);
-            showImportStatus(
-              "Settings imported successfully! Reloading...",
-              "success"
-            );
+            showImportStatus(t("settingsImportSuccess"), "success");
 
             setTimeout(() => {
               window.location.reload();
             }, 1500);
           } else {
             importFileInput.value = "";
-            showImportStatus("Import cancelled", "error");
+            showImportStatus(t("settingsImportCancelled"), "error");
           }
         } catch (parseError) {
-          showImportStatus(`Import failed: ${parseError.message}`, "error");
+          showImportStatus(
+            t("settingsImportFailed", parseError.message),
+            "error"
+          );
         }
       };
 
       reader.readAsText(file);
     } catch (error) {
-      showImportStatus(`Import failed: ${error.message}`, "error");
+      showImportStatus(t("settingsImportFailed", error.message), "error");
     }
   }
 
@@ -439,7 +470,7 @@ document.addEventListener("DOMContentLoaded", function () {
    */
   async function displayAddonVersion() {
     const manifest = browser.runtime.getManifest();
-    versionElement.textContent = `Version: ${manifest.version}`;
+    versionElement.textContent = t("settingsVersion", manifest.version);
   }
 
   /**
@@ -477,7 +508,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
-    headerRow.innerHTML = `<th>Setting</th><th>Value</th>`;
+    headerRow.innerHTML = `<th>${t("settingsTableSetting")}</th><th>${t(
+      "settingsTableValue"
+    )}</th>`;
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
@@ -504,7 +537,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${formatSettingName("lastFetchedTime")}</td>
-        <td><span class="null-value">Never</span></td>
+        <td><span class="null-value">${t("settingsNever")}</span></td>
       `;
       tbody.appendChild(row);
     }
@@ -547,22 +580,24 @@ document.addEventListener("DOMContentLoaded", function () {
     const titleSection = document.createElement("div");
     titleSection.className = "list-title-section";
 
-    const forceModeName = isWhitelistMode ? "Whitelist" : "Blacklist";
-    const styleModeName = isWhitelistStyleMode ? "Whitelist" : "Blacklist";
+    const forceModeName = isWhitelistMode
+      ? t("popupWhitelistMode")
+      : t("popupBlacklistMode");
+    const styleModeName = isWhitelistStyleMode
+      ? t("popupWhitelistMode")
+      : t("popupBlacklistMode");
+    const forceModeScope = isWhitelistMode
+      ? t("settingsModeOnlyListed")
+      : t("settingsModeAllExceptListed");
+    const styleModeScope = isWhitelistStyleMode
+      ? t("settingsModeOnlyListed")
+      : t("settingsModeAllExceptListed");
 
     titleSection.innerHTML = `
-      <h3>Website Lists Overview</h3>
+      <h3>${t("settingsListsOverview")}</h3>
       <div class="mode-info">
-        <div><strong>Force Styling Mode:</strong> ${forceModeName} Mode (${
-      isWhitelistMode
-        ? "only apply to sites in the list"
-        : "apply to all except sites in the list"
-    })</div>
-        <div><strong>General Styling Mode:</strong> ${styleModeName} Mode (${
-      isWhitelistStyleMode
-        ? "only apply to sites in the list"
-        : "apply to all except sites in the list"
-    })</div>
+        <div><strong>${t("settingsForceModeLabel")}</strong> ${forceModeName} (${forceModeScope})</div>
+        <div><strong>${t("settingsGeneralModeLabel")}</strong> ${styleModeName} (${styleModeScope})</div>
       </div>
     `;
 
@@ -579,7 +614,9 @@ document.addEventListener("DOMContentLoaded", function () {
         "danger",
         "clear-list-button"
       );
-      clearAllButton.innerHTML = '<i class="fas fa-trash"></i> Clear All Lists';
+      clearAllButton.innerHTML = `<i class="fas fa-trash"></i> ${t(
+        "settingsClearAllLists"
+      )}`;
       clearAllButton.addEventListener("click", clearAllSkipLists);
       skipListElement.appendChild(clearAllButton);
     }
@@ -590,28 +627,28 @@ document.addEventListener("DOMContentLoaded", function () {
     const forceListSection = createSingleListSection(
       skipForceList,
       isWhitelistMode,
-      "Force Styling List",
+      t("settingsForceListTitle"),
       isWhitelistMode
-        ? "Sites where forced styling IS applied"
-        : "Sites where forced styling is NOT applied",
+        ? t("settingsForceListApplied")
+        : t("settingsForceListSkipped"),
       SKIP_FORCE_THEMING_KEY
     );
 
     const regularListSection = createSingleListSection(
       skipThemingList,
       isWhitelistStyleMode,
-      "Regular Styling List",
+      t("settingsRegularListTitle"),
       isWhitelistStyleMode
-        ? "Sites where regular styling IS applied"
-        : "Sites where regular styling is NOT applied",
+        ? t("settingsRegularListApplied")
+        : t("settingsRegularListSkipped"),
       SKIP_THEMING_KEY
     );
 
     const fallbackListSection = createSingleListSection(
       fallbackBackgroundList,
       false,
-      "Fallback Background List",
-      "Sites where a default background added, no transparency",
+      t("settingsFallbackListTitle"),
+      t("settingsFallbackListDescription"),
       FALLBACK_BACKGROUND_KEY
     );
 
@@ -646,7 +683,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (list.length === 0) {
       const emptyMessage = document.createElement("div");
       emptyMessage.className = "no-data";
-      emptyMessage.textContent = "No websites in this list";
+      emptyMessage.textContent = t("settingsEmptyList");
       section.appendChild(emptyMessage);
       return section;
     }
@@ -656,7 +693,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
-    headerRow.innerHTML = `<th>Website</th><th>Action</th>`;
+    headerRow.innerHTML = `<th>${t("settingsTableWebsite")}</th><th>${t(
+      "settingsTableAction"
+    )}</th>`;
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
@@ -672,7 +711,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const removeButton = document.createElement("button");
       removeButton.className = "remove-site-button";
       removeButton.innerHTML = '<i class="fas fa-times"></i>';
-      removeButton.title = "Remove from list";
+      removeButton.title = t("settingsRemoveFromList");
       removeButton.addEventListener("click", function () {
         removeSiteFromList(site, storageKey);
       });
@@ -697,7 +736,7 @@ document.addEventListener("DOMContentLoaded", function () {
       await browser.storage.local.set({ [listKey]: newList });
       loadAllData();
     } catch (error) {
-      alert(`An error occurred: ${error.message}`);
+      alert(t("settingsErrorOccurred", error.message));
     }
   }
 
@@ -706,11 +745,7 @@ document.addEventListener("DOMContentLoaded", function () {
    */
   async function clearAllSkipLists() {
     try {
-      if (
-        confirm(
-          "Are you sure you want to clear ALL website lists?"
-        )
-      ) {
+      if (confirm(t("settingsConfirmClearLists"))) {
         await browser.storage.local.set({
           [SKIP_FORCE_THEMING_KEY]: [],
           [SKIP_THEMING_KEY]: [],
@@ -719,7 +754,7 @@ document.addEventListener("DOMContentLoaded", function () {
         loadAllData();
       }
     } catch (error) {
-      alert("An error occurred while clearing the lists: " + error.message);
+      alert(t("settingsErrorClearingLists", error.message));
     }
   }
 
@@ -742,8 +777,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (websiteKeys.length === 0) {
-      combinedWebsitesElement.innerHTML =
-        '<div class="no-data">No websites found. Try fetching styles first.</div>';
+      combinedWebsitesElement.innerHTML = `<div class="no-data">${t(
+        "settingsNoWebsites"
+      )}</div>`;
       return;
     }
 
@@ -752,7 +788,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const searchInput = document.createElement("input");
     searchInput.type = "text";
-    searchInput.placeholder = "Search websites...";
+    searchInput.placeholder = t("settingsSearchPlaceholder");
     searchInput.classList.add("search-input");
     searchInput.addEventListener("input", function () {
       filterWebsites(this.value.toLowerCase());
@@ -771,9 +807,10 @@ document.addEventListener("DOMContentLoaded", function () {
       "secondary",
       "view-all-button"
     );
-    expandAllButton.textContent = "Expand All";
+    expandAllButton.textContent = t("settingsExpandAll");
+    expandAllButton.dataset.expanded = "false";
     expandAllButton.addEventListener("click", function () {
-      const expanded = this.textContent === "Collapse All";
+      const expanded = this.dataset.expanded === "true";
       const panels = document.querySelectorAll(".website-panel");
 
       panels.forEach((panel) => {
@@ -794,7 +831,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
-      this.textContent = expanded ? "Expand All" : "Collapse All";
+      this.dataset.expanded = expanded ? "false" : "true";
+      this.textContent = expanded
+        ? t("settingsExpandAll")
+        : t("settingsCollapseAll");
     });
 
     combinedWebsitesElement.appendChild(expandAllButton);
@@ -836,7 +876,10 @@ document.addEventListener("DOMContentLoaded", function () {
       header.innerHTML = `
         <div class="website-header-content">
           <span class="website-name">${website}</span>
-          <span class="feature-count">${featureCount} features</span>
+          <span class="feature-count">${t(
+            "settingsFeatureCount",
+            featureCount
+          )}</span>
         </div>
       `;
 
@@ -928,7 +971,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const mapping = userMapping.mapping || {};
       const keys = Object.keys(mapping);
       if (keys.length === 0) {
-        userMappingsList.innerHTML = '<div class="no-mappings">No custom mappings added.</div>';
+        userMappingsList.innerHTML = `<div class="no-mappings">${t(
+          "settingsNoCustomMappings"
+        )}</div>`;
         return;
       }
       keys.sort();
@@ -988,14 +1033,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (userMappingData && userMappingData.mapping) {
       for (const [src, targets] of Object.entries(userMappingData.mapping)) {
         if (!merged[src]) merged[src] = [];
-        for (const t of targets) {
-          if (!merged[src].includes(t)) merged[src].push(t);
+        for (const target of targets) {
+          if (!merged[src].includes(target)) merged[src].push(target);
         }
       }
     }
     const mappingKeys = Object.keys(merged);
     if (mappingKeys.length === 0) {
-      mappingsContainer.innerHTML = '<div class="no-mappings">No style mappings found.</div>';
+      mappingsContainer.innerHTML = `<div class="no-mappings">${t(
+        "settingsNoStyleMappings"
+      )}</div>`;
       return;
     }
     mappingKeys.sort();
@@ -1003,13 +1050,16 @@ document.addEventListener("DOMContentLoaded", function () {
       const user = (userMappingData && userMappingData.mapping && userMappingData.mapping[sourceStyle]) || [];
       const targetSitesHTML = merged[sourceStyle].map(site => {
         const isUser = user.includes(site);
-        return `<span class="target-site-tag${isUser ? ' user-mapping' : ''}">${site}${isUser ? ' <i class=\'fas fa-user-edit\' title=\'Custom mapping\'></i>' : ''}</span>`;
+        return `<span class="target-site-tag${isUser ? ' user-mapping' : ''}">${site}${isUser ? ` <i class='fas fa-user-edit' title='${t("settingsCustomMapping")}'></i>` : ''}</span>`;
       }).join('');
       return `
         <div class="mapping-item">
           <div class="mapping-header">
             <span class="source-style">${sourceStyle}</span>
-            <span class="target-count">${merged[sourceStyle].length} mapped sites</span>
+            <span class="target-count">${t(
+              "settingsMappedSites",
+              merged[sourceStyle].length
+            )}</span>
           </div>
           <div class="target-sites-list">
             ${targetSitesHTML}
@@ -1066,6 +1116,10 @@ document.addEventListener("DOMContentLoaded", function () {
    * Formats internal setting keys into human-readable labels.
    */
   function formatSettingName(name) {
+    const key = `setting${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+    const label = t(key);
+    if (label !== key) return label;
+
     return name
       .replace(/([A-Z])/g, " $1")
       .replace(/^./, (str) => str.toUpperCase());
@@ -1077,8 +1131,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function formatSettingValue(value) {
     if (typeof value === "boolean") {
       return value
-        ? '<span class="badge enabled">Enabled</span>'
-        : '<span class="badge disabled">Disabled</span>';
+        ? `<span class="badge enabled">${t("settingsEnabled")}</span>`
+        : `<span class="badge disabled">${t("settingsDisabled")}</span>`;
     } else if (value === null) {
       return '<span class="null-value">null</span>';
     } else if (typeof value === "object") {

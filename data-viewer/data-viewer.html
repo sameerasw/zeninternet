@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenInternet - Advanced Settings</title>
+    <title data-i18n="settingsPageTitle">ZenInternet - Advanced Settings</title>
     <link rel="stylesheet" href="../theme.css">
     <link rel="stylesheet" href="../popup/popup.css">
     <link rel="stylesheet" href="data-viewer.css">
@@ -16,33 +16,42 @@
         <header class="app-header">
             <div id="header-container">
                 <div class="logo-container">
-                    <img src="../assets/images/logo.png" alt="ZenInternet Logo" class="logo-img">
-                    <h1 class="app-title">Zen Internet Settings</h1>
+                    <img src="../assets/images/logo.png" alt="ZenInternet Logo" class="logo-img"
+                        data-i18n-alt="logoAlt">
+                    <h1 class="app-title" data-i18n="settingsAppTitle">Zen Internet Settings</h1>
                 </div>
                 <div class="miniheader">
                     <div id="addon-version" class="addon-version"></div>
-                    <div class="author">by <a href="https://www.sameerasw.com/" target="_blank">@sameerasw</a></div>
+                    <div class="author"><span data-i18n="commonBy">by</span> <a href="https://www.sameerasw.com/" target="_blank">@sameerasw</a></div>
                 </div>
             </div>
         </header>
 
         <main class="app-content">
+            <!-- Interface language selection -->
+            <div class="data-section">
+                <h2 class="section-title" data-i18n="settingsInterfaceLanguage">Interface Language</h2>
+                <p class="setting-description" data-i18n="settingsInterfaceLanguageDescription">
+                    Choose the language used by the extension interface. Reload the page to apply.</p>
+                <select id="interface-language" class="repository-url-input language-select"></select>
+            </div>
+
             <!-- Backup & Restore section moved to top -->
             <div class="data-section">
-                <h2 class="section-title">Backup & Restore ✨</h2>
+                <h2 class="section-title" data-i18n="settingsBackupTitle">Backup &amp; Restore ✨</h2>
                 <div class="backup-restore-container">
-                    <p class="backup-description">
+                    <p class="backup-description" data-i18n-html="settingsBackupDescription">
                         Export your settings to a JSON file or import settings from a previously exported file.
                         <br><strong>Note:</strong> This includes global settings, website lists, and website-specific
                         feature toggles, but not the actual style data which will be re-fetched.
                     </p>
                     <div class="backup-actions">
                         <button id="export-settings" class="action-button primary">
-                            <i class="fas fa-upload"></i> Export Settings
+                            <i class="fas fa-upload"></i> <span data-i18n="settingsExport">Export Settings</span>
                         </button>
                         <div class="import-container">
                             <label for="import-file" class="action-button secondary import-label">
-                                <i class="fas fa-download"></i> Import Settings
+                                <i class="fas fa-download"></i> <span data-i18n="settingsImport">Import Settings</span>
                             </label>
                             <input type="file" id="import-file" accept=".json" hidden>
                         </div>
@@ -53,7 +62,7 @@
 
             <!-- Global toggles grouped into a single section with a heading -->
             <div class="data-section">
-                <h2 class="section-title">Global Feature Controls ✨</h2>
+                <h2 class="section-title" data-i18n="settingsGlobalControlsTitle">Global Feature Controls ✨</h2>
                 <div class="global-toggles-container">
                     <div class="toggle-row">
                         <div class="toggle-container">
@@ -61,14 +70,14 @@
                                 <input type="checkbox" id="disable-transparency">
                                 <span class="slider round"></span>
                             </label>
-                            <span class="toggle-label">Disable Transparency</span>
+                            <span class="toggle-label" data-i18n="settingsDisableTransparency">Disable Transparency</span>
                         </div>
                         <div class="toggle-container">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="disable-hover">
                                 <span class="slider round"></span>
                             </label>
-                            <span class="toggle-label">Disable Hover Effects</span>
+                            <span class="toggle-label" data-i18n="settingsDisableHover">Disable Hover Effects</span>
                         </div>
                     </div>
                     <div class="toggle-row">
@@ -77,18 +86,18 @@
                                 <input type="checkbox" id="disable-footer">
                                 <span class="slider round"></span>
                             </label>
-                            <span class="toggle-label">Keep Footers</span>
+                            <span class="toggle-label" data-i18n="settingsKeepFooters">Keep Footers</span>
                         </div>
                         <div class="toggle-container">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="disable-darkreader">
                                 <span class="slider round"></span>
                             </label>
-                            <span class="toggle-label">Disable DarkReader Support</span>
+                            <span class="toggle-label" data-i18n="settingsDisableDarkReader">Disable DarkReader Support</span>
                         </div>
                     </div>
                     
-                    <div class="setting-description">
+                    <div class="setting-description" data-i18n="settingsGlobalControlsDescription">
                         These settings control specific feature types across all websites.
                         Changes apply only to newly opened or reloaded tabs.
                     </div>
@@ -101,27 +110,27 @@
                                 <input type="checkbox" id="enable-logs">
                                 <span class="slider round"></span>
                             </label>
-                            <span class="toggle-label">Enable Logs</span>
+                            <span class="toggle-label" data-i18n="settingsEnableLogs">Enable Logs</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="data-section">
-                <h2 class="section-title">Global Settings</h2>
+                <h2 class="section-title" data-i18n="settingsGlobalSettingsTitle">Global Settings</h2>
                 <div id="global-settings-data" class="data-container"></div>
             </div>
 
             <div class="data-section">
-                <h2 class="section-title">Skip/Enable List</h2>
+                <h2 class="section-title" data-i18n="settingsSkipListTitle">Skip/Enable List</h2>
                 <div id="skip-list-data" class="data-container"></div>
             </div>
 
             <!-- Repository URL section moved above danger zone -->
             <div class="data-section">
-                <h2 class="section-title">Custom Styles Repository ✨</h2>
+                <h2 class="section-title" data-i18n="settingsRepositoryTitle">Custom Styles Repository ✨</h2>
                 <div class="repository-url-container">
-                    <p class="setting-description">
+                    <p class="setting-description" data-i18n-html="settingsRepositoryDescription">
                         Change the URL where styles are fetched from. Use this if you want to use a different styles
                         repository.
                         <br><strong>Note:</strong> After changing the URL, you should clear existing styles data for
@@ -129,13 +138,13 @@
                     </p>
                     <div class="repository-url-controls">
                         <input type="text" id="repository-url" class="repository-url-input"
-                            placeholder="Enter repository URL...">
+                            placeholder="Enter repository URL..." data-i18n-placeholder="settingsRepositoryPlaceholder">
                         <div class="repository-url-buttons">
                             <button id="set-repository-url" class="action-button primary">
-                                <i class="fas fa-save"></i> Set URL
+                                <i class="fas fa-save"></i> <span data-i18n="settingsSetUrl">Set URL</span>
                             </button>
                             <button id="reset-repository-url" class="action-button secondary">
-                                <i class="fas fa-undo"></i> Reset to Default
+                                <i class="fas fa-undo"></i> <span data-i18n="settingsResetDefault">Reset to Default</span>
                             </button>
                         </div>
                     </div>
@@ -144,10 +153,10 @@
             </div>
 
             <div class="danger-zone">
-                <h3 class="danger-title">Danger Zone</h3>
+                <h3 class="danger-title" data-i18n="settingsDangerZone">Danger Zone</h3>
                 <div class="danger-actions">
                     <button id="delete-all-data" class="action-button danger">
-                        <i class="fas fa-trash"></i> Delete All Data
+                        <i class="fas fa-trash"></i> <span data-i18n="settingsDeleteAll">Delete All Data</span>
                     </button>
                 </div>
             </div>
@@ -155,7 +164,7 @@
             <div class="data-section">
                 <h2 class="section-title collapsible" data-target="websites-section">
                     <i class="fas fa-chevron-down"></i>
-                    Websites and CSS
+                    <span data-i18n="settingsWebsitesTitle">Websites and CSS</span>
                 </h2>
                 <div id="combined-websites-data" class="data-container collapsed" data-section="websites-section"></div>
             </div>
@@ -163,21 +172,21 @@
             <div class="data-section">
                 <h2 class="section-title collapsible" data-target="mappings-section">
                     <i class="fas fa-chevron-down"></i>
-                    Style Mappings ✨
+                    <span data-i18n="settingsMappingsTitle">Style Mappings ✨</span>
                 </h2>
                 <div id="mappings-data" class="data-container collapsed" data-section="mappings-section"></div>
                 <div id="user-mapping-controls" class="mapping-controls">
-                    <div class="mapping-instructions">
+                    <div class="mapping-instructions" data-i18n-html="settingsCustomMappingInstructions">
                         <strong>Custom Mapping:</strong> Add your own site-to-style mappings below.<br>
                         <em>Do <b>not</b> include <b>https://</b> or <b>www</b> in the site field. Use only the domain
                             (e.g. <b>example.com</b>).</em>
                     </div>
                     <form id="add-mapping-form" class="add-mapping-form">
                         <input type="text" id="source-style-input" placeholder="Source Style (e.g. github.com.css)"
-                            required>
+                            data-i18n-placeholder="settingsSourcePlaceholder" required>
                         <input type="text" id="target-site-input" placeholder="Target Site (e.g. gist.github.com)"
-                            required>
-                        <button type="submit" class="action-button primary">Add Mapping</button>
+                            data-i18n-placeholder="settingsTargetPlaceholder" required>
+                        <button type="submit" class="action-button primary" data-i18n="settingsAddMapping">Add Mapping</button>
                     </form>
                     <div id="user-mappings-list" class="user-mappings-list"></div>
                 </div>
@@ -186,16 +195,17 @@
 
             <footer class="app-footer">
                 <a href="https://sameerasw.github.io/my-internet/" class="footer-link" target="_blank">
-                    <i class="fas fa-book"></i> Styles Repository
+                    <i class="fas fa-book"></i> <span data-i18n="settingsStylesRepository">Styles Repository</span>
                 </a>
                 <div class="footer-divider"></div>
                 <a href="https://github.com/sameerasw/zeninternet" class="footer-link" target="_blank">
-                    <i class="fa-brands fa-github"></i> Project Repository
+                    <i class="fa-brands fa-github"></i> <span data-i18n="settingsProjectRepository">Project Repository</span>
                 </a>
             </footer>
         </main>
     </div>
     <script src="../shared/polyfill.js"></script>
+    <script src="../shared/i18n.js"></script>
     <script src="data-viewer.js"></script>
 </body>
 

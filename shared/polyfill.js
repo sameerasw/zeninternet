@@ -61,6 +61,10 @@ if (typeof root.browser === "undefined" && typeof root.chrome !== "undefined") {
             getManifest: c.runtime?.getManifest?.bind(c.runtime),
             lastError: c.runtime?.lastError,
         },
+        i18n: {
+            getMessage: c.i18n?.getMessage?.bind(c.i18n),
+            getUILanguage: c.i18n?.getUILanguage?.bind(c.i18n),
+        },
         webNavigation: {
             onBeforeNavigate: wrapEvent(c.webNavigation?.onBeforeNavigate),
             onCommitted: wrapEvent(c.webNavigation?.onCommitted),

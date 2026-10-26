@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Zen Internet",
+  "default_locale": "en",
+  "name": "__MSG_extensionName__",
   "version": "3.2.0",
-  "description": "Immersive, minimal and transparent internet. Learn more at sameerasw.com/zen",
+  "description": "__MSG_extensionDescription__",
   "browser_specific_settings": {
     "gecko": {
       "id": "{91aa3897-2634-4a8a-9092-279db23a7689}"
@@ -16,7 +17,7 @@
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Zen Internet",
+    "default_title": "__MSG_extensionName__",
     "default_icon": {
       "48": "assets/images/logo_48.png",
       "96": "assets/images/logo_96.png"
@@ -54,25 +55,25 @@
       "suggested_key": {
         "default": "Alt+Shift+U"
       },
-      "description": "Toggle Zen Internet for the current website"
+      "description": "__MSG_commandToggleCurrentSite__"
     },
     "toggle-global-styling": {
       "suggested_key": {
         "default": "Alt+Shift+G"
       },
-      "description": "Toggle Zen Internet global styling"
+      "description": "__MSG_commandToggleGlobalStyling__"
     },
     "toggle-global-transparency": {
       "suggested_key": {
         "default": "Alt+Shift+O"
       },
-      "description": "Toggle Zen Internet global transparency"
+      "description": "__MSG_commandToggleGlobalTransparency__"
     },
     "toggle-fallback-background": {
       "suggested_key": {
         "default": "Alt+Shift+B"
       },
-      "description": "Toggle fallback background for the current website"
+      "description": "__MSG_commandToggleFallbackBackground__"
     }
   }
 }

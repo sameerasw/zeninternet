@@ -47,6 +47,20 @@ function normalizeHostname(hostname) {
 const $ = (selector) => document.getElementById(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const on = (el, event, handler) => el && el.addEventListener(event, handler);
+const t = (key, substitutions) => window.ZenI18n.t(key, substitutions);
+
+/**
+ * Updates a button label while preserving its leading icon.
+ */
+function setActionLabel(button, key) {
+  const label = button.querySelector("span");
+  if (label) {
+    label.removeAttribute("data-i18n");
+    label.textContent = t(key);
+  } else {
+    button.textContent = t(key);
+  }
+}
 
 /**
  * Centralized logging helper that respects the enableLogs setting.
@@ -75,7 +89,7 @@ function setupOverlay({ overlayId, cancelId, submitId, onCancel, onSubmit, onSho
   return { show, hide };
 }
 
-new (class ExtensionPopup {
+class ExtensionPopup {
   BROWSER_STORAGE_KEY = "transparentZenSettings";
   globalSettings = {};
   siteSettings = {};
@@ -261,11 +275,11 @@ new (class ExtensionPopup {
         const checkbox = event.target;
         const row = checkbox.closest(".feature-toggle-row");
         const nameSpan = row ? row.querySelector(".feature-name") : null;
-        const featureName = nameSpan ? nameSpan.textContent.replace("[overridden]", "").trim() : "Feature";
+        const featureName = nameSpan ? nameSpan.textContent.replace("[overridden]", "").trim() : t("requestFeatureFallback");
         
         this.saveSettings();
         this.updateActiveTabStyling();
-        this.showToast(`${featureName}: ${checkbox.checked ? 'On' : 'Off'}`, checkbox.checked);
+        this.showToast(t("popupFeatureToggleToast", [featureName, t(checkbox.checked ? "commonOn" : "commonOff")]), checkbox.checked);
       }
     });
 
@@ -399,7 +413,7 @@ new (class ExtensionPopup {
     browser.storage.local.set(updateObj).then(() => {
       this.updateActiveTabStyling();
       if (prevEnable !== this.globalSettings.enableStyling) {
-        this.showToast(`Global Styling: ${this.globalSettings.enableStyling ? 'On' : 'Off'}`, this.globalSettings.enableStyling);
+        this.showToast(t("popupToastGlobalStyling", t(this.globalSettings.enableStyling ? "commonOn" : "commonOff")), this.globalSettings.enableStyling);
       }
       
       // Notify content script about potential JS feature change
@@ -486,7 +500,7 @@ new (class ExtensionPopup {
       })
       .then(() => {
         this.updateActiveTabStyling();
-        this.showToast(`Forced Styling: ${!isChecked ? 'On' : 'Off'}`, !isChecked);
+        this.showToast(t("popupToastForcedStyling", t(!isChecked ? "commonOn" : "commonOff")), !isChecked);
       });
   }
 
@@ -512,7 +526,7 @@ new (class ExtensionPopup {
       })
       .then(() => {
         this.updateActiveTabStyling();
-        this.showToast(`Site Styling: ${!isChecked ? 'On' : 'Off'}`, !isChecked);
+        this.showToast(t("popupToastSiteStyling", t(!isChecked ? "commonOn" : "commonOff")), !isChecked);
       });
   }
 
@@ -632,7 +646,7 @@ new (class ExtensionPopup {
 
     const submitBtn = $("submit-request");
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+    submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t("requestChecking")}`;
     submitBtn.disabled = true;
 
     try {
@@ -698,16 +712,20 @@ new (class ExtensionPopup {
     this.pendingRequestData = { forcingValue, accountValue };
 
     const createdDate = new Date(existingIssue.created_at).toLocaleDateString();
-    const issueState = existingIssue.state === "open" ? "Open" : "Closed";
+    const issueState =
+      existingIssue.state === "open"
+        ? t("requestStateOpen")
+        : t("requestStateClosed");
     const stateClass =
       existingIssue.state === "open" ? "status-open" : "status-closed";
 
     prompt.innerHTML = `
-      <h3>Existing Request Found</h3>
+      <h3>${t("requestExistingTitle")}</h3>
       <div class="existing-issue-info">
-        <p>An existing theme request was found for <strong>${
-          this.currentSiteHostname
-        }</strong></p>
+        <p>${t(
+          "requestExistingDescription",
+          `<strong>${this.currentSiteHostname}</strong>`
+        )}</p>
 
         <div class="issue-details">
           <div class="issue-header">
@@ -718,18 +736,18 @@ new (class ExtensionPopup {
           <div class="issue-meta">
             <div class="issue-meta-item">
               <i class="fas fa-calendar-alt"></i>
-              <span>Created: ${createdDate}</span>
+              <span>${t("requestCreated", createdDate)}</span>
             </div>
             <div class="issue-meta-item">
               <i class="fas fa-comments"></i>
-              <span>${existingIssue.comments} comments</span>
+              <span>${t("requestComments", existingIssue.comments)}</span>
             </div>
             ${
               existingIssue.assignee
                 ? `
               <div class="issue-meta-item">
                 <i class="fas fa-user"></i>
-                <span>Assigned to ${existingIssue.assignee.login}</span>
+                <span>${t("requestAssignedTo", existingIssue.assignee.login)}</span>
               </div>
             `
                 : ""
@@ -740,7 +758,7 @@ new (class ExtensionPopup {
             existingIssue.body
               ? `
             <div class="issue-body">
-              <p><strong>Description:</strong></p>
+              <p><strong>${t("requestDescription")}</strong></p>
               <p class="issue-description">${this.truncateText(
                 existingIssue.body,
                 200
@@ -753,17 +771,17 @@ new (class ExtensionPopup {
 
         <div class="existing-issue-actions">
           <button id="view-existing-issue" class="action-button secondary">
-            <i class="fas fa-external-link-alt"></i> View Existing Request
+            <i class="fas fa-external-link-alt"></i> ${t("requestViewExisting")}
           </button>
         </div>
       </div>
 
       <div class="prompt-actions">
         <button id="submit-anyway" class="action-button secondary">
-          Submit Anyway
+          ${t("requestSubmitAnyway")}
         </button>
         <button id="close-request" class="action-button primary">
-          Close
+          ${t("commonClose")}
         </button>
       </div>
     `;
@@ -880,7 +898,7 @@ new (class ExtensionPopup {
         mappedIndicator.innerHTML = `
           <span class="mapped-badge">
             <i class="fas fa-link"></i>
-            Mapped from ${sourceWebsite}
+            ${t("popupMappedFrom", sourceWebsite)}
           </span>
         `;
         this.currentSiteFeatures.appendChild(mappedIndicator);
@@ -972,7 +990,7 @@ new (class ExtensionPopup {
         ) {
           const requestThemeButton = document.createElement("button");
           requestThemeButton.className = "action-button primary";
-          requestThemeButton.innerHTML = `Request Theme for ${this.currentSiteHostname}`;
+          requestThemeButton.innerHTML = t("requestThemeFor", this.currentSiteHostname);
           requestThemeButton.addEventListener("click", () => {
             this.showThemeRequestOverlay();
           });
@@ -982,7 +1000,7 @@ new (class ExtensionPopup {
           fetchFirstMessage.className = "toggle-container";
           fetchFirstMessage.innerHTML = `
             <div class="actions secondary">
-              <span class="toggle-label warning">Please fetch styles first using the \"Refetch latest styles\" button</span>
+              <span class="toggle-label warning">${t("popupFetchFirst")}</span>
             </div>
           `;
           this.currentSiteFeatures.appendChild(fetchFirstMessage);
@@ -1004,7 +1022,7 @@ new (class ExtensionPopup {
         skipForceThemingToggle.className = "toggle-container";
         skipForceThemingToggle.innerHTML = `
         <div class="actions secondary">
-          <span class="toggle-label warning">No specific theme found for this website. Using default styling.</span>
+          <span class="toggle-label warning">${t("popupNoSpecificTheme")}</span>
         </div>
         `;
         this.currentSiteFeatures.appendChild(skipForceThemingToggle);
@@ -1024,8 +1042,8 @@ new (class ExtensionPopup {
         
         movableChatToggle.innerHTML = `
           <div class="feature-toggle-row">
-            <span class="feature-name feature-title-ellipsis feature-has-tooltip" title="Make the live chat window draggable in theater mode">
-              Movable Live Chat
+            <span class="feature-name feature-title-ellipsis feature-has-tooltip" title="${t("popupMovableLiveChatTooltip")}">
+              ${t("popupMovableLiveChat")}
             </span>
             <label class="toggle-switch">
               <input type="checkbox" name="${currentSiteKey}|movableLiveChat" ${isChecked ? "checked" : ""}>
@@ -1069,7 +1087,7 @@ new (class ExtensionPopup {
 
         const nameSpan = document.createElement("span");
         nameSpan.className = "feature-name feature-title-ellipsis";
-        nameSpan.innerHTML = displayFeatureName + (isOverridden ? ' <span class="overridden-label">[overridden]</span>' : "");
+        nameSpan.innerHTML = displayFeatureName + (isOverridden ? ` <span class="overridden-label">${t("popupOverridden")}</span>` : "");
         if (featureCaption) {
           nameSpan.title = featureCaption;
           nameSpan.classList.add("feature-has-tooltip");
@@ -1091,7 +1109,7 @@ new (class ExtensionPopup {
     } catch (error) {
       console.error("Error loading current site features:", error);
       this.currentSiteFeatures.innerHTML =
-        "<div class='feature-toggle'>Error loading features.</div>";
+        `<div class='feature-toggle'>${t("popupErrorLoadingFeatures")}</div>`;
     }
   }
 
@@ -1138,7 +1156,7 @@ new (class ExtensionPopup {
    * Triggers a manual refresh of all styles.
    */
   async refetchCSS() {
-    this.refetchCSSButton.textContent = "Fetching...";
+    setActionLabel(this.refetchCSSButton, "popupFetching");
     try {
       const DEFAULT_REPOSITORY_URL =
         "https://sameerasw.github.io/my-internet/styles.json";
@@ -1154,7 +1172,7 @@ new (class ExtensionPopup {
         },
       });
       if (!response.ok)
-        throw new Error(`Failed to fetch styles (Status: ${response.status})`);
+        throw new Error(t("popupFetchFailed", response.status));
       const styles = await response.json();
 
       const hasNewMappings = styles.mapping && Object.keys(styles.mapping).length > 0;
@@ -1210,17 +1228,17 @@ new (class ExtensionPopup {
       this.loadCurrentSiteFeatures();
       this.updateActiveTabStyling();
 
-      this.refetchCSSButton.textContent = "Done!";
+      setActionLabel(this.refetchCSSButton, "popupDone");
       setTimeout(() => {
-        this.refetchCSSButton.textContent = "Refetch latest styles";
+        setActionLabel(this.refetchCSSButton, "popupRefetchStyles");
       }, 2000);
       this.displayLastFetchedTime();
     } catch (error) {
-      this.refetchCSSButton.textContent = "Error!";
+      setActionLabel(this.refetchCSSButton, "popupError");
       setTimeout(() => {
-        this.refetchCSSButton.textContent = "Refetch latest styles";
+        setActionLabel(this.refetchCSSButton, "popupRefetchStyles");
       }, 2000);
-      alert(`Error fetching styles: ${error.message}`);
+      alert(t("popupFetchErrorAlert", error.message));
     }
   }
 
@@ -1440,11 +1458,12 @@ new (class ExtensionPopup {
     browser.storage.local.get(this.BROWSER_STORAGE_KEY).then((result) => {
       const settings = result[this.BROWSER_STORAGE_KEY] || {};
       if (settings.lastFetchedTime) {
-        $("last-fetched-time").textContent = `Last fetched: ${new Date(
-          settings.lastFetchedTime
-        ).toLocaleString()}`;
+        $("last-fetched-time").textContent = t(
+          "popupLastFetched",
+          new Date(settings.lastFetchedTime).toLocaleString()
+        );
       } else {
-        $("last-fetched-time").textContent = "Last fetched: Never";
+        $("last-fetched-time").textContent = t("popupLastFetchedNever");
       }
     });
   }
@@ -1461,7 +1480,7 @@ new (class ExtensionPopup {
    */
   handleMiddleClick(event) {
     if (event.button === 1) {
-      if (confirm("Are you sure you want to clear all settings?")) {
+      if (confirm(t("popupConfirmClearSettings"))) {
         browser.storage.local.clear().then(() => {
           location.reload();
         });
@@ -1490,11 +1509,9 @@ new (class ExtensionPopup {
    */
   updateModeIndicator() {
     if (this.whitelistModeSwitch.checked) {
-      this.modeIndicator.textContent =
-        "In Whitelist Mode (apply only to listed sites)";
+      this.modeIndicator.textContent = t("popupModeIndicatorWhitelist");
     } else {
-      this.modeIndicator.textContent =
-        "In Blacklist Mode (apply to all except listed sites)";
+      this.modeIndicator.textContent = t("popupModeIndicatorBlacklist");
     }
   }
 
@@ -1503,9 +1520,9 @@ new (class ExtensionPopup {
    */
   updateSiteToggleLabel() {
     if (this.whitelistModeSwitch.checked) {
-      this.siteToggleLabel.textContent = "Enable for this Site";
+      this.siteToggleLabel.textContent = t("popupEnableForSite");
     } else {
-      this.siteToggleLabel.textContent = "Skip Forcing for this Site";
+      this.siteToggleLabel.textContent = t("popupSkipForcingForSite");
     }
   }
 
@@ -1514,19 +1531,19 @@ new (class ExtensionPopup {
    */
   updateModeLabels() {
     if (this.whitelistModeSwitch.checked) {
-      this.whitelistModeLabel.textContent = "Forced Whitelist Mode";
-      this.siteToggleLabel.textContent = "Enable forcing for this Site";
+      this.whitelistModeLabel.textContent = t("popupForcedWhitelistMode");
+      this.siteToggleLabel.textContent = t("popupEnableForcingForSite");
     } else {
-      this.whitelistModeLabel.textContent = "Forced Blacklist Mode";
-      this.siteToggleLabel.textContent = "Skip forcing for this Site";
+      this.whitelistModeLabel.textContent = t("popupForcedBlacklistMode");
+      this.siteToggleLabel.textContent = t("popupSkipForcingForSite");
     }
 
     if (this.whitelistStylingModeSwitch.checked) {
-      this.whitelistStylingModeLabel.textContent = "Whitelist Mode";
-      this.siteStyleToggleLabel.textContent = "Enable for this Site";
+      this.whitelistStylingModeLabel.textContent = t("popupWhitelistMode");
+      this.siteStyleToggleLabel.textContent = t("popupEnableForSite");
     } else {
-      this.whitelistStylingModeLabel.textContent = "Blacklist Mode";
-      this.siteStyleToggleLabel.textContent = "Skip Styling for this Site";
+      this.whitelistStylingModeLabel.textContent = t("popupBlacklistMode");
+      this.siteStyleToggleLabel.textContent = t("popupSkipStylingForSite");
     }
   }
 
@@ -1699,7 +1716,7 @@ new (class ExtensionPopup {
     const submitBtn = $("submit-bug-report");
 
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+    submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t("bugCreating")}`;
     submitBtn.disabled = true;
 
     try {
@@ -1723,7 +1740,7 @@ new (class ExtensionPopup {
       this.hideBugReportOverlay();
     } catch (error) {
       console.error("Error submitting bug report:", error);
-      alert("Failed to create bug report. Please try again.");
+      alert(t("bugFailed"));
     } finally {
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
@@ -2016,4 +2033,10 @@ new (class ExtensionPopup {
       }
     } catch (error) {}
   }
+}
+
+(async () => {
+  await window.ZenI18n.init();
+  window.ZenI18n.apply();
+  new ExtensionPopup();
 })();
